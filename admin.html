@@ -398,6 +398,11 @@
                             </a>
                         </li>
                         <li class="nav-item">
+                            <a class="nav-link" data-bs-toggle="tab" href="#matchesTab">
+                                <i class="uil uil-calendar-alt"></i> جدول المباريات
+                            </a>
+                        </li>
+                        <li class="nav-item">
                             <a class="nav-link" data-bs-toggle="tab" href="#firebaseTab">
                                 <i class="uil uil-database"></i> إعدادات Firebase
                             </a>
@@ -414,6 +419,11 @@
                         <!-- Channels Management -->
                         <div class="tab-pane fade" id="channelsTab">
                             ${this.loadChannelsTab()}
+                        </div>
+
+                        <!-- جدول المباريات الجديد -->
+                        <div class="tab-pane fade" id="matchesTab">
+                            ${this.loadMatchesTab()}
                         </div>
 
                         <!-- Firebase Settings -->
@@ -577,6 +587,47 @@
                                         <span class="visually-hidden">جاري التحميل...</span>
                                     </div>
                                     <p class="mt-3 text-muted">جاري تحميل القنوات...</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }
+
+            loadMatchesTab() {
+                return `
+                    <div class="card" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                        <div class="card-header card-header-custom">
+                            <h4 class="mb-0 text-white">
+                                <i class="uil uil-calendar-alt"></i> جدول المباريات
+                            </h4>
+                        </div>
+                        <div class="card-body">
+                            <div class="text-center mb-4">
+                                <p class="text-white mb-3">يمكنك إدارة جدول المباريات من خلال لوحة التحكم المخصصة</p>
+                                <button class="btn btn-primary btn-lg" onclick="adminManager.openMatchesPage()">
+                                    <i class="uil uil-external-link-alt"></i> فتح صفحة جدول المباريات
+                                </button>
+                            </div>
+                            
+                            <div class="row mt-4">
+                                <div class="col-md-6">
+                                    <div class="card" style="background: rgba(0,0,0,0.5); border: 1px solid #42318F;">
+                                        <div class="card-body text-center">
+                                            <i class="uil uil-database" style="font-size: 40px; color: #28a745;"></i>
+                                            <h5 class="mt-3 text-white">بيانات Firebase</h5>
+                                            <p class="text-muted">إدارة المباريات عبر قاعدة البيانات</p>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="card" style="background: rgba(0,0,0,0.5); border: 1px solid #42318F;">
+                                        <div class="card-body text-center">
+                                            <i class="uil uil-setting" style="font-size: 40px; color: #ffc107;"></i>
+                                            <h5 class="mt-3 text-white">إعدادات البث</h5>
+                                            <p class="text-muted">تخصيص روابط البث والمعلقين</p>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -808,7 +859,7 @@ service cloud.firestore {
                     order: parseInt(document.getElementById('sectionOrder').value),
                     isActive: document.getElementById('sectionStatus').value === 'active',
                     description: document.getElementById('sectionDescription').value,
-                    image: document.getElementById('sectionImage').value, // إضافة حقل الصورة
+                    image: document.getElementById('sectionImage').value,
                     createdAt: new Date(),
                     updatedAt: new Date()
                 };
@@ -1125,6 +1176,10 @@ service cloud.firestore {
                         alertDiv.remove();
                     }
                 }, 5000);
+            }
+
+            openMatchesPage() {
+                window.open('matches.html', '_blank');
             }
 
             logout() {
