@@ -1,0 +1,168 @@
+/* تحسينات للعرض على الجوال */
+@media (max-width: 768px) {
+    .sections-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+        padding: 15px 0;
+    }
+    
+    .section-card {
+        min-height: 60px;
+        padding: 15px;
+    }
+    
+    .section-image {
+        width: 100px;
+        height: 100px;
+    }
+    
+    .section-icon {
+        font-size: 30px;
+        width: 60px;
+        height: 60px;
+    }
+    
+    .section-name {
+        font-size: 14px;
+        padding: 6px 12px;
+    }
+    
+    .channels-container {
+        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+        gap: 15px;
+    }
+    
+    .channel-card {
+        max-width: 130px;
+    }
+    
+    .channel-logo {
+        width: 70px;
+        height: 70px;
+    }
+    
+    .matches-container {
+        grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+        gap: 15px;
+    }
+    
+    .ticker ul {
+        animation-duration: 20s;
+    }
+    
+    .back-button {
+        padding: 6px 15px;
+        font-size: 12px;
+        right: 10px;
+    }
+
+    .page-title, .section-title {
+        font-size: 20px;
+    }
+    
+    .welcome-message, .section-description {
+        font-size: 9px;
+        padding: 0 15px;
+    }
+}
+
+@media (max-width: 480px) {
+    .sections-grid {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 10px;
+        padding: 10px 0;
+    }
+    
+    .section-card {
+        min-height: 140px;
+        padding: 10px;
+    }
+    
+    .section-image {
+        width: 80px;
+        height: 80px;
+    }
+    
+    .section-icon {
+        font-size: 50px;
+        width: 60px;
+        height: 60px;
+        margin-bottom: 10px;
+        border-radius: 10px 20px 10px 20px;
+        border-bottom: 5px double rgba(255, 255, 255, 0.7); 
+        border-top: 5px double rgba(255, 255, 255, 0.7); 
+        border-left: 0px ridge #2F2562;
+        border-right: 0px groove #2F2562;
+    }
+    
+    .section-name {
+        font-size: 9px;
+        padding: 0px 5px;
+        margin-bottom: 10px;
+        width: 100%;
+        height: 100%;
+    }
+    
+    .channels-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+    }
+    
+    .channel-card {
+        max-width: 110px;
+        padding: 8px;
+    }
+    
+    .channel-logo {
+        width: 60px;
+        height: 60px;
+    }
+    
+    .channel-name {
+        font-size: 10px;
+    }
+    
+    .matches-container {
+        grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+        gap: 10px;
+    }
+    
+    .modal-content {
+        width: 95%;
+        padding: 15px;
+    }
+    
+    .modal-buttons {
+        flex-direction: column;
+    }
+    
+    .modal-button {
+        margin: 5px 0;
+    }
+    
+    .back-button {
+        padding: 5px 12px;
+        font-size: 11px;
+        right: 5px;
+    }
+    
+    .page-title, .section-title {
+        font-size: 18px;
+    }
+    
+    .welcome-message, .section-description {
+        font-size: 13px;
+    }
+    
+    .bottom-nav {
+        padding: 8px 0;
+    }
+    
+    .nav-item {
+        font-size: 10px;
+    }
+    
+    .nav-item i {
+        font-size: 16px;
+    }
+}
