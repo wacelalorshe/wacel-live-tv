@@ -798,9 +798,9 @@ header {
             background: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
             display: flex;
             justify-content: space-around;
-            padding: 10px 0;
-            border-top: 2px double rgba(0, 0, 0, 0.2);
-            border-bottom: 2px double rgba(0, 0, 0, 0.2);
+            padding: 5px 0;
+            border-top: 2px double rgba(0, 0, 0, 0.5);
+            
             z-index: 999;
             border-radius: 0px 0px 0px 0px;
         }
