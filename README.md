@@ -1,17 +1,24 @@
-# Bein Sport TV - Aseel TV
+# Aseel TV - تطبيق قنوات بي إن سبورت
 
-مشروع لعرض قنوات بي إن سبورت مع نظام إدارة متكامل.
+تطبيق ويب متكامل لعرض قنوات بي إن سبورت وجدول المباريات مع نظام حماية متقدم.
 
 ## المميزات
 
-- عرض قنوات بي إن سبورت
-- نظام إدارة القنوات
-- واجهة مستخدم عربية
-- تكامل مع Firebase
-- تصميم متجاوب
+- ✅ عرض الأقسام والقنوات من Firebase
+- ✅ جدول المباريات المباشر
+- ✅ نظام حماية متقدم ضد النسخ
+- ✅ واجهة مستخدم متجاوبة
+- ✅ إعادة الاتصال التلقائي بقاعدة البيانات
+
+## التقنيات المستخدمة
+
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Backend**: Firebase (Firestore & Realtime Database)
+- **Libraries**: Bootstrap, Unicons Icons
+- **Protection**: نظام تشفير متقدم
 
 ## التثبيت
 
-1. انسخ المشروع:
+1. قم بنسخ المشروع:
 ```bash
-git clone https://github.com/your-username/beinsport-tv.git
+git clone https://github.com/your-username/aseel-tv-app.git
