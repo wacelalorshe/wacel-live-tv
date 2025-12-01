@@ -14,8 +14,6 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
-    
     <style>
         .content {
             margin-top: 100px;
@@ -45,12 +43,6 @@
             grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
             gap: 20px;
             margin-top: 20px;
-        }
-
-        .sections-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
         }
 
         .section-card {
@@ -229,53 +221,58 @@
         // تهيئة Firebase مع البيانات المشفرة
         const encryptedFirebaseConfig = "W1siYXBpS2V5IiwiQUl6YVN5QUtnRWlZWWxtcE1lME5MZXd1bGhlb3ZsVFFNelZDNzk4MCJdLFsicHJvamVjdElkIiwiYmVpbi00MmY5ZSJdLFsic3RvcmFnZUJ1Y2tldCIsImJlaW4tNDJmOWUuZmlyZWJhc2VzdG9yYWdlLmFwcCJdLFsibWVzc2FnaW5nU2VuZGVySWQiLCIxNDM3NDExNjcwNTAiXSxbImFwcElkIiwiMToxNDM3NDExNjcwNTA6d2ViOjkyMmQzYTBjZGRiNDBmNjdiMjFiMzMiXSxbIm1lYXN1cmVtZW50SWQiLCJHIEpIMTk4U0tDRlMiXV0=";
         
-        function decryptConfig(encrypted) {
-            try {
-                const decoded = atob(encrypted);
-                const configArray = JSON.parse(decoded);
-                const config = {};
-                
-                configArray.forEach(item => {
-                    config[getConfigKey(item[0])] = item[1];
-                });
-                
-                return config;
-            } catch (e) {
-                console.error("خطأ في فك تشفير الإعدادات");
-                return null;
+        // إذا لم تكن دوال فك التشفير موجودة في protection.js، ننشئها هنا
+        if (typeof decryptConfig === 'undefined') {
+            function decryptConfig(encrypted) {
+                try {
+                    const decoded = atob(encrypted);
+                    const configArray = JSON.parse(decoded);
+                    const config = {};
+                    
+                    configArray.forEach(item => {
+                        config[getConfigKey(item[0])] = item[1];
+                    });
+                    
+                    return config;
+                } catch (e) {
+                    console.error("خطأ في فك تشفير الإعدادات");
+                    return null;
+                }
             }
-        }
 
-        function getConfigKey(encryptedKey) {
-            const keyMap = {
-                "YXBpS2V5": "apiKey",
-                "cHJvamVjdElk": "projectId",
-                "c3RvcmFnZUJ1Y2tldA==": "storageBucket",
-                "bWVzc2FnaW5nU2VuZGVySWQ=": "messagingSenderId",
-                "YXBwSWQ=": "appId",
-                "bWVhc3VyZW1lbnRJZA==": "measurementId"
-            };
-            
-            return keyMap[encryptedKey] || encryptedKey;
+            function getConfigKey(encryptedKey) {
+                const keyMap = {
+                    "YXBpS2V5": "apiKey",
+                    "cHJvamVjdElk": "projectId",
+                    "c3RvcmFnZUJ1Y2tldA==": "storageBucket",
+                    "bWVzc2FnaW5nU2VuZGVySWQ=": "messagingSenderId",
+                    "YXBwSWQ=": "appId",
+                    "bWVhc3VyZW1lbnRJZA==": "measurementId"
+                };
+                
+                return keyMap[encryptedKey] || encryptedKey;
+            }
         }
 
         // تهيئة Firebase
         const firebaseConfig = decryptConfig(encryptedFirebaseConfig);
         if (firebaseConfig) {
-            firebase.initializeApp(firebaseConfig);
-            window.db = firebase.firestore();
-            console.log('✅ تم تهيئة Firebase بنجاح');
+            try {
+                firebase.initializeApp(firebaseConfig);
+                window.db = firebase.firestore();
+                console.log('✅ تم تهيئة Firebase بنجاح');
+            } catch (error) {
+                console.error('❌ فشل تهيئة Firebase:', error);
+            }
         }
     </script>
     <script src="js/app.js"></script>
     
     <script>
         function showMainPage() {
-            // هذه الدالة للعودة للرئيسية (موجودة بالفعل)
             window.location.reload();
         }
         
-        // إظهار المحتوى بعد تحميل البيانات
         document.addEventListener('DOMContentLoaded', function() {
             document.getElementById('currentYear').textContent = new Date().getFullYear();
         });
