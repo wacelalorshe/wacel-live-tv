@@ -760,21 +760,21 @@ header {
 /* الفوتر (Footer) */
 /* =========================================== */
 
-.footer {
-    
+.bottom-nav {
             position: fixed;
-            bottom: -5px;
+            bottom: 0;
             left: 0;
             width: 100%;
-            text-align: center;
-            padding: 0.5rem;
-            
-            border-top: 6px groove #000;
-            font-family: Amita, cursive;
-            color: white;
-            z-index: 100;
-}
-
+            background: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 9px double rgba(0, 0, 0, 0.2);
+            border-bottom: 9px double rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            border-radius: 0px 0px 0px 0px;
+        }
+        
 .footer a {
     text-decoration: none;
     color: #ff4d4d;
