@@ -799,8 +799,8 @@ header {
             display: flex;
             justify-content: space-around;
             padding: 10px 0;
-            border-top: 9px double rgba(0, 0, 0, 0.2);
-            border-bottom: 9px double rgba(0, 0, 0, 0.2);
+            border-top: 2px double rgba(0, 0, 0, 0.2);
+            border-bottom: 2px double rgba(0, 0, 0, 0.2);
             z-index: 999;
             border-radius: 0px 0px 0px 0px;
         }
