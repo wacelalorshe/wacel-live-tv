@@ -4,7 +4,6 @@
 
 // تشفير بيانات Firebase
 const encryptedFirebaseConfig = "W1siYXBpS2V5IiwiQUl6YVN5QUtnRWlZWWxtcE1lME5MZXd1bGhlb3ZsVFFNelZDNzk4MCJdLFsicHJvamVjdElkIiwiYmVpbi00MmY5ZSJdLFsic3RvcmFnZUJ1Y2tldCIsImJlaW4tNDJmOWUuZmlyZWJhc2VzdG9yYWdlLmFwcCJdLFsibWVzc2FnaW5nU2VuZGVySWQiLCIxNDM3NDExNjcwNTAiXSxbImFwcElkIiwiMToxNDM3NDExNjcwNTA6d2ViOjkyMmQzYTBjZGRiNDBmNjdiMjFiMzMiXSxbIm1lYXN1cmVtZW50SWQiLCJHIEpIMTk4U0tDRlMiXV0=";
-const encryptedMatchesConfig = "W1siYXBpS2V5IiwiQUl6YVN5Q3FFN1p3dmVIZzFkSWhZZjFIbG83T3BIeUNadWRlWnZNIl0sWyJwcm9qZWN0SWQiLCJ3YWNlbC1saXZlIl0sWyJkYXRhYmFzZVVSTCIsImh0dHBzOi8vd2FjZWwtbGl2ZS1kZWZhdWx0LXJ0ZGIuYXNpYS1zb3V0aGVhc3QxLmZpcmViYXNlZGF0YWJhc2UuYXBwIl0sWyJzdG9yYWdlQnVja2V0Iiwid2FjZWwtbGl2ZS5maXJlYmFzZXN0b3JhZ2UuYXBwIl0sWyJtZXNzYWdpbmdTZW5kZXJJZCIsIjE4NTEwODU1NDAwNiJdLFsiYXBwSWQiLCIxOjE4NTEwODU1NDAwNjp3ZWI6OTMxNzE4OTViMWQ0YmIwN2M2ZjAzNyJdXQ==";
 
 // دالة فك التشفير
 function decryptConfig(encrypted) {
@@ -32,9 +31,7 @@ function getConfigKey(encryptedKey) {
         "c3RvcmFnZUJ1Y2tldA==": "storageBucket",
         "bWVzc2FnaW5nU2VuZGVySWQ=": "messagingSenderId",
         "YXBwSWQ=": "appId",
-        "bWVhc3VyZW1lbnRJZA==": "measurementId",
-        "ZGF0YWJhc2VVUkw=": "databaseURL",
-        "YXV0aERvbWFpbg==": "authDomain"
+        "bWVhc3VyZW1lbnRJZA==": "measurementId"
     };
     
     return keyMap[encryptedKey] || encryptedKey;
@@ -113,25 +110,8 @@ function showToast(message, type = 'info') {
     document.body.appendChild(toast);
     
     setTimeout(() => {
-        document.body.removeChild(toast);
+        if (toast.parentNode) {
+            document.body.removeChild(toast);
+        }
     }, 3000);
-}
-
-// تشفير البيانات المحفوظة محلياً
-function encryptData(data) {
-    try {
-        return btoa(JSON.stringify(data));
-    } catch (e) {
-        console.error("خطأ في تشفير البيانات");
-        return null;
-    }
-}
-
-function decryptData(encrypted) {
-    try {
-        return JSON.parse(atob(encrypted));
-    } catch (e) {
-        console.error("خطأ في فك تشفير البيانات");
-        return null;
-    }
 }
