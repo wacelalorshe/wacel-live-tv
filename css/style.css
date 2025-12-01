@@ -761,18 +761,18 @@ header {
 /* =========================================== */
 
 .footer {
-    position: fixed;
-    bottom: 50px;
-    left: 0;
-    width: 100%;
-    text-align: center;
-    padding: 12px;
-    background: linear-gradient(to right, #503FA6, var(--dark-bg), #2F2562);
-    border-top: 1px solid #fff;
-    font-family: Amita, cursive;
-    color: white;
-    z-index: 100;
-    font-size: 14px;
+    
+            position: fixed;
+            bottom: -5px;
+            left: 0;
+            width: 100%;
+            text-align: center;
+            padding: 0.5rem;
+            
+            border-top: 6px groove #000;
+            font-family: Amita, cursive;
+            color: white;
+            z-index: 100;
 }
 
 .footer a {
@@ -789,19 +789,21 @@ header {
 /* القائمة السفلية */
 /* =========================================== */
 
-.bottom-nav {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-    background: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    display: flex;
-    justify-content: space-around;
-    padding: 12px 0;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
-    z-index: 999;
-    box-shadow: 0 -2px 10px rgba(0,0,0,0.3);
-}
+        /* Bottom Navigation */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            width: 100%;
+            background: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+            display: flex;
+            justify-content: space-around;
+            padding: 10px 0;
+            border-top: 9px double rgba(0, 0, 0, 0.2);
+            border-bottom: 9px double rgba(0, 0, 0, 0.2);
+            z-index: 999;
+            border-radius: 0px 0px 0px 0px;
+        }
 
 .nav-item {
     display: flex;
@@ -822,10 +824,10 @@ header {
 }
 
 .nav-item:hover {
-    color: var(--secondary-color);
-    transform: translateY(-3px);
-    background: rgba(255, 255, 255, 0.1);
-}
+            color: #00D3FF;
+            transform: translateY(-3px);
+        }
+
 
 /* =========================================== */
 /* أنماط التحميل */
@@ -842,7 +844,7 @@ header {
 }
 
 .loading .spinner-border {
-    margin-bottom: 20px;
+    margin-bottom: 200px;
 }
 
 .loading p {
