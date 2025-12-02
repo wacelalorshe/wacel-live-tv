@@ -58,100 +58,6 @@
             </div>
         </div>
 
-        <!-- Section Page (القنوات) -->
-        <div id="sectionPage">
-            <!-- Header -->
-            <header>
-                <div class="header-title">
-                    <a href="#" class="text-box">
-                        <span id="sectionHeader">قنوات القسم</span>
-                    </a>
-                </div>
-                
-                <!-- Back Button -->
-                <a href="#" class="back-button" onclick="showPage('mainPage')">
-                    <i class="uil uil-arrow-left"></i> العودة للأقسام
-                </a>
-            </header>
-            
-            <!-- Ticker -->
-            <div class="ticker-container">
-                <div class="ticker">
-                    <span>تنويه هام</span>
-                    <ul>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">قم بتحديث مشغل الفيديو الخاص بالتطبيق</a></li>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">من متجر جوجل بلاي لضمان</a></li>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">تشغيل القنوات وعدم التقطيع</a></li>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">شكرا لكم متابعينا الكرام</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="content">
-                <h1 class="section-title" id="sectionName">قنوات القسم</h1>
-                <div class="section-description" id="sectionDescription">
-                    جاري تحميل القنوات...
-                </div>
-                
-                <!-- Channels Grid -->
-                <div id="channelsContainer" class="channels-container">
-                    <div class="loading">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">جاري التحميل...</span>
-                        </div>
-                        <p>جاري تحميل القنوات...</p>
-                        <small>يرجى الانتظار</small>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Matches Page (جدول المباريات) -->
-        <div id="matchesPage">
-            <!-- Header -->
-            <header>
-                <div class="header-title">
-                    <a href="#" class="text-box">
-                        <span>وسيل لايف برو - جدول المباريات</span>
-                    </a>
-                </div>
-                
-                <!-- Back Button -->
-                <a href="#" class="back-button" onclick="showPage('mainPage')">
-                    <i class="uil uil-arrow-left"></i> العودة للأقسام
-                </a>
-            </header>
-            
-            <!-- Bottom Navigation -->
-            <div class="bottom-nav">
-                <a href="#" class="nav-item" onclick="showPage('mainPage')">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAnElEQVQ4T2NkYGBg+M+ABxMyAiK4Mzv/yzmYGBgY8Q/JwMDEwMDDf//8/8rJz5xw2iGzk4eH/4gYGBkZGRkYvYFjvH4GBgaGVkZGRQYGJgZGRkZGRhZlAI0DZ4ABsDR0DAwMCuRAbzExMDJ4I6Q4GkRkZFQA0Snhj/0/6nwsLCwsXyPn9ZkDgAAt7QXo/tkX0AAAAASUVORK5CYII=" alt="الرئيسية" style="width:30px; height:30px;">
-                    <span>الرئيسية</span>
-                </a>
-                <a href="#" class="nav-item" onclick="showPage('matchesPage'); loadMatches();">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAlUlEQVQ4T2NkYGBg+M+ABxMyAiK4Mzv/yzmYGBgY8Q/JwMDEwMDDf//8/8rJz5xw2iGzk4eH/4gYGBkZGRkYvYFjvH4GBgaGVkZGRQYGJgZGRkZGRhZlAI0DZ4ABsDR0DAwMCuRAbzExMDJ4I6Q4GkRkZFQA0Snhj/0/6nwsLCwsXyPn9ZkDgAAslQXo/tkX0AAAAASUVORK5CYII=" alt="جدول المباريات" style="width:30px; height:30px;">
-                    <span>جدول المباريات</span>
-                </a>
-                <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAUUlEQVQ4T2NkoBAwUqifgX4GBgYGBgYGBgYFj/AEG4YWdnZ2Zm5iYGJhYGBgZGBoZGBgYGBg+Mf///8PBBgYGBj4z6SAgYGhgkCJgYGRkZGBgZ2DiBxkZEZGBgZGHgZwAADn2CFc8Op0rAAAAAElFTkSuQmCC" alt="تليجرام" style="width:30px; height:30px;">
-                    <span>تليجرام</span>
-                </a>
-                <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAZ0lEQVQ4T2NkoBAwUqifgX4GBgYGBgYGBgYFj/AEG4YWdnZ2Zm5iYGJhYGBgZGBoZGBgYGBg+Mf///8PBBgYGBj4z6SAgYGhgkCJgYGRkZGBgZ2DiBxkZEZGBgZGHgZwAAAg4Bcf+8GfDUAAAAAElFTkSuQmCC" alt="تحميل المشغل" style="width:30px; height:30px;">
-                    <span>تحميل المشغل</span>
-                </a>
-            </div>
-
-            <!-- Matches Grid -->
-            <div id="matchesContainer" class="matches-container">
-                <div class="loading">
-                    <i class="uil uil-refresh"></i>
-                    جاري تحميل المباريات...
-                </div>
-            </div>
-        </div>
-        
         <!-- Footer -->
         <div class="footer">
             <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
@@ -163,7 +69,7 @@
                 <i class="uil uil-home"></i>
                 <span>الرئيسية</span>
             </a>
-            <a href="#" class="nav-item" onclick="showPage('matchesPage'); loadMatches();">
+            <a href="matches.html" class="nav-item" target="_blank">
                 <i class="uil uil-schedule"></i>
                 <span>جدول المباريات</span>
             </a>
