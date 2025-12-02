@@ -1,24 +1,366 @@
 <!DOCTYPE html>
 <html lang="ar" dir="rtl">
 <head>
-    <!-- نفس محتويات head السابقة -->
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>قنوات القسم - Aseel TV</title>
+    
+    <!-- CSS Libraries -->
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-bg: #151825;
+            --secondary-bg: #322769;
+            --accent-color: #5d72d6;
+            --text-color: #ffffff;
+            --card-bg: rgba(47, 37, 98, 0.9);
+        }
+        
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: var(--secondary-bg);
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent-color);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+        
+        .header-title {
+            font-size: 22px;
+            font-weight: bold;
+            color: var(--accent-color);
+        }
+        
+        .back-button {
+            background: var(--accent-color);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+        
+        .back-button:hover {
+            background: #7a63e0;
+            color: white;
+            text-decoration: none;
+            transform: translateX(-5px);
+        }
+        
+        .page-title {
+            text-align: center;
+            margin: 40px 0 20px;
+            color: white;
+            font-size: 32px;
+        }
+        
+        .section-description {
+            text-align: center;
+            color: #b8b8b8;
+            font-size: 18px;
+            margin-bottom: 40px;
+            max-width: 800px;
+            margin-left: auto;
+            margin-right: auto;
+            line-height: 1.6;
+            padding: 20px;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 15px;
+        }
+        
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .channel-card {
+            background: linear-gradient(135deg, var(--card-bg), rgba(58, 66, 102, 0.9));
+            border-radius: 20px;
+            padding: 25px;
+            text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .channel-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+        
+        .channel-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--accent-color);
+            background: var(--secondary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .channel-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .channel-action {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(93, 114, 214, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 20px;
+        }
+        
+        .channel-card:hover .channel-action {
+            opacity: 1;
+        }
+        
+        .channel-action i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .channel-action span {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+            color: #b8b8b8;
+            font-size: 18px;
+        }
+        
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 5px solid rgba(255, 255, 255, 0.1);
+            border-radius: 50%;
+            border-top-color: var(--accent-color);
+            animation: spin 1s linear infinite;
+            margin: 0 auto 20px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #ff6b6b;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #b8b8b8;
+            margin-bottom: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: var(--secondary-bg);
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .copyright {
+            color: #b8b8b8;
+            font-size: 14px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--secondary-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 2px solid var(--accent-color);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            color: #b8b8b8;
+            text-decoration: none;
+            text-align: center;
+            transition: color 0.3s ease;
+            flex: 1;
+        }
+        
+        .nav-item:hover {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .nav-item i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .channels-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .section-description {
+                font-size: 16px;
+                padding: 15px;
+            }
+            
+            header {
+                flex-direction: column;
+                gap: 15px;
+                padding: 15px;
+            }
+            
+            .back-button {
+                order: -1;
+                align-self: flex-start;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- نفس محتويات body السابقة -->
+    <!-- Header -->
+    <header>
+        <div class="header-title" id="pageTitle">قنوات القسم</div>
+        <a href="index.html" class="back-button">
+            <i class="uil uil-arrow-left"></i> العودة للأقسام
+        </a>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="page-title" id="sectionName">جاري التحميل...</h1>
+        <div class="section-description" id="sectionDescription">
+            جاري تحميل قنوات القسم...
+        </div>
+        
+        <!-- Channels Container -->
+        <div id="channelsContainer" class="channels-grid">
+            <div class="loading">
+                <div class="loading-spinner"></div>
+                <p>جاري تحميل قنوات القسم...</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
+            <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
+        </div>
+    </footer>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="uil uil-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="matches.html" class="nav-item" target="_blank">
+            <i class="uil uil-schedule"></i>
+            <span>جدول المباريات</span>
+        </a>
+        <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
+            <i class="uil uil-telegram-alt"></i>
+            <span>تليجرام</span>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
+            <i class="uil uil-import"></i>
+            <span>تحميل المشغل</span>
+        </a>
+    </div>
 
-    <!-- أضف Firebase SDK -->
+    <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
     
+    <!-- Custom JS -->
     <script src="js/data.js"></script>
     <script>
-        class MainApp {
+        class SectionPage {
             constructor() {
+                this.sectionId = null;
+                this.section = null;
+                this.channels = [];
                 this.init();
             }
             
             async init() {
-                console.log('🚀 بدء التطبيق الرئيسي...');
+                console.log('🚀 بدء صفحة القسم...');
                 
                 // إعداد السنة الحالية
                 document.getElementById('currentYear').textContent = new Date().getFullYear();
@@ -26,72 +368,180 @@
                 // انتظار تحميل البيانات
                 await this.waitForData();
                 
-                // عرض الأقسام
-                this.displaySections();
+                // الحصول على معرف القسم
+                this.getSectionId();
+                
+                if (!this.sectionId) {
+                    this.showError('لم يتم تحديد القسم. الرابط غير صحيح.');
+                    return;
+                }
+                
+                // تحميل وعرض البيانات
+                this.loadAndDisplayData();
             }
             
             async waitForData() {
-                // انتظار لمدة قصيرة للتأكد من تحميل البيانات
-                await new Promise(resolve => setTimeout(resolve, 1000));
+                console.log('⏳ انتظار تحميل البيانات...');
+                
+                // الانتظار حتى تحميل البيانات من dataManager
+                if (!window.dataManager.isDataLoaded) {
+                    try {
+                        await window.dataManager.loadData();
+                    } catch (error) {
+                        console.error('❌ خطأ في انتظار تحميل البيانات:', error);
+                    }
+                }
             }
             
-            displaySections() {
-                const container = document.getElementById('sectionsContainer');
+            getSectionId() {
+                const urlParams = new URLSearchParams(window.location.search);
+                this.sectionId = urlParams.get('id');
                 
+                // إذا لم يوجد في query params، جرب الحصول من hash
+                if (!this.sectionId && window.location.hash) {
+                    this.sectionId = window.location.hash.substring(1);
+                }
+                
+                console.log('🔗 معرف القسم من الرابط:', this.sectionId);
+            }
+            
+            loadAndDisplayData() {
                 // تحميل البيانات من dataManager
-                const sections = window.dataManager.getAllSections();
-                const channels = window.dataManager.channels;
+                this.section = window.dataManager.getSectionById(this.sectionId);
+                this.channels = window.dataManager.getChannelsBySectionId(this.sectionId);
                 
-                if (sections.length === 0) {
+                if (!this.section) {
+                    this.showError('القسم غير موجود');
+                    return;
+                }
+                
+                // عرض البيانات
+                this.displayData();
+            }
+            
+            displayData() {
+                console.log(`📺 عرض ${this.channels.length} قناة للقسم: ${this.section.name}`);
+                
+                // تحديث العنوان والوصف
+                document.title = `${this.section.name} - Aseel TV`;
+                document.getElementById('pageTitle').textContent = this.section.name;
+                document.getElementById('sectionName').textContent = this.section.name;
+                
+                const description = this.section.description || 
+                                  `استمتع بمشاهدة ${this.channels.length} قناة متاحة في هذا القسم`;
+                document.getElementById('sectionDescription').textContent = description;
+                
+                // عرض القنوات
+                this.displayChannels();
+            }
+            
+            displayChannels() {
+                const container = document.getElementById('channelsContainer');
+                
+                if (this.channels.length === 0) {
                     container.innerHTML = `
-                        <div class="loading">
-                            <i class="uil uil-folder" style="font-size: 3rem; color: #b8b8b8;"></i>
-                            <p>لا توجد أقسام متاحة</p>
-                            <button onclick="location.reload()" class="btn btn-primary mt-3">
-                                إعادة تحميل
-                            </button>
+                        <div class="empty-state">
+                            <i class="uil uil-tv-retro"></i>
+                            <h3>لا توجد قنوات في هذا القسم</h3>
+                            <p>سيتم إضافة القنوات قريباً</p>
+                            <a href="index.html" class="back-button" style="display: inline-flex; margin-top: 20px;">
+                                <i class="uil uil-arrow-left"></i> العودة للأقسام
+                            </a>
                         </div>
                     `;
                     return;
                 }
                 
-                // إنشاء HTML للأقسام
-                container.innerHTML = sections.map(section => {
-                    const sectionChannels = channels.filter(ch => ch.sectionId === section.id);
-                    const channelCount = sectionChannels.length;
-                    const sectionLink = `section.html?id=${section.id}`;
-                    
-                    return `
-                        <a href="${sectionLink}" target="_blank" class="section-card">
-                            <div class="section-image">
-                                <img src="${section.image}" 
-                                     alt="${section.name}"
-                                     onerror="this.src='https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png'">
-                            </div>
-                            <div class="section-content">
-                                <div class="section-name">${section.name}</div>
-                                <div class="section-description">${section.description}</div>
-                                <div class="section-footer">
-                                    <div class="channel-count">
-                                        ${channelCount} قناة
-                                    </div>
-                                    <div class="open-btn">
-                                        <i class="uil uil-external-link-alt"></i>
-                                        <span>فتح القسم</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </a>
-                    `;
-                }).join('');
+                // إنشاء HTML للقنوات
+                container.innerHTML = this.channels.map((channel, index) => `
+                    <div class="channel-card" onclick="sectionPage.openChannel(${index})" 
+                         style="animation-delay: ${index * 0.1}s;">
+                        <div class="channel-logo">
+                            <img src="${channel.image || 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png'}" 
+                                 alt="${channel.name}"
+                                 onerror="this.src='https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png'">
+                        </div>
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-action">
+                            <i class="uil uil-play-circle"></i>
+                            <span>مشاهدة القناة</span>
+                        </div>
+                    </div>
+                `).join('');
                 
-                console.log(`✅ تم عرض ${sections.length} قسم`);
+                // إضافة أنماط للحركات
+                this.addAnimationStyles();
+            }
+            
+            addAnimationStyles() {
+                if (!document.querySelector('#channel-animations')) {
+                    const style = document.createElement('style');
+                    style.id = 'channel-animations';
+                    style.textContent = `
+                        .channel-card {
+                            opacity: 0;
+                            transform: translateY(20px);
+                            animation: fadeInUp 0.5s ease forwards;
+                        }
+                        
+                        @keyframes fadeInUp {
+                            to {
+                                opacity: 1;
+                                transform: translateY(0);
+                            }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+            
+            openChannel(index) {
+                const channel = this.channels[index];
+                if (!channel) return;
+                
+                console.log('🔗 فتح القناة:', channel.name);
+                
+                if (channel.url && channel.url !== '#' && channel.url.trim() !== '') {
+                    try {
+                        window.open(channel.url, '_blank');
+                    } catch (error) {
+                        console.error('❌ خطأ في فتح الرابط:', error);
+                        this.showDownloadPrompt(channel);
+                    }
+                } else {
+                    this.showDownloadPrompt(channel);
+                }
+            }
+            
+            showDownloadPrompt(channel) {
+                if (confirm('لمشاهدة القناة يجب تثبيت مشغل القنوات. هل تريد التحميل الآن؟')) {
+                    const downloadUrl = channel.downloadUrl || 
+                                      channel.appUrl || 
+                                      'https://play.google.com/store/apps/details?id=com.xpola.player';
+                    window.open(downloadUrl, '_blank');
+                }
+            }
+            
+            showError(message) {
+                const container = document.getElementById('channelsContainer');
+                container.innerHTML = `
+                    <div class="error">
+                        <i class="uil uil-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                        <h3>${message}</h3>
+                        <a href="index.html" class="back-button" style="display: inline-flex; margin-top: 20px;">
+                            <i class="uil uil-arrow-left"></i> العودة للأقسام
+                        </a>
+                    </div>
+                `;
+                
+                document.getElementById('sectionName').textContent = 'خطأ';
+                document.getElementById('sectionDescription').textContent = message;
             }
         }
         
         // بدء التطبيق
         document.addEventListener('DOMContentLoaded', () => {
-            window.mainApp = new MainApp();
+            window.sectionPage = new SectionPage();
         });
     </script>
 </body>
