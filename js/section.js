@@ -7,29 +7,60 @@ class SectionPageApp {
         this.sectionId = null;
         this.section = null;
         this.channels = [];
+        this.db = null;
         this.init();
     }
 
     async init() {
         console.log('🚀 بدء تشغيل صفحة القسم المنفصلة...');
         
-        // الحصول على معرف القسم من الرابط
-        this.getSectionIdFromURL();
-        
-        // إعداد السنة الحالية
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-        
-        // إعداد مستمعي الأحداث
-        this.setupEventListeners();
-        
-        // تحميل بيانات القسم
-        await this.loadSectionData();
-        
-        // إظهار المحتوى
-        document.getElementById('pageLoadingScreen').style.display = 'none';
-        document.getElementById('pageContentWrapper').style.display = 'block';
-        
-        console.log('✅ تم تهيئة صفحة القسم بنجاح');
+        try {
+            // الحصول على معرف القسم من الرابط
+            this.getSectionIdFromURL();
+            
+            if (!this.sectionId) {
+                this.showError('لم يتم تحديد القسم. الرابط غير صالح.');
+                return;
+            }
+            
+            // إعداد السنة الحالية
+            document.getElementById('currentYear').textContent = new Date().getFullYear();
+            
+            // إعداد مستمعي الأحداث
+            this.setupEventListeners();
+            
+            // محاولة الاتصال بـ Firebase
+            await this.initializeFirebase();
+            
+            // تحميل بيانات القسم
+            await this.loadSectionData();
+            
+            // إظهار المحتوى
+            document.getElementById('pageLoadingScreen').style.display = 'none';
+            document.getElementById('pageContentWrapper').style.display = 'block';
+            
+            console.log('✅ تم تهيئة صفحة القسم بنجاح');
+            
+        } catch (error) {
+            console.error('❌ خطأ في تحميل الصفحة:', error);
+            this.showError('حدث خطأ أثناء تحميل القسم. جاري استخدام البيانات المحلية...');
+            await this.loadFromLocalStorage();
+            
+            document.getElementById('pageLoadingScreen').style.display = 'none';
+            document.getElementById('pageContentWrapper').style.display = 'block';
+        }
+    }
+
+    async initializeFirebase() {
+        try {
+            // استخدام دالة تهيئة Firebase العامة
+            const { app, db } = await initializeFirebase();
+            this.db = db;
+            console.log('✅ تم الاتصال بـ Firebase بنجاح');
+        } catch (error) {
+            console.error('❌ فشل الاتصال بـ Firebase:', error);
+            this.db = null;
+        }
     }
 
     getSectionIdFromURL() {
@@ -40,74 +71,29 @@ class SectionPageApp {
         
         if (!this.sectionId) {
             console.error('❌ لم يتم تحديد معرف القسم في الرابط');
-            this.showError('لم يتم تحديد القسم. الرابط غير صالح.');
             return;
         }
     }
 
     async loadSectionData() {
         try {
-            // محاولة الاتصال بـ Firebase
-            const { app, db } = await this.initializeFirebase();
-            this.db = db;
+            let loadedFromFirebase = false;
             
-            // تحميل البيانات مع إعادة المحاولة
-            await this.loadDataWithRetry();
+            // محاولة تحميل من Firebase أولاً
+            if (this.db) {
+                loadedFromFirebase = await this.loadFromFirebase();
+            }
+            
+            // إذا فشل تحميل Firebase، استخدم localStorage
+            if (!loadedFromFirebase) {
+                await this.loadFromLocalStorage();
+            }
+            
+            this.renderData();
             
         } catch (error) {
-            console.error('❌ فشل الاتصال بـ Firebase:', error);
-            this.showError('فشل في الاتصال بقاعدة البيانات. جاري استخدام البيانات المحلية...');
-            await this.loadFromLocalStorage();
-        }
-    }
-
-    async initializeFirebase() {
-        return new Promise((resolve, reject) => {
-            try {
-                console.log('🚀 جاري تهيئة Firebase...');
-                
-                // فك تشفير إعدادات Firebase
-                const firebaseConfig = decryptConfig(encryptedFirebaseConfig);
-                
-                if (!firebaseConfig) {
-                    throw new Error('فشل في فك تشفير إعدادات Firebase');
-                }
-
-                // Initialize Firebase
-                const app = firebase.initializeApp(firebaseConfig);
-                const db = firebase.firestore();
-                
-                console.log('✅ تم تهيئة Firebase بنجاح');
-                resolve({ app, db });
-                
-            } catch (error) {
-                console.error('❌ فشل تهيئة Firebase:', error);
-                reject(error);
-            }
-        });
-    }
-
-    async loadDataWithRetry(maxRetries = 3) {
-        let retries = 0;
-        
-        while (retries < maxRetries) {
-            try {
-                console.log(`📥 جاري تحميل بيانات القسم... المحاولة ${retries + 1}`);
-                await this.loadFromFirebase();
-                console.log('✅ تم تحميل بيانات القسم بنجاح');
-                this.renderData();
-                return;
-            } catch (error) {
-                retries++;
-                console.error(`❌ فشل تحميل البيانات (المحاولة ${retries}):`, error);
-                
-                if (retries < maxRetries) {
-                    console.log(`🔄 إعادة المحاولة بعد 2 ثانية...`);
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                } else {
-                    throw error;
-                }
-            }
+            console.error('❌ خطأ في تحميل بيانات القسم:', error);
+            throw error;
         }
     }
 
@@ -136,7 +122,6 @@ class SectionPageApp {
             // جلب قنوات القسم
             const channelsSnapshot = await this.db.collection('channels')
                 .where('sectionId', '==', this.sectionId)
-                .orderBy('order')
                 .get();
 
             this.channels = channelsSnapshot.docs.map(doc => ({
@@ -146,12 +131,11 @@ class SectionPageApp {
             
             console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
             
-            // حفظ في localStorage كنسخة احتياطية
-            this.saveToLocalStorage();
+            return true;
             
         } catch (error) {
             console.error('❌ خطأ في تحميل البيانات من Firebase:', error);
-            throw error;
+            return false;
         }
     }
 
@@ -167,8 +151,7 @@ class SectionPageApp {
             
             if (savedChannels) {
                 const allChannels = decryptData(savedChannels) || [];
-                this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId)
-                    .sort((a, b) => (a.order || 1) - (b.order || 1));
+                this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId);
             }
             
             if (!this.section) {
@@ -176,22 +159,10 @@ class SectionPageApp {
             }
             
             console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
-            this.renderData();
             
         } catch (error) {
             console.error('❌ خطأ في تحميل البيانات المحلية:', error);
-            this.showError('لا توجد بيانات لهذا القسم. الرابط قد يكون غير صالح.');
-        }
-    }
-
-    saveToLocalStorage() {
-        try {
-            // نحتاج لحفظ بيانات القسم فقط لهذه الجلسة
-            localStorage.setItem('current_section', JSON.stringify(this.section));
-            localStorage.setItem('current_section_channels', JSON.stringify(this.channels));
-            console.log('💾 تم حفظ بيانات القسم في التخزين المحلي');
-        } catch (error) {
-            console.error('❌ خطأ في حفظ البيانات محلياً:', error);
+            throw error;
         }
     }
 
@@ -217,7 +188,10 @@ class SectionPageApp {
             return;
         }
 
-        if (this.channels.length === 0) {
+        // ترتيب القنوات حسب الترتيب
+        const sortedChannels = this.channels.sort((a, b) => (a.order || 999) - (b.order || 999));
+        
+        if (sortedChannels.length === 0) {
             container.innerHTML = `
                 <div class="loading">
                     <i class="uil uil-tv-retro" style="font-size: 4rem; color: #6c757d;"></i>
@@ -233,7 +207,7 @@ class SectionPageApp {
 
         container.innerHTML = `
             <div class="channels-grid">
-                ${this.channels.map(channel => `
+                ${sortedChannels.map(channel => `
                     <div class="channel-card" data-channel-id="${channel.id}" onclick="sectionPageApp.openChannel('${channel.id}')">
                         <div class="channel-logo">
                             <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
