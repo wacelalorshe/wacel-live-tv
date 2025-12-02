@@ -2,334 +2,255 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>قنوات القسم - Aseel TV</title>
     
-    <!-- CSS Libraries -->
+    <!-- CSS -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amita">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
     
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    
     <style>
-        /* الأنماط الأساسية */
         :root {
-            --primary-color: #322769;
-            --secondary-color: #151825;
-            --accent-color: #654FD4;
-            --text-color: #E1E1E1;
-            --text-secondary: #B8B8B8;
+            --primary-bg: #151825;
+            --secondary-bg: #322769;
+            --accent-color: #5d72d6;
+            --text-color: #ffffff;
+            --card-bg: rgba(47, 37, 98, 0.9);
         }
         
         body {
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--primary-color));
+            background: var(--primary-bg);
             color: var(--text-color);
-            min-height: 100vh;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
-        }
-        
-        /* شاشة التحميل */
-        #pageLoadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to right, var(--primary-color), var(--secondary-color), var(--primary-color));
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
-        }
-        
-        .loading-spinner {
-            width: 60px;
-            height: 60px;
-            border: 5px solid rgba(255, 255, 255, 0.1);
-            border-radius: 50%;
-            border-top-color: var(--accent-color);
-            animation: spin 1s ease-in-out infinite;
-            margin-bottom: 20px;
-        }
-        
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-        
-        .loading-text {
-            font-size: 18px;
-            color: var(--text-color);
-            margin-bottom: 10px;
-        }
-        
-        .loading-details {
-            font-size: 14px;
-            color: var(--text-secondary);
-            max-width: 300px;
-            text-align: center;
-        }
-        
-        /* محتوى الصفحة */
-        #pageContentWrapper {
-            display: none;
             min-height: 100vh;
         }
         
-        /* الهيدر */
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
         header {
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
+            background: var(--secondary-bg);
             padding: 15px 20px;
-            position: fixed;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 3px solid var(--accent-color);
+            position: sticky;
             top: 0;
-            left: 0;
-            right: 0;
             z-index: 1000;
-            border-bottom: 2px solid var(--accent-color);
         }
         
         .header-title {
-            text-align: center;
-        }
-        
-        .text-box {
-            background: linear-gradient(45deg, var(--accent-color), #FF5200);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            text-decoration: none;
-            display: inline-block;
-            padding: 5px 0;
+            color: var(--accent-color);
         }
         
-        /* زر العودة */
         .back-button {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(45deg, var(--accent-color), #FF5200);
+            background: var(--accent-color);
             color: white;
             border: none;
+            padding: 10px 20px;
             border-radius: 25px;
-            padding: 10px 25px;
-            font-size: 14px;
-            cursor: pointer;
             text-decoration: none;
             display: flex;
             align-items: center;
             gap: 8px;
-            transition: all 0.3s ease;
             font-weight: bold;
+            transition: all 0.3s ease;
         }
         
         .back-button:hover {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+            background: #7a63e0;
             color: white;
             text-decoration: none;
+            transform: translateX(-5px);
         }
         
-        /* Ticker */
-        .ticker-container {
-            margin-top: 70px;
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 0;
-            overflow: hidden;
-            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-        }
-        
-        .ticker {
-            display: flex;
-            align-items: center;
-            animation: ticker 30s linear infinite;
-        }
-        
-        @keyframes ticker {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
-        
-        .ticker span {
-            background: var(--accent-color);
-            color: white;
-            padding: 5px 15px;
-            border-radius: 20px;
-            margin-right: 20px;
-            font-weight: bold;
-            white-space: nowrap;
-        }
-        
-        .ticker ul {
-            display: flex;
-            list-style: none;
-            margin: 0;
-            padding: 0;
-        }
-        
-        .ticker li {
-            margin-right: 40px;
-            white-space: nowrap;
-        }
-        
-        .ticker a {
-            color: var(--text-color);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-        
-        .ticker a:hover {
-            color: var(--accent-color);
-        }
-        
-        /* المحتوى الرئيسي */
-        .content {
-            margin-top: 140px;
-            padding: 20px;
-            padding-bottom: 100px;
-            max-width: 1200px;
-            margin-left: auto;
-            margin-right: auto;
-        }
-        
-        .section-title {
+        .page-title {
             text-align: center;
-            margin-bottom: 30px;
-            color: var(--text-color);
+            margin: 40px 0 20px;
+            color: white;
             font-size: 32px;
-            font-weight: bold;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
         }
         
         .section-description {
             text-align: center;
-            margin-bottom: 50px;
-            color: var(--text-secondary);
+            color: #b8b8b8;
             font-size: 18px;
+            margin-bottom: 40px;
             max-width: 800px;
             margin-left: auto;
             margin-right: auto;
-            line-height: 1.8;
+            line-height: 1.6;
             padding: 20px;
-            background: rgba(0, 0, 0, 0.3);
+            background: rgba(0, 0, 0, 0.2);
             border-radius: 15px;
-            border: 1px solid rgba(255, 255, 255, 0.1);
         }
         
-        /* حاوية القنوات */
-        .channels-container {
-            min-height: 300px;
+        .channels-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
         }
         
-        /* الفوتر */
-        .footer {
-            background: rgba(0, 0, 0, 0.8);
-            padding: 20px;
+        .channel-card {
+            background: linear-gradient(135deg, var(--card-bg), rgba(58, 66, 102, 0.9));
+            border-radius: 20px;
+            padding: 25px;
             text-align: center;
+            border: 2px solid transparent;
+            transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .channel-card:hover {
+            transform: translateY(-10px) scale(1.02);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+        }
+        
+        .channel-logo {
+            width: 120px;
+            height: 120px;
+            margin: 0 auto 20px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 4px solid var(--accent-color);
+            background: var(--secondary-bg);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .channel-logo img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .channel-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: white;
+            margin-bottom: 10px;
+        }
+        
+        .channel-action {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(93, 114, 214, 0.9);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            border-radius: 20px;
+        }
+        
+        .channel-card:hover .channel-action {
+            opacity: 1;
+        }
+        
+        .channel-action i {
+            font-size: 40px;
+            margin-bottom: 10px;
+        }
+        
+        .channel-action span {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .error {
+            text-align: center;
+            padding: 50px;
+            color: #ff6b6b;
+        }
+        
+        .empty-state {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        .empty-state i {
+            font-size: 4rem;
+            color: #b8b8b8;
+            margin-bottom: 20px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: var(--secondary-bg);
+            margin-top: 40px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .copyright {
+            color: #b8b8b8;
+            font-size: 14px;
+        }
+        
+        .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             right: 0;
+            background: var(--secondary-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 2px solid var(--accent-color);
+            z-index: 1000;
         }
         
-        .copyright {
-            color: var(--text-secondary);
-            margin: 0;
-            font-size: 14px;
-        }
-        
-        /* التنقل السفلي */
-        .bottom-nav {
-            display: none;
-        }
-        
-        /* نافذة التثبيت */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.8);
-            z-index: 2000;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .modal-content {
-            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
-            padding: 30px;
-            border-radius: 20px;
-            max-width: 400px;
-            width: 90%;
-            border: 2px solid var(--accent-color);
+        .nav-item {
+            color: #b8b8b8;
+            text-decoration: none;
             text-align: center;
-        }
-        
-        .modal-content p {
-            margin-bottom: 20px;
-            font-size: 16px;
-            line-height: 1.6;
-        }
-        
-        .dont-show-container {
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 10px;
-        }
-        
-        .modal-buttons {
-            display: flex;
-            gap: 15px;
-            justify-content: center;
-        }
-        
-        .modal-button {
-            background: linear-gradient(45deg, var(--accent-color), #FF5200);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 25px;
-            cursor: pointer;
-            font-weight: bold;
-            transition: all 0.3s ease;
+            transition: color 0.3s ease;
             flex: 1;
-            max-width: 150px;
         }
         
-        .modal-button:hover {
-            transform: scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        .nav-item:hover {
+            color: var(--accent-color);
+            text-decoration: none;
         }
         
-        .cancel-button {
-            background: #6c757d;
+        .nav-item i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
         }
         
-        /* التجاوب */
+        .nav-item span {
+            font-size: 12px;
+        }
+        
         @media (max-width: 768px) {
-            .back-button {
-                position: relative;
-                left: 0;
-                top: 0;
-                transform: none;
-                margin: 10px auto;
-                display: inline-flex;
-                justify-content: center;
+            .channels-grid {
+                grid-template-columns: 1fr;
             }
             
-            .section-title {
+            .page-title {
                 font-size: 24px;
             }
             
@@ -338,99 +259,218 @@
                 padding: 15px;
             }
             
-            .content {
-                margin-top: 120px;
+            header {
+                flex-direction: column;
+                gap: 15px;
                 padding: 15px;
             }
             
-            .modal-buttons {
-                flex-direction: column;
-            }
-            
-            .modal-button {
-                max-width: 100%;
+            .back-button {
+                order: -1;
+                align-self: flex-start;
             }
         }
     </style>
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div id="pageLoadingScreen">
-        <div class="loading-spinner"></div>
-        <div class="loading-text">جاري تحميل قنوات القسم...</div>
-        <div class="loading-details" id="loadingDetails">جاري التهيئة...</div>
+    <!-- Header -->
+    <header>
+        <div class="header-title" id="pageTitle">قنوات القسم</div>
+        <a href="index.html" class="back-button">
+            <i class="uil uil-arrow-left"></i> العودة للأقسام
+        </a>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="page-title" id="sectionName">جاري التحميل...</h1>
+        <div class="section-description" id="sectionDescription">
+            جاري تحميل قنوات القسم...
+        </div>
+        
+        <!-- Channels Container -->
+        <div id="channelsContainer" class="channels-grid">
+            <!-- سيتم تعبئة القنوات هنا -->
+        </div>
     </div>
-
-    <!-- محتوى الصفحة -->
-    <div id="pageContentWrapper">
-        <!-- Header -->
-        <header>
-            <div class="header-title">
-                <a href="#" class="text-box">
-                    <span id="sectionHeader">قنوات القسم</span>
-                </a>
-            </div>
-            
-            <!-- زر العودة -->
-            <a href="index.html" class="back-button">
-                <i class="uil uil-arrow-left"></i> العودة للأقسام
-            </a>
-        </header>
-        
-        <!-- Ticker -->
-        <div class="ticker-container">
-            <div class="ticker">
-                <span>تنويه هام</span>
-                <ul>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">قم بتحديث مشغل الفيديو الخاص بالتطبيق</a></li>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">من متجر جوجل بلاي لضمان</a></li>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">تشغيل القنوات وعدم التقطيع</a></li>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">شكرا لكم متابعينا الكرام</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <!-- المحتوى الرئيسي -->
-        <div class="content">
-            <h1 class="section-title" id="sectionName">قنوات القسم</h1>
-            <div class="section-description" id="sectionDescription">
-                جاري تحميل القنوات...
-            </div>
-            
-            <!-- حاوية القنوات -->
-            <div id="channelsContainer" class="channels-container">
-                <!-- سيتم تعبئة القنوات هنا -->
-            </div>
-        </div>
-        
-        <!-- Footer -->
-        <div class="footer">
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
             <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
         </div>
-        
-        <!-- Install Modal -->
-        <div id="installModal" class="modal">
-            <div class="modal-content">
-                <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
-                <div class="dont-show-container">
-                    <input type="checkbox" id="dontShowAgain">
-                    <label for="dontShowAgain" style="margin-right: 10px;">عدم الإظهار مرة أخرى</label>
-                </div>
-                <div class="modal-buttons">
-                    <button id="confirmInstall" class="modal-button">تحميل مشغل القنوات</button>
-                    <button id="cancelInstall" class="modal-button cancel-button">الغاء التحميل</button>
-                </div>
-            </div>
-        </div>
+    </footer>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="index.html" class="nav-item">
+            <i class="uil uil-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="matches.html" class="nav-item" target="_blank">
+            <i class="uil uil-schedule"></i>
+            <span>جدول المباريات</span>
+        </a>
+        <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
+            <i class="uil uil-telegram-alt"></i>
+            <span>تليجرام</span>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
+            <i class="uil uil-import"></i>
+            <span>تحميل المشغل</span>
+        </a>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-    <!-- Custom JS -->
-    <script src="js/protection.js"></script>
-    <script src="js/section-app.js"></script>
+    <!-- JavaScript -->
+    <script src="js/data.js"></script>
+    <script>
+        class SectionPage {
+            constructor() {
+                this.sectionId = null;
+                this.section = null;
+                this.channels = [];
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 بدء صفحة القسم...');
+                
+                // إعداد السنة الحالية
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+                
+                // الحصول على معرف القسم
+                this.getSectionId();
+                
+                if (!this.sectionId) {
+                    this.showError('لم يتم تحديد القسم. الرابط غير صحيح.');
+                    return;
+                }
+                
+                // تحميل وعرض البيانات
+                this.loadAndDisplayData();
+            }
+            
+            getSectionId() {
+                // الحصول من query parameter
+                const urlParams = new URLSearchParams(window.location.search);
+                this.sectionId = urlParams.get('id');
+                
+                // إذا لم يوجد، جرب الحصول من hash
+                if (!this.sectionId && window.location.hash) {
+                    this.sectionId = window.location.hash.substring(1);
+                }
+                
+                console.log('🔗 معرف القسم:', this.sectionId);
+            }
+            
+            loadAndDisplayData() {
+                // تحميل البيانات من الـ data manager
+                this.section = window.dataManager.getSectionById(this.sectionId);
+                this.channels = window.dataManager.getChannelsBySectionId(this.sectionId);
+                
+                if (!this.section) {
+                    this.showError('القسم غير موجود');
+                    return;
+                }
+                
+                // عرض البيانات
+                this.displayData();
+            }
+            
+            displayData() {
+                console.log(`📺 عرض ${this.channels.length} قناة للقسم: ${this.section.name}`);
+                
+                // تحديث العنوان والوصف
+                document.title = `${this.section.name} - Aseel TV`;
+                document.getElementById('pageTitle').textContent = this.section.name;
+                document.getElementById('sectionName').textContent = this.section.name;
+                
+                const description = this.section.description || 
+                                  `استمتع بمشاهدة ${this.channels.length} قناة متاحة في هذا القسم`;
+                document.getElementById('sectionDescription').textContent = description;
+                
+                // عرض القنوات
+                this.displayChannels();
+            }
+            
+            displayChannels() {
+                const container = document.getElementById('channelsContainer');
+                
+                if (this.channels.length === 0) {
+                    container.innerHTML = `
+                        <div class="empty-state">
+                            <i class="uil uil-tv-retro"></i>
+                            <h3>لا توجد قنوات في هذا القسم</h3>
+                            <p>سيتم إضافة القنوات قريباً</p>
+                            <a href="index.html" class="back-button" style="display: inline-flex; margin-top: 20px;">
+                                <i class="uil uil-arrow-left"></i> العودة للأقسام
+                            </a>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // إنشاء HTML للقنوات
+                container.innerHTML = this.channels.map(channel => `
+                    <div class="channel-card" onclick="sectionPage.openChannel('${channel.id}')">
+                        <div class="channel-logo">
+                            <img src="${channel.image || 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png'}" 
+                                 alt="${channel.name}"
+                                 onerror="this.src='https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png'">
+                        </div>
+                        <div class="channel-name">${channel.name}</div>
+                        <div class="channel-action">
+                            <i class="uil uil-play-circle"></i>
+                            <span>مشاهدة القناة</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            openChannel(channelId) {
+                const channel = this.channels.find(c => c.id === channelId);
+                if (!channel) return;
+                
+                console.log('🔗 فتح القناة:', channel.name);
+                
+                // إذا كان هناك رابط، افتحه
+                if (channel.url && channel.url !== '#') {
+                    window.open(channel.url, '_blank');
+                } else {
+                    // وإلا اطلب تحميل المشغل
+                    this.showDownloadPrompt(channel);
+                }
+            }
+            
+            showDownloadPrompt(channel) {
+                if (confirm('لمشاهدة القناة يجب تثبيت مشغل القنوات. هل تريد التحميل الآن؟')) {
+                    const downloadUrl = 'https://play.google.com/store/apps/details?id=com.xpola.player';
+                    window.open(downloadUrl, '_blank');
+                }
+            }
+            
+            showError(message) {
+                const container = document.getElementById('channelsContainer');
+                container.innerHTML = `
+                    <div class="error">
+                        <i class="uil uil-exclamation-triangle" style="font-size: 4rem; margin-bottom: 20px;"></i>
+                        <h3>${message}</h3>
+                        <a href="index.html" class="back-button" style="display: inline-flex; margin-top: 20px;">
+                            <i class="uil uil-arrow-left"></i> العودة للأقسام
+                        </a>
+                    </div>
+                `;
+                
+                // تحديث العنوان
+                document.getElementById('sectionName').textContent = 'خطأ';
+                document.getElementById('sectionDescription').textContent = message;
+            }
+        }
+        
+        // بدء التطبيق
+        document.addEventListener('DOMContentLoaded', () => {
+            window.sectionPage = new SectionPage();
+        });
+    </script>
 </body>
 </html>
