@@ -1,166 +1,192 @@
-// data.js - بيانات ثابتة للتجربة
+// data.js - نظام هجين (Firebase + بيانات محلية)
+
 const sampleData = {
-    sections: [
-        {
-            id: 'bein-sports',
-            name: 'قنوات بي إن سبورت',
-            description: 'جميع قنوات بي إن سبورت الرياضية المميزة',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            order: 1,
-            isActive: true
-        },
-        {
-            id: 'arabic-channels',
-            name: 'القنوات العربية',
-            description: 'أفضل القنوات العربية والفضائية',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            order: 2,
-            isActive: true
-        },
-        {
-            id: 'sports-channels',
-            name: 'القنوات الرياضية',
-            description: 'أهم القنوات الرياضية العالمية',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            order: 3,
-            isActive: true
-        },
-        {
-            id: 'movies-series',
-            name: 'أفلام ومسلسلات',
-            description: 'أحدث الأفلام والمسلسلات',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            order: 4,
-            isActive: true
-        }
-    ],
-    
-    channels: [
-        // قنوات بي إن سبورت
-        {
-            id: 'bein-1',
-            name: 'bein sport 1',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/bein1',
-            sectionId: 'bein-sports',
-            order: 1
-        },
-        {
-            id: 'bein-2',
-            name: 'bein sport 2',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/bein2',
-            sectionId: 'bein-sports',
-            order: 2
-        },
-        {
-            id: 'bein-3',
-            name: 'bein sport 3',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/bein3',
-            sectionId: 'bein-sports',
-            order: 3
-        },
-        
-        // قنوات عربية
-        {
-            id: 'mbc-1',
-            name: 'MBC 1',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/mbc1',
-            sectionId: 'arabic-channels',
-            order: 1
-        },
-        {
-            id: 'mbc-2',
-            name: 'MBC 2',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/mbc2',
-            sectionId: 'arabic-channels',
-            order: 2
-        },
-        
-        // قنوات رياضية
-        {
-            id: 'espn-1',
-            name: 'ESPN 1',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/espn1',
-            sectionId: 'sports-channels',
-            order: 1
-        },
-        {
-            id: 'sky-sports',
-            name: 'Sky Sports',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/skysports',
-            sectionId: 'sports-channels',
-            order: 2
-        },
-        
-        // أفلام ومسلسلات
-        {
-            id: 'osn-movies',
-            name: 'OSN Movies',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/osn',
-            sectionId: 'movies-series',
-            order: 1
-        },
-        {
-            id: 'shahid',
-            name: 'Shahid',
-            image: 'https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png',
-            url: 'https://example.com/shahid',
-            sectionId: 'movies-series',
-            order: 2
-        }
-    ]
+    sections: [...], // نفس البيانات السابقة
+    channels: [...]  // نفس البيانات السابقة
 };
 
-// حفظ البيانات في localStorage
-function saveDataToStorage() {
-    localStorage.setItem('bein_sections', JSON.stringify(sampleData.sections));
-    localStorage.setItem('bein_channels', JSON.stringify(sampleData.channels));
-    console.log('✅ تم حفظ البيانات في localStorage');
-}
+// إعدادات Firebase الحقيقية
+const firebaseConfig = {
+    apiKey: "AIzaSyAKgEiYYlmpMe0NLewulheovlTQMzVC7980",
+    authDomain: "bein-42f9e.firebaseapp.com",
+    projectId: "bein-42f9e",
+    storageBucket: "bein-42f9e.firebasestorage.app",
+    messagingSenderId: "143741167050",
+    appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
+    measurementId: "G-JH198SKCFS"
+};
 
-// تحميل البيانات من localStorage
-function loadDataFromStorage() {
-    const sections = JSON.parse(localStorage.getItem('bein_sections') || '[]');
-    const channels = JSON.parse(localStorage.getItem('bein_channels') || '[]');
-    
-    // إذا لم توجد بيانات، استخدم البيانات الافتراضية
-    if (sections.length === 0) {
-        saveDataToStorage();
-        return sampleData;
+class DataManager {
+    constructor() {
+        this.firebaseAvailable = false;
+        this.db = null;
+        this.sections = [];
+        this.channels = [];
     }
     
-    return { sections, channels };
+    // تهيئة Firebase
+    async initializeFirebase() {
+        try {
+            if (typeof firebase === 'undefined') {
+                console.log('❌ Firebase SDK غير محمل');
+                return false;
+            }
+            
+            // تهيئة Firebase
+            const app = firebase.initializeApp(firebaseConfig);
+            this.db = firebase.firestore(app);
+            this.firebaseAvailable = true;
+            
+            console.log('✅ تم تهيئة Firebase بنجاح');
+            return true;
+            
+        } catch (error) {
+            if (error.code === 'app/duplicate-app') {
+                console.log('⚠️ Firebase مهيأ بالفعل');
+                this.db = firebase.firestore();
+                this.firebaseAvailable = true;
+                return true;
+            }
+            console.error('❌ فشل تهيئة Firebase:', error);
+            return false;
+        }
+    }
+    
+    // تحميل البيانات من Firebase
+    async loadFromFirebase() {
+        if (!this.firebaseAvailable) {
+            console.log('⚠️ Firebase غير متاح');
+            return false;
+        }
+        
+        try {
+            console.log('📡 جاري تحميل البيانات من Firebase...');
+            
+            // تحميل الأقسام
+            const sectionsSnapshot = await this.db.collection('sections').get();
+            this.sections = sectionsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            console.log(`✅ تم تحميل ${this.sections.length} قسم من Firebase`);
+            
+            // تحميل القنوات
+            const channelsSnapshot = await this.db.collection('channels').get();
+            this.channels = channelsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
+            
+            // حفظ نسخة في localStorage للاستخدام المستقبلي
+            this.saveToLocalStorage();
+            
+            return true;
+            
+        } catch (error) {
+            console.error('❌ خطأ في تحميل Firebase:', error);
+            return false;
+        }
+    }
+    
+    // تحميل البيانات من localStorage
+    loadFromLocalStorage() {
+        try {
+            const sections = localStorage.getItem('bein_sections');
+            const channels = localStorage.getItem('bein_channels');
+            
+            if (sections) {
+                this.sections = JSON.parse(sections);
+            }
+            
+            if (channels) {
+                this.channels = JSON.parse(channels);
+            }
+            
+            console.log(`📋 تم تحميل ${this.sections.length} قسم و ${this.channels.length} قناة من localStorage`);
+            
+            return this.sections.length > 0;
+            
+        } catch (error) {
+            console.error('❌ خطأ في تحميل localStorage:', error);
+            return false;
+        }
+    }
+    
+    // استخدام البيانات الافتراضية
+    useDefaultData() {
+        console.log('🔄 استخدام البيانات الافتراضية');
+        this.sections = [...sampleData.sections];
+        this.channels = [...sampleData.channels];
+        this.saveToLocalStorage();
+        return true;
+    }
+    
+    // حفظ البيانات في localStorage
+    saveToLocalStorage() {
+        try {
+            localStorage.setItem('bein_sections', JSON.stringify(this.sections));
+            localStorage.setItem('bein_channels', JSON.stringify(this.channels));
+            console.log('💾 تم حفظ البيانات في localStorage');
+        } catch (error) {
+            console.error('❌ خطأ في حفظ البيانات:', error);
+        }
+    }
+    
+    // الدالة الرئيسية لتحميل البيانات
+    async loadData() {
+        console.log('📥 بدء تحميل البيانات...');
+        
+        // 1. محاولة تهيئة Firebase
+        await this.initializeFirebase();
+        
+        // 2. محاولة تحميل من Firebase
+        if (this.firebaseAvailable) {
+            const firebaseLoaded = await this.loadFromFirebase();
+            if (firebaseLoaded && this.sections.length > 0) {
+                console.log('✅ تم تحميل البيانات من Firebase بنجاح');
+                return;
+            }
+        }
+        
+        // 3. إذا فشل Firebase، جرب localStorage
+        const localStorageLoaded = this.loadFromLocalStorage();
+        if (localStorageLoaded && this.sections.length > 0) {
+            console.log('✅ تم استخدام البيانات من localStorage');
+            return;
+        }
+        
+        // 4. إذا فشل كل شيء، استخدم البيانات الافتراضية
+        this.useDefaultData();
+        console.log('✅ تم استخدام البيانات الافتراضية');
+    }
+    
+    // الحصول على قسم محدد
+    getSectionById(sectionId) {
+        return this.sections.find(section => section.id === sectionId);
+    }
+    
+    // الحصول على قنوات قسم محدد
+    getChannelsBySectionId(sectionId) {
+        return this.channels
+            .filter(channel => channel.sectionId === sectionId)
+            .sort((a, b) => (a.order || 999) - (b.order || 999));
+    }
+    
+    // الحصول على جميع الأقسام
+    getAllSections() {
+        return this.sections
+            .filter(section => section.isActive !== false)
+            .sort((a, b) => (a.order || 999) - (b.order || 999));
+    }
 }
 
-// الحصول على قسم محدد
-function getSectionById(sectionId) {
-    const { sections } = loadDataFromStorage();
-    return sections.find(section => section.id === sectionId);
-}
+// إنشاء نسخة عامة
+window.dataManager = new DataManager();
 
-// الحصول على قنوات قسم محدد
-function getChannelsBySectionId(sectionId) {
-    const { channels } = loadDataFromStorage();
-    return channels
-        .filter(channel => channel.sectionId === sectionId)
-        .sort((a, b) => (a.order || 999) - (b.order || 999));
-}
-
-// تصدير الدوال للاستخدام
-window.dataManager = {
-    saveDataToStorage,
-    loadDataFromStorage,
-    getSectionById,
-    getChannelsBySectionId,
-    sampleData
-};
-
-// حفظ البيانات عند تحميل الملف
-saveDataToStorage();
+// تحميل البيانات تلقائياً
+document.addEventListener('DOMContentLoaded', () => {
+    window.dataManager.loadData();
+});
