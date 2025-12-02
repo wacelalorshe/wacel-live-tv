@@ -4,7 +4,7 @@
 
 // تشفير بيانات Firebase
 const encryptedFirebaseConfig = "W1siYXBpS2V5IiwiQUl6YVN5QUtnRWlZWWxtcE1lME5MZXd1bGhlb3ZsVFFNelZDNzk4MCJdLFsicHJvamVjdElkIiwiYmVpbi00MmY5ZSJdLFsic3RvcmFnZUJ1Y2tldCIsImJlaW4tNDJmOWUuZmlyZWJhc2VzdG9yYWdlLmFwcCJdLFsibWVzc2FnaW5nU2VuZGVySWQiLCIxNDM3NDExNjcwNTAiXSxbImFwcElkIiwiMToxNDM3NDExNjcwNTA6d2ViOjkyMmQzYTBjZGRiNDBmNjdiMjFiMzMiXSxbIm1lYXN1cmVtZW50SWQiLCJHIEpIMTk4U0tDRlMiXV0=";
-const encryptedMatchesConfig = "W1siYXBpS2V5IiwiQUl6YVN5Q3FFN1p3dmVIZzFkSWhZZjFIbG83T3BIeUNadWRlWnZNIl0sWyJwcm9qZWN0SWQiLCJ3YWNlbC1saXZlIl0sWyJkYXRhYmFzZVVSTCIsImh0dHBzOi8vd2FjZWwtbGl2ZS1kZWZhdWx0LXJ0ZGIuYXNpYS1zb3V0aGVhc3QxLmZpcmViYXNlZGF0YWJhc2UuYXBwIl0sWyJzdG9yYWdlQnVja2V0Iiwid2FjZWwtbGl2ZS5maXJlYmFzZXN0b3JhZ2UuYXBwIl0sWyJtZXNzYWdpbmdTZW5kZXJJZCIsIjE4NTEwODU1NDAwNiJdLFsiYXBwSWQiLCIxOjE4NTEwODU1NDAwNjp3ZWI6OTMxNzE4OTViMWQ0YmIwN2M2ZjAzNyJdXQ==";
+const encryptedMatchesConfig = "W1siYXBpS2V5IiwiQUl6YVN5Q3FFN1p3dmVIZzFkSWhZZjFIbG83T3BIeUNadWRlWnZNIl0sWyJwcm9qZWN0SWQiLCJ3YWNlbC1saXZlIl0sWyJkYXRhYmFzZVVSTCIsImh0dHBzOi8vd2FjZWwtbGl2ZS1kZWZhdWx0LXJ0ZGIuYXNpYS1س1dGhLmZpcmViYXNlZGF0YWJhc2UuYXBwIl0sWyJzdG9yYWdlQnVja2V0Iiwid2FjZWwtbGl2ZS5maXJlYmFzZXN0b3JhZ2UuYXBwIl0sWyJtZXNzYWdpbmdTZW5kZXJJZCIsIjE4NTEwODU1NDAwNiJdLFsiYXBwSWQiLCIxOjE4NTEwODU1NDAwNjp3ZWI6OTMxNzE4OTViMWQ0YmIwN2M2ZjAzNyJdXQ==";
 
 // دالة فك التشفير
 function decryptConfig(encrypted) {
@@ -81,20 +81,60 @@ document.addEventListener('dragstart', function(e) {
     return false;
 });
 
-// التحقق من النطاق المسموح
+// التحقق من النطاق المسموح - نسخة معدلة للسماح بالتطوير المحلي
 function checkAllowedDomain() {
-    const allowedDomains = ['localhost', '127.0.0.1', 'aseeltv.com', 'wacellive.com'];
+    // السماح بجميع النطاقات في بيئة التطوير
+    if (window.location.hostname === 'localhost' || 
+        window.location.hostname === '127.0.0.1' ||
+        window.location.hostname.startsWith('192.168.') ||
+        window.location.hostname.startsWith('10.0.')) {
+        console.log('✅ بيئة تطوير محلية - السماح بالوصول');
+        return true;
+    }
+    
+    const allowedDomains = ['aseeltv.com', 'wacellive.com'];
     const currentDomain = window.location.hostname;
     
     if (!allowedDomains.some(domain => currentDomain.includes(domain))) {
-        document.body.innerHTML = '<div style="text-align:center; padding:50px; color:white; background:#151825;"><h2>غير مصرح بالوصول</h2><p>هذا التطبيق غير متاح على هذا النطاق</p></div>';
-        return false;
+        // عرض رسالة توضيحية بدلاً من منع الوصول تماماً
+        console.warn('⚠️ تحذير: هذا النطاق غير مدرج في القائمة المسموحة:', currentDomain);
+        
+        // بدلاً من منع الوصول، نعرض تحذيراً فقط
+        if (document.body && !document.querySelector('.domain-warning')) {
+            const warningDiv = document.createElement('div');
+            warningDiv.className = 'domain-warning';
+            warningDiv.style.cssText = `
+                background: #ff9800;
+                color: white;
+                padding: 10px;
+                text-align: center;
+                font-size: 14px;
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 9999;
+            `;
+            warningDiv.innerHTML = `
+                ⚠️ تحذير: هذا النطاق غير مصرح به رسمياً. للتجربة المحلية فقط.
+                <button onclick="this.parentElement.remove()" style="margin-left: 10px; background: white; border: none; padding: 2px 10px; border-radius: 3px;">✕</button>
+            `;
+            document.body.prepend(warningDiv);
+        }
+        
+        return true; // السماح بالوصول مع تحذير
     }
     return true;
 }
 
 // إظهار رسالة تنبيه
 function showToast(message, type = 'info') {
+    // التأكد من وجود document.body أولاً
+    if (!document.body) {
+        console.log('Toast message (body not ready):', message);
+        return;
+    }
+    
     const toast = document.createElement('div');
     toast.style.cssText = `
         position: fixed;
@@ -113,7 +153,9 @@ function showToast(message, type = 'info') {
     document.body.appendChild(toast);
     
     setTimeout(() => {
-        document.body.removeChild(toast);
+        if (toast.parentNode) {
+            document.body.removeChild(toast);
+        }
     }, 3000);
 }
 
@@ -137,6 +179,7 @@ function decryptData(encrypted) {
 }
 
 // التحقق من الدومين عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', function() {
-    checkAllowedDomain();
-});
+// إزالة الاستدعاء التلقائي لمنع المشاكل
+// document.addEventListener('DOMContentLoaded', function() {
+//     checkAllowedDomain();
+// });
