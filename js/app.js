@@ -1,5 +1,5 @@
 // ===========================================
-// تطبيق Bein Sport مع الحماية المحسّنة
+// تطبيق Bein Sport - إصدار مصحح
 // ===========================================
 
 class ProtectedBeinSportApp {
@@ -16,9 +16,6 @@ class ProtectedBeinSportApp {
         console.log('🚀 بدء تشغيل تطبيق Bein Sport...');
         
         try {
-            // التحقق من الدومين المسموح
-            this.checkDomainAccess();
-            
             // إعداد السنة الحالية
             document.getElementById('currentYear').textContent = new Date().getFullYear();
             
@@ -28,10 +25,10 @@ class ProtectedBeinSportApp {
             // تهيئة Firebase
             await this.initializeFirebase();
             
-            // تحميل البيانات مع إعادة المحاولة التلقائية
-            await this.loadDataWithRetry();
+            // تحميل البيانات
+            await this.loadData();
             
-            // إظهار المحتوى بعد التهيئة
+            // إظهار المحتوى
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('contentWrapper').style.display = 'block';
             
@@ -52,13 +49,11 @@ class ProtectedBeinSportApp {
         try {
             console.log('📡 جاري الاتصال بـ Firebase...');
             
-            // استخدام دالة تهيئة Firebase العامة
-            const { app, db, matchesApp, matchesDb } = await initializeFirebase();
+            // استخدام دالة تهيئة Firebase الجديدة
+            const { app, db } = await initializeFirebase();
             
             this.app = app;
             this.db = db;
-            this.matchesApp = matchesApp;
-            this.matchesDb = matchesDb;
             this.firebaseAvailable = true;
             
             console.log('✅ تم الاتصال بـ Firebase بنجاح');
@@ -66,100 +61,74 @@ class ProtectedBeinSportApp {
         } catch (error) {
             console.error('❌ فشل الاتصال بـ Firebase:', error);
             this.firebaseAvailable = false;
-            // نستمر بدون Firebase
+            
+            // إنشاء db وهمي للاستمرار في التطوير
+            this.createMockDb();
         }
     }
 
-    checkDomainAccess() {
-        const hostname = window.location.hostname;
-        const allowedDomains = ['localhost', '127.0.0.1', 'aseeltv.com', 'wacellive.com'];
+    createMockDb() {
+        console.log('🛠️ إنشاء قاعدة بيانات وهمية للتطوير');
         
-        const isLocal = hostname === 'localhost' || 
-                       hostname === '127.0.0.1' ||
-                       hostname.startsWith('192.168.') ||
-                       hostname.startsWith('10.0.') ||
-                       hostname === '';
-        
-        const isAllowed = isLocal || allowedDomains.some(domain => hostname.includes(domain));
-        
-        if (!isAllowed) {
-            console.warn('⚠️ تحذير: التطبيق يعمل على نطاق غير رسمي:', hostname);
-        } else {
-            console.log('✅ النطاق مسموح:', hostname);
-        }
-    }
-
-    async loadDataWithRetry(maxRetries = 3) {
-        let retries = 0;
-        
-        while (retries < maxRetries) {
-            try {
-                console.log(`📥 جاري تحميل البيانات... المحاولة ${retries + 1}`);
-                await this.loadData();
-                console.log('✅ تم تحميل البيانات بنجاح');
-                return;
-            } catch (error) {
-                retries++;
-                console.error(`❌ فشل تحميل البيانات (المحاولة ${retries}):`, error);
-                
-                if (retries < maxRetries) {
-                    console.log(`🔄 إعادة المحاولة بعد 2 ثانية...`);
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-                } else {
-                    throw error;
-                }
-            }
-        }
+        // كائن وهمي لمحاكاة Firestore
+        this.db = {
+            collection: (name) => ({
+                where: () => ({ get: async () => ({ empty: true, docs: [] }) }),
+                orderBy: () => ({ get: async () => ({ empty: true, docs: [] }) }),
+                doc: () => ({ get: async () => ({ exists: false }) }),
+                get: async () => ({ empty: true, docs: [] }),
+                limit: () => ({ get: async () => ({ empty: true, docs: [] }) })
+            })
+        };
     }
 
     async loadData() {
         try {
-            let firebaseLoaded = false;
-            
-            if (this.firebaseAvailable && this.db) {
-                firebaseLoaded = await this.loadFromFirebase();
+            // محاولة تحميل من Firebase أولاً
+            if (this.firebaseAvailable) {
+                const loaded = await this.loadFromFirebase();
+                if (loaded) {
+                    console.log('✅ تم تحميل البيانات من Firebase');
+                    this.renderData();
+                    return;
+                }
             }
             
-            if (firebaseLoaded) {
-                console.log('✅ تم تحميل البيانات من Firebase');
-                this.renderData();
-            } else {
-                console.log('💾 تحميل البيانات من التخزين المحلي...');
-                await this.loadFromLocalStorage();
-                this.renderData();
-            }
+            // إذا فشل Firebase، جرب localStorage
+            console.log('💾 جاري تحميل البيانات من التخزين المحلي...');
+            await this.loadFromLocalStorage();
+            this.renderData();
+            
         } catch (error) {
             console.error('❌ خطأ في تحميل البيانات:', error);
-            await this.loadFromLocalStorage();
+            this.loadDefaultData();
             this.renderData();
         }
     }
 
     async loadFromFirebase() {
         if (!this.db) {
-            console.error('❌ Firestore غير مهيأ');
+            console.error('❌ قاعدة البيانات غير متاحة');
             return false;
         }
 
         try {
             console.log('📡 جاري جلب البيانات من Firebase...');
             
-            // تحميل الأقسام
+            // جلب الأقسام
             let sectionsSnapshot;
             try {
-                sectionsSnapshot = await this.db.collection('sections')
-                    .orderBy('order')
-                    .get();
-            } catch (error) {
-                console.warn('⚠️ فشل في ترتيب الأقسام، جاري جلب بدون ترتيب:', error);
                 sectionsSnapshot = await this.db.collection('sections').get();
-            }
-
-            if (sectionsSnapshot.empty) {
-                console.log('ℹ️ لا توجد أقسام في Firebase');
+            } catch (error) {
+                console.error('❌ خطأ في جلب الأقسام:', error);
                 return false;
             }
-
+            
+            if (sectionsSnapshot.empty) {
+                console.log('ℹ️ لا توجد أقسام في قاعدة البيانات');
+                return false;
+            }
+            
             this.sections = sectionsSnapshot.docs.map(doc => ({
                 id: doc.id,
                 ...doc.data()
@@ -167,45 +136,70 @@ class ProtectedBeinSportApp {
             
             console.log(`✅ تم تحميل ${this.sections.length} قسم من Firebase`);
             
-            // تحميل القنوات
-            const channelsSnapshot = await this.db.collection('channels').get();
-            if (!channelsSnapshot.empty) {
-                this.channels = channelsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
+            // جلب القنوات
+            try {
+                const channelsSnapshot = await this.db.collection('channels').get();
+                if (!channelsSnapshot.empty) {
+                    this.channels = channelsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
+                }
+            } catch (error) {
+                console.warn('⚠️ خطأ في جلب القنوات:', error);
+                // نستمر بدون القنوات
             }
             
-            // حفظ في localStorage مع التشفير
+            // حفظ نسخة في localStorage
             this.saveToLocalStorage();
             
             return true;
-
+            
         } catch (error) {
-            console.error('❌ خطأ في تحميل البيانات من Firebase:', error);
+            console.error('❌ خطأ عام في جلب البيانات:', error);
             return false;
         }
     }
 
     async loadFromLocalStorage() {
         try {
-            const savedSections = localStorage.getItem('protected_bein_sections');
-            const savedChannels = localStorage.getItem('protected_bein_channels');
+            // محاولة استخدام البيانات المشفرة
+            const encryptedSections = localStorage.getItem('protected_bein_sections');
+            const encryptedChannels = localStorage.getItem('protected_bein_channels');
             
-            if (savedSections) {
-                this.sections = decryptData(savedSections) || [];
+            if (encryptedSections) {
+                this.sections = decryptData(encryptedSections) || [];
                 console.log(`✅ تم تحميل ${this.sections.length} قسم من localStorage`);
             }
             
-            if (savedChannels) {
-                this.channels = decryptData(savedChannels) || [];
+            if (encryptedChannels) {
+                this.channels = decryptData(encryptedChannels) || [];
                 console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
             }
             
+            // إذا لم توجد بيانات مشفرة، جرب البيانات غير المشفرة
             if (this.sections.length === 0) {
+                const plainSections = localStorage.getItem('bein_sections');
+                if (plainSections) {
+                    this.sections = JSON.parse(plainSections);
+                    console.log(`📝 تم تحميل ${this.sections.length} قسم (غير مشفر)`);
+                }
+            }
+            
+            if (this.channels.length === 0) {
+                const plainChannels = localStorage.getItem('bein_channels');
+                if (plainChannels) {
+                    this.channels = JSON.parse(plainChannels);
+                    console.log(`📝 تم تحميل ${this.channels.length} قناة (غير مشفر)`);
+                }
+            }
+            
+            // إذا لم توجد بيانات أبداً
+            if (this.sections.length === 0 && this.channels.length === 0) {
                 this.loadDefaultData();
             }
+            
         } catch (error) {
             console.error('❌ خطأ في تحميل البيانات المحلية:', error);
             this.loadDefaultData();
@@ -214,9 +208,15 @@ class ProtectedBeinSportApp {
 
     saveToLocalStorage() {
         try {
+            // حفظ نسخة مشفرة
             localStorage.setItem('protected_bein_sections', encryptData(this.sections));
             localStorage.setItem('protected_bein_channels', encryptData(this.channels));
-            console.log('💾 تم حفظ البيانات في التخزين المحلي مع التشفير');
+            
+            // حفظ نسخة غير مشفرة للتوافق
+            localStorage.setItem('bein_sections', JSON.stringify(this.sections));
+            localStorage.setItem('bein_channels', JSON.stringify(this.channels));
+            
+            console.log('💾 تم حفظ البيانات في التخزين المحلي');
         } catch (error) {
             console.error('❌ خطأ في حفظ البيانات محلياً:', error);
         }
@@ -257,7 +257,15 @@ class ProtectedBeinSportApp {
         const activeSections = this.getActiveSections();
         
         if (activeSections.length === 0) {
-            this.showErrorState('لا توجد أقسام متاحة حالياً');
+            container.innerHTML = `
+                <div class="loading">
+                    <i class="uil uil-folder text-muted mb-3" style="font-size: 3rem;"></i>
+                    <p>لا توجد أقسام متاحة حالياً</p>
+                    <button class="btn btn-primary mt-2" onclick="protectedApp.loadDefaultData()">
+                        <i class="uil uil-plus-circle"></i> استخدام بيانات تجريبية
+                    </button>
+                </div>
+            `;
             return;
         }
 
@@ -267,7 +275,6 @@ class ProtectedBeinSportApp {
             <div class="sections-grid">
                 ${activeSections.map(section => {
                     const channelCount = this.getChannelsCount(section.id);
-                    // إنشاء رابط فريد لكل قسم
                     const sectionLink = `section.html?id=${section.id}`;
                     
                     return `
@@ -297,55 +304,48 @@ class ProtectedBeinSportApp {
             </div>
         `;
 
-        // إضافة أنماط CSS للروابط
         this.addSectionLinkStyles();
     }
 
     addSectionLinkStyles() {
-        const style = document.createElement('style');
-        style.textContent = `
-            .section-card-link {
-                text-decoration: none;
-                color: inherit;
-                display: block;
-                transition: transform 0.3s ease;
-            }
-            
-            .section-card-link:hover {
-                transform: translateY(-5px);
-            }
-            
-            .section-link-indicator {
-                position: absolute;
-                bottom: 10px;
-                right: 10px;
-                background: rgba(0, 0, 0, 0.7);
-                padding: 5px 10px;
-                border-radius: 15px;
-                font-size: 12px;
-                color: #654FD4;
-                display: flex;
-                align-items: center;
-                gap: 5px;
-                opacity: 0;
-                transition: opacity 0.3s ease;
-            }
-            
-            .section-card:hover .section-link-indicator {
-                opacity: 1;
-            }
-            
-            .section-card {
-                position: relative;
-                transition: all 0.3s ease;
-            }
-            
-            .section-card:hover {
-                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                transform: scale(1.02);
-            }
-        `;
-        document.head.appendChild(style);
+        // إضافة الأنماط مرة واحدة فقط
+        if (!document.querySelector('#section-link-styles')) {
+            const style = document.createElement('style');
+            style.id = 'section-link-styles';
+            style.textContent = `
+                .section-card-link {
+                    text-decoration: none;
+                    color: inherit;
+                    display: block;
+                    transition: transform 0.3s ease;
+                }
+                
+                .section-card-link:hover {
+                    transform: translateY(-5px);
+                }
+                
+                .section-link-indicator {
+                    position: absolute;
+                    bottom: 10px;
+                    right: 10px;
+                    background: rgba(0, 0, 0, 0.7);
+                    padding: 5px 10px;
+                    border-radius: 15px;
+                    font-size: 12px;
+                    color: #654FD4;
+                    display: flex;
+                    align-items: center;
+                    gap: 5px;
+                    opacity: 0;
+                    transition: opacity 0.3s ease;
+                }
+                
+                .section-card:hover .section-link-indicator {
+                    opacity: 1;
+                }
+            `;
+            document.head.appendChild(style);
+        }
     }
 
     getChannelsCount(sectionId) {
@@ -383,66 +383,80 @@ class ProtectedBeinSportApp {
     }
 
     loadDefaultData() {
-        console.log('📋 استخدام البيانات الافتراضية...');
+        console.log('📋 إنشاء بيانات تجريبية...');
         
-        this.sections = [{
-            id: 'default-1',
-            name: 'قنوات بي إن سبورت',
-            order: 1,
-            isActive: true,
-            description: 'جميع قنوات بي إن سبورت الرياضية',
-            image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=BEIN+SPORT'
-        }, {
-            id: 'default-2', 
-            name: 'القنوات الرياضية',
-            order: 2,
-            isActive: true,
-            description: 'أفضل القنوات الرياضية',
-            image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=SPORTS'
-        }];
+        this.sections = [
+            {
+                id: 'bein-sports',
+                name: 'قنوات بي إن سبورت',
+                order: 1,
+                isActive: true,
+                description: 'جميع قنوات بي إن سبورت الرياضية',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/7/79/BeIN_Sports_logo.svg/1200px-BeIN_Sports_logo.svg.png'
+            },
+            {
+                id: 'arabic-channels', 
+                name: 'القنوات العربية',
+                order: 2,
+                isActive: true,
+                description: 'أفضل القنوات العربية والفضائية',
+                image: 'https://cdn-icons-png.flaticon.com/512/2991/2991148.png'
+            },
+            {
+                id: 'sports-channels',
+                name: 'القنوات الرياضية',
+                order: 3,
+                isActive: true,
+                description: 'القنوات الرياضية العالمية',
+                image: 'https://cdn-icons-png.flaticon.com/512/857/857492.png'
+            }
+        ];
         
         this.channels = [
             {
-                id: 'default-1',
+                id: 'bein-1',
                 name: 'bein sport 1',
-                image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+1',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/9/99/Bein_sports_1.png/320px-Bein_sports_1.png',
                 url: '#',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 1,
-                sectionId: 'default-1'
+                sectionId: 'bein-sports'
             },
             {
-                id: 'default-2',
+                id: 'bein-2',
                 name: 'bein sport 2', 
-                image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+2',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/8/8a/Bein_sports_2.png/320px-Bein_sports_2.png',
                 url: '#',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
                 order: 2,
-                sectionId: 'default-1'
+                sectionId: 'bein-sports'
+            },
+            {
+                id: 'bein-3',
+                name: 'bein sport 3',
+                image: 'https://upload.wikimedia.org/wikipedia/commons/thumb/5/58/Bein_sports_3.png/320px-Bein_sports_3.png',
+                url: '#',
+                appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
+                downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
+                order: 3,
+                sectionId: 'bein-sports'
             }
         ];
         
         this.saveToLocalStorage();
+        
+        // عرض رسالة نجاح
+        if (typeof showToast === 'function') {
+            showToast('تم تحميل البيانات التجريبية بنجاح', 'success');
+        }
     }
 
     async retryLoadData() {
         console.log('🔄 إعادة محاولة تحميل البيانات...');
-        await this.loadDataWithRetry();
+        await this.loadData();
     }
-}
-
-// ===========================================
-// الدوال العامة
-// ===========================================
-
-function showPage(pageId) {
-    document.getElementById('mainPage').style.display = 'none';
-    document.getElementById('sectionPage').style.display = 'none';
-    document.getElementById('matchesPage').style.display = 'none';
-    
-    document.getElementById(pageId).style.display = 'block';
 }
 
 // ===========================================
