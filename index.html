@@ -15,14 +15,40 @@
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
     <link rel="stylesheet" href="css/responsive.css">
+    
+    <style>
+        #loadingScreen {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to right, #322769, #151825, #322769);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+        }
+        
+        .loading-text {
+            margin-top: 20px;
+            color: white;
+            font-size: 18px;
+        }
+        
+        #contentWrapper {
+            display: none;
+        }
+    </style>
 </head>
 <body>
     <!-- شاشة التحميل -->
     <div id="loadingScreen">
-        <div class="spinner-border text-primary mb-3" role="status">
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
             <span class="visually-hidden">جاري التحميل...</span>
         </div>
-        <p>جاري تحميل التطبيق...</p>
+        <p class="loading-text">جاري تحميل التطبيق...</p>
     </div>
 
     <!-- المحتوى الرئيسي -->
@@ -51,13 +77,12 @@
                         <div class="spinner-border text-primary mb-3" role="status">
                             <span class="visually-hidden">جاري التحميل...</span>
                         </div>
-                        <p>جاري تحميل الأقسام من قاعدة البيانات...</p>
-                        <small>يرجى الانتظار</small>
+                        <p>جاري تحميل الأقسام...</p>
                     </div>
                 </div>
             </div>
         </div>
-
+        
         <!-- Footer -->
         <div class="footer">
             <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
@@ -65,7 +90,7 @@
         
         <!-- Bottom Navigation -->
         <div class="bottom-nav">
-            <a href="#" class="nav-item" onclick="showPage('mainPage')">
+            <a href="#" class="nav-item">
                 <i class="uil uil-home"></i>
                 <span>الرئيسية</span>
             </a>
@@ -106,7 +131,7 @@
 
     <!-- Custom JS -->
     <script src="js/protection.js"></script>
-    <script src="js/firebase-config.js"></script>
+    <script src="js/firebase-config-fixed.js"></script>
     <script src="js/app.js"></script>
 </body>
 </html>
