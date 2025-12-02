@@ -8,23 +8,25 @@ class ProtectedBeinSportApp {
         this.channels = [];
         this.currentSection = null;
         this.isInitialized = false;
+        this.firebaseAvailable = false;
         this.init();
     }
 
     async init() {
-        console.log('🚀 بدء تشغيل تطبيق Bein Sport مع الحماية...');
+        console.log('🚀 بدء تشغيل تطبيق Bein Sport...');
         
         try {
-            // تهيئة Firebase مع إعادة المحاولة التلقائية
-            const { app, db, matchesApp, matchesDb } = await initializeFirebase();
-            this.db = db;
-            this.matchesDb = matchesDb;
+            // التحقق من الدومين المسموح
+            this.checkDomainAccess();
             
             // إعداد السنة الحالية
             document.getElementById('currentYear').textContent = new Date().getFullYear();
             
             // إعداد مستمعي الأحداث
             this.setupEventListeners();
+            
+            // تهيئة Firebase
+            await this.initializeFirebase();
             
             // تحميل البيانات مع إعادة المحاولة التلقائية
             await this.loadDataWithRetry();
@@ -34,7 +36,7 @@ class ProtectedBeinSportApp {
             document.getElementById('contentWrapper').style.display = 'block';
             
             this.isInitialized = true;
-            console.log('✅ تم تهيئة التطبيق مع الحماية بنجاح');
+            console.log('✅ تم تهيئة التطبيق بنجاح');
             
         } catch (error) {
             console.error('❌ فشل تهيئة التطبيق:', error);
@@ -43,6 +45,47 @@ class ProtectedBeinSportApp {
             
             document.getElementById('loadingScreen').style.display = 'none';
             document.getElementById('contentWrapper').style.display = 'block';
+        }
+    }
+
+    async initializeFirebase() {
+        try {
+            console.log('📡 جاري الاتصال بـ Firebase...');
+            
+            // استخدام دالة تهيئة Firebase العامة
+            const { app, db, matchesApp, matchesDb } = await initializeFirebase();
+            
+            this.app = app;
+            this.db = db;
+            this.matchesApp = matchesApp;
+            this.matchesDb = matchesDb;
+            this.firebaseAvailable = true;
+            
+            console.log('✅ تم الاتصال بـ Firebase بنجاح');
+            
+        } catch (error) {
+            console.error('❌ فشل الاتصال بـ Firebase:', error);
+            this.firebaseAvailable = false;
+            // نستمر بدون Firebase
+        }
+    }
+
+    checkDomainAccess() {
+        const hostname = window.location.hostname;
+        const allowedDomains = ['localhost', '127.0.0.1', 'aseeltv.com', 'wacellive.com'];
+        
+        const isLocal = hostname === 'localhost' || 
+                       hostname === '127.0.0.1' ||
+                       hostname.startsWith('192.168.') ||
+                       hostname.startsWith('10.0.') ||
+                       hostname === '';
+        
+        const isAllowed = isLocal || allowedDomains.some(domain => hostname.includes(domain));
+        
+        if (!isAllowed) {
+            console.warn('⚠️ تحذير: التطبيق يعمل على نطاق غير رسمي:', hostname);
+        } else {
+            console.log('✅ النطاق مسموح:', hostname);
         }
     }
 
@@ -71,7 +114,11 @@ class ProtectedBeinSportApp {
 
     async loadData() {
         try {
-            const firebaseLoaded = await this.loadFromFirebase();
+            let firebaseLoaded = false;
+            
+            if (this.firebaseAvailable && this.db) {
+                firebaseLoaded = await this.loadFromFirebase();
+            }
             
             if (firebaseLoaded) {
                 console.log('✅ تم تحميل البيانات من Firebase');
@@ -196,7 +243,8 @@ class ProtectedBeinSportApp {
 
     getActiveSections() {
         return this.sections
-            .sort((a, b) => (a.order || 1) - (b.order || 1));
+            .filter(section => section.isActive !== false)
+            .sort((a, b) => (a.order || 999) - (b.order || 999));
     }
 
     renderSections() {
@@ -219,9 +267,12 @@ class ProtectedBeinSportApp {
             <div class="sections-grid">
                 ${activeSections.map(section => {
                     const channelCount = this.getChannelsCount(section.id);
+                    // إنشاء رابط فريد لكل قسم
+                    const sectionLink = `section.html?id=${section.id}`;
+                    
                     return `
-                        <div class="section-card" data-section-id="${section.id}">
-                            <div class="section-card-link">
+                        <a href="${sectionLink}" class="section-card-link" target="_blank">
+                            <div class="section-card" data-section-id="${section.id}">
                                 ${section.image ? `
                                     <div class="section-image">
                                         <img src="${section.image}" alt="${section.name}" 
@@ -235,131 +286,70 @@ class ProtectedBeinSportApp {
                                 <div class="section-name">${section.name}</div>
                                 ${section.description ? `<div class="section-description-card">${section.description}</div>` : ''}
                                 <div class="section-badge">${channelCount} قناة</div>
+                                <div class="section-link-indicator">
+                                    <i class="uil uil-external-link-alt"></i>
+                                    <span>فتح في صفحة جديدة</span>
+                                </div>
                             </div>
-                        </div>
+                        </a>
                     `;
                 }).join('')}
             </div>
         `;
 
-        this.setupSectionEventListeners();
+        // إضافة أنماط CSS للروابط
+        this.addSectionLinkStyles();
+    }
+
+    addSectionLinkStyles() {
+        const style = document.createElement('style');
+        style.textContent = `
+            .section-card-link {
+                text-decoration: none;
+                color: inherit;
+                display: block;
+                transition: transform 0.3s ease;
+            }
+            
+            .section-card-link:hover {
+                transform: translateY(-5px);
+            }
+            
+            .section-link-indicator {
+                position: absolute;
+                bottom: 10px;
+                right: 10px;
+                background: rgba(0, 0, 0, 0.7);
+                padding: 5px 10px;
+                border-radius: 15px;
+                font-size: 12px;
+                color: #654FD4;
+                display: flex;
+                align-items: center;
+                gap: 5px;
+                opacity: 0;
+                transition: opacity 0.3s ease;
+            }
+            
+            .section-card:hover .section-link-indicator {
+                opacity: 1;
+            }
+            
+            .section-card {
+                position: relative;
+                transition: all 0.3s ease;
+            }
+            
+            .section-card:hover {
+                box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                transform: scale(1.02);
+            }
+        `;
+        document.head.appendChild(style);
     }
 
     getChannelsCount(sectionId) {
         return this.channels.filter(channel => channel.sectionId === sectionId).length;
-    }
-
-    setupSectionEventListeners() {
-        const sectionCards = document.querySelectorAll('.section-card');
-        sectionCards.forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                const sectionId = card.getAttribute('data-section-id');
-                console.log('🎯 تم النقر على القسم:', sectionId);
-                this.showSection(sectionId);
-            });
-        });
-    }
-
-    showSection(sectionId) {
-        console.log('📂 محاولة عرض القسم:', sectionId);
-        
-        const section = this.sections.find(s => s.id === sectionId);
-        if (!section) {
-            console.error('❌ القسم غير موجود:', sectionId);
-            return;
-        }
-
-        this.currentSection = section;
-        
-        document.getElementById('sectionHeader').textContent = section.name;
-        document.getElementById('sectionName').textContent = section.name;
-        document.getElementById('sectionDescription').textContent = section.description || 'استمتع بمشاهدة القنوات المتاحة في هذا القسم';
-        
-        this.renderSectionChannels(sectionId);
-        
-        showPage('sectionPage');
-    }
-
-    renderSectionChannels(sectionId) {
-        const container = document.getElementById('channelsContainer');
-        if (!container) {
-            console.error('❌ حاوية القنوات غير موجودة');
-            return;
-        }
-
-        const sectionChannels = this.channels
-            .filter(channel => channel.sectionId === sectionId)
-            .sort((a, b) => (a.order || 1) - (b.order || 1));
-
-        console.log(`📺 عرض ${sectionChannels.length} قناة في قسم ${sectionId}`);
-
-        if (sectionChannels.length === 0) {
-            container.innerHTML = '<div class="loading">لا توجد قنوات في هذا القسم</div>';
-            return;
-        }
-
-        container.innerHTML = sectionChannels.map(channel => `
-            <div class="channel-card" data-channel-id="${channel.id}">
-                <div class="channel-logo">
-                    <img src="${channel.image || 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'}" 
-                         alt="${channel.name}"
-                         onerror="this.src='https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'">
-                </div>
-                <div class="channel-name">${channel.name}</div>
-            </div>
-        `).join('');
-
-        this.setupChannelEventListeners(sectionChannels);
-    }
-
-    setupChannelEventListeners(sectionChannels) {
-        document.querySelectorAll('.channel-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const channelId = card.getAttribute('data-channel-id');
-                const channel = sectionChannels.find(c => c.id === channelId);
-                if (channel) {
-                    console.log('🔗 فتح القناة:', channel.name);
-                    this.openChannel(channel);
-                }
-            });
-        });
-    }
-
-    openChannel(channel) {
-        if (channel.url && channel.url !== '#' && channel.url.trim() !== '') {
-            try {
-                window.open(channel.url, '_blank');
-            } catch (error) {
-                console.error('❌ خطأ في فتح الرابط:', error);
-                this.showInstallModal(channel);
-            }
-        } else {
-            this.showInstallModal(channel);
-        }
-    }
-
-    showInstallModal(channel) {
-        const modal = document.getElementById('installModal');
-        if (modal) {
-            modal.style.display = "block";
-            const confirmBtn = document.getElementById('confirmInstall');
-            if (confirmBtn) {
-                confirmBtn.onclick = () => {
-                    const downloadUrl = channel.downloadUrl || channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
-                    window.open(downloadUrl, '_blank');
-                    this.closeModal();
-                };
-            }
-        }
-    }
-
-    closeModal() {
-        const modal = document.getElementById('installModal');
-        if (modal) modal.style.display = "none";
     }
 
     setupEventListeners() {
@@ -385,6 +375,11 @@ class ProtectedBeinSportApp {
                 this.closeModal();
             });
         }
+    }
+
+    closeModal() {
+        const modal = document.getElementById('installModal');
+        if (modal) modal.style.display = "none";
     }
 
     loadDefaultData() {
@@ -439,7 +434,7 @@ class ProtectedBeinSportApp {
 }
 
 // ===========================================
-// الدوال العامة مع الحماية
+// الدوال العامة
 // ===========================================
 
 function showPage(pageId) {
@@ -450,104 +445,11 @@ function showPage(pageId) {
     document.getElementById(pageId).style.display = 'block';
 }
 
-function loadMatches() {
-    if (!window.protectedApp || !window.protectedApp.matchesDb) {
-        showToast('التطبيق غير مهيأ بشكل صحيح', 'warning');
-        return;
-    }
-
-    const container = document.getElementById('matchesContainer');
-    const dateElement = document.getElementById('matchesDate');
-    
-    const today = new Date();
-    dateElement.textContent = today.toLocaleDateString('ar-AR', { 
-        weekday: 'long', 
-        year: 'numeric', 
-        month: 'long', 
-        day: 'numeric' 
-    });
-
-    container.innerHTML = '<div class="loading"><i class="uil uil-refresh"></i> جاري تحميل المباريات...</div>';
-
-    window.protectedApp.matchesDb.ref('matches').on('value', snapshot => {
-        displayMatches(snapshot);
-    }, error => {
-        console.error(error);
-        container.innerHTML = '<div class="loading">❌ حدث خطأ في تحميل المباريات</div>';
-    });
-}
-
-function displayMatches(snapshot) {
-    const container = document.getElementById('matchesContainer');
-    container.innerHTML = '';
-    
-    if (!snapshot.exists()) { 
-        container.innerHTML = '<div class="loading">لا توجد مباريات اليوم</div>'; 
-        return; 
-    }
-
-    const matches = snapshot.val();
-    let hasMatches = false;
-    
-    for (const key in matches) {
-        const match = matches[key];
-        if (match && (match.team1 || match.team2)) {
-            hasMatches = true;
-            const matchDiv = document.createElement('div');
-            matchDiv.className = 'match-box fade-in';
-            matchDiv.innerHTML = `
-                <div class="match-info">
-                    <div>
-                        <img src="${match.team1Logo||'https://via.placeholder.com/50x50/2F2562/FFFFFF?text=TEAM1'}" 
-                             alt="${match.team1||'فريق 1'}"
-                             onerror="this.src='https://via.placeholder.com/50x50/2F2562/FFFFFF?text=TEAM1'">
-                        <p>${match.team1||'فريق 1'}</p>
-                    </div>
-                    <div>
-                        <span class="match-time">${match.time||'00:00'}</span>
-                    </div>
-                    <div>
-                        <img src="${match.team2Logo||'https://via.placeholder.com/50x50/2F2562/FFFFFF?text=TEAM2'}" 
-                             alt="${match.team2||'فريق 2'}"
-                             onerror="this.src='https://via.placeholder.com/50x50/2F2562/FFFFFF?text=TEAM2'">
-                        <p>${match.team2||'فريق 2'}</p>
-                    </div>
-                </div>
-                <div class="match-details">
-                    <div>${match.channel||'قناة غير محددة'}</div>
-                    <div>${match.commentator||'معلق غير محدد'}</div>
-                </div>
-                <div class="match-actions">
-                    <button class="match-btn match-btn-success" onclick="openXpolaApp('${match.xmtvLink||'#'}')">
-                        <i class="uil uil-play-circle"></i> مشاهدة المباراة
-                    </button>
-                    <button class="match-btn match-btn-info" onclick="window.open('https://play.google.com/store/apps/details?id=com.xpola.player','_blank')">
-                        <i class="uil uil-import"></i> تحميل المشغل
-                    </button>
-                </div>
-            `;
-            container.appendChild(matchDiv);
-        }
-    }
-    
-    if (!hasMatches) {
-        container.innerHTML = '<div class="loading">لا توجد مباريات متاحة اليوم</div>';
-    }
-}
-
-function openXpolaApp(link) { 
-    if (link && link !== '#') {
-        window.location.href = link;
-    } else {
-        showToast('رابط البث غير متاح حالياً', 'warning');
-    }
-}
-
 // ===========================================
-// بدء التطبيق مع الحماية
+// بدء التطبيق
 // ===========================================
 
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🏠 تهيئة التطبيق مع الحماية...');
+    console.log('🏠 تهيئة التطبيق...');
     window.protectedApp = new ProtectedBeinSportApp();
 });
