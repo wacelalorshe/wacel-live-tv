@@ -1,5 +1,8 @@
-// تطبيق قسم معين - يعرض قنوات قسم معين
-class SectionApp {
+// ===========================================
+// تطبيق صفحة القسم المنفصلة
+// ===========================================
+
+class SectionPageApp {
     constructor() {
         this.sectionId = null;
         this.section = null;
@@ -8,103 +11,203 @@ class SectionApp {
     }
 
     async init() {
-        console.log('🚀 بدء تشغيل صفحة القسم...');
+        console.log('🚀 بدء تشغيل صفحة القسم المنفصلة...');
         
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-        this.setupEventListeners();
+        // الحصول على معرف القسم من الرابط
         this.getSectionIdFromURL();
+        
+        // إعداد السنة الحالية
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // إعداد مستمعي الأحداث
+        this.setupEventListeners();
+        
+        // تحميل بيانات القسم
         await this.loadSectionData();
-        this.renderChannels();
+        
+        // إظهار المحتوى
+        document.getElementById('pageLoadingScreen').style.display = 'none';
+        document.getElementById('pageContentWrapper').style.display = 'block';
+        
+        console.log('✅ تم تهيئة صفحة القسم بنجاح');
     }
 
     getSectionIdFromURL() {
         const urlParams = new URLSearchParams(window.location.search);
-        this.sectionId = urlParams.get('sectionId');
-        console.log('📋 sectionId من الرابط:', this.sectionId);
+        this.sectionId = urlParams.get('id');
+        
+        console.log('📋 معرف القسم من الرابط:', this.sectionId);
         
         if (!this.sectionId) {
-            console.error('❌ لم يتم تحديد sectionId في الرابط');
-            this.showError('لم يتم تحديد القسم');
+            console.error('❌ لم يتم تحديد معرف القسم في الرابط');
+            this.showError('لم يتم تحديد القسم. الرابط غير صالح.');
             return;
         }
     }
 
     async loadSectionData() {
         try {
-            // محاولة تحميل البيانات من Firebase أولاً
-            if (typeof db !== 'undefined' && db !== null) {
-                await this.loadFromFirebase();
-            } else {
-                await this.loadFromLocalStorage();
-            }
+            // محاولة الاتصال بـ Firebase
+            const { app, db } = await this.initializeFirebase();
+            this.db = db;
+            
+            // تحميل البيانات مع إعادة المحاولة
+            await this.loadDataWithRetry();
+            
         } catch (error) {
-            console.error('❌ خطأ في تحميل بيانات القسم:', error);
+            console.error('❌ فشل الاتصال بـ Firebase:', error);
+            this.showError('فشل في الاتصال بقاعدة البيانات. جاري استخدام البيانات المحلية...');
             await this.loadFromLocalStorage();
         }
     }
 
+    async initializeFirebase() {
+        return new Promise((resolve, reject) => {
+            try {
+                console.log('🚀 جاري تهيئة Firebase...');
+                
+                // فك تشفير إعدادات Firebase
+                const firebaseConfig = decryptConfig(encryptedFirebaseConfig);
+                
+                if (!firebaseConfig) {
+                    throw new Error('فشل في فك تشفير إعدادات Firebase');
+                }
+
+                // Initialize Firebase
+                const app = firebase.initializeApp(firebaseConfig);
+                const db = firebase.firestore();
+                
+                console.log('✅ تم تهيئة Firebase بنجاح');
+                resolve({ app, db });
+                
+            } catch (error) {
+                console.error('❌ فشل تهيئة Firebase:', error);
+                reject(error);
+            }
+        });
+    }
+
+    async loadDataWithRetry(maxRetries = 3) {
+        let retries = 0;
+        
+        while (retries < maxRetries) {
+            try {
+                console.log(`📥 جاري تحميل بيانات القسم... المحاولة ${retries + 1}`);
+                await this.loadFromFirebase();
+                console.log('✅ تم تحميل بيانات القسم بنجاح');
+                this.renderData();
+                return;
+            } catch (error) {
+                retries++;
+                console.error(`❌ فشل تحميل البيانات (المحاولة ${retries}):`, error);
+                
+                if (retries < maxRetries) {
+                    console.log(`🔄 إعادة المحاولة بعد 2 ثانية...`);
+                    await new Promise(resolve => setTimeout(resolve, 2000));
+                } else {
+                    throw error;
+                }
+            }
+        }
+    }
+
     async loadFromFirebase() {
-        const database = db;
-        if (!database) {
-            throw new Error('Firebase غير متاح');
+        if (!this.db) {
+            throw new Error('Firestore غير مهيأ');
         }
 
-        // جلب بيانات القسم
-        const sectionDoc = await database.collection('sections').doc(this.sectionId).get();
-        if (sectionDoc.exists) {
+        try {
+            console.log('📡 جاري جلب بيانات القسم من Firebase...');
+            
+            // جلب بيانات القسم
+            const sectionDoc = await this.db.collection('sections').doc(this.sectionId).get();
+            
+            if (!sectionDoc.exists) {
+                throw new Error('القسم غير موجود في قاعدة البيانات');
+            }
+
             this.section = {
                 id: sectionDoc.id,
                 ...sectionDoc.data()
             };
+            
             console.log('✅ تم تحميل بيانات القسم من Firebase:', this.section.name);
-        } else {
-            throw new Error('القسم غير موجود في Firebase');
+            
+            // جلب قنوات القسم
+            const channelsSnapshot = await this.db.collection('channels')
+                .where('sectionId', '==', this.sectionId)
+                .orderBy('order')
+                .get();
+
+            this.channels = channelsSnapshot.docs.map(doc => ({
+                id: doc.id,
+                ...doc.data()
+            }));
+            
+            console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
+            
+            // حفظ في localStorage كنسخة احتياطية
+            this.saveToLocalStorage();
+            
+        } catch (error) {
+            console.error('❌ خطأ في تحميل البيانات من Firebase:', error);
+            throw error;
         }
-
-        // جلب قنوات القسم
-        const channelsSnapshot = await database.collection('channels')
-            .where('sectionId', '==', this.sectionId)
-            .orderBy('order')
-            .get();
-
-        this.channels = channelsSnapshot.docs.map(doc => ({
-            id: doc.id,
-            ...doc.data()
-        }));
-        console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
-        
-        this.updateUI();
     }
 
     async loadFromLocalStorage() {
-        const savedSections = localStorage.getItem('bein_sections');
-        const savedChannels = localStorage.getItem('bein_channels');
-        
-        if (savedSections) {
-            const sections = JSON.parse(savedSections);
-            this.section = sections.find(s => s.id === this.sectionId);
+        try {
+            const savedSections = localStorage.getItem('protected_bein_sections');
+            const savedChannels = localStorage.getItem('protected_bein_channels');
+            
+            if (savedSections) {
+                const sections = decryptData(savedSections) || [];
+                this.section = sections.find(s => s.id === this.sectionId);
+            }
+            
+            if (savedChannels) {
+                const allChannels = decryptData(savedChannels) || [];
+                this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId)
+                    .sort((a, b) => (a.order || 1) - (b.order || 1));
+            }
+            
+            if (!this.section) {
+                throw new Error('القسم غير موجود في التخزين المحلي');
+            }
+            
+            console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
+            this.renderData();
+            
+        } catch (error) {
+            console.error('❌ خطأ في تحميل البيانات المحلية:', error);
+            this.showError('لا توجد بيانات لهذا القسم. الرابط قد يكون غير صالح.');
         }
-        
-        if (savedChannels) {
-            const allChannels = JSON.parse(savedChannels);
-            this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId)
-                .sort((a, b) => (a.order || 1) - (b.order || 1));
-        }
-        
-        if (!this.section) {
-            throw new Error('القسم غير موجود في التخزين المحلي');
-        }
-        
-        console.log(`✅ تم تحميل ${this.channels.length} قناة من التخزين المحلي`);
-        this.updateUI();
     }
 
-    updateUI() {
-        // تحديث عنوان الصفحة واسم القسم
+    saveToLocalStorage() {
+        try {
+            // نحتاج لحفظ بيانات القسم فقط لهذه الجلسة
+            localStorage.setItem('current_section', JSON.stringify(this.section));
+            localStorage.setItem('current_section_channels', JSON.stringify(this.channels));
+            console.log('💾 تم حفظ بيانات القسم في التخزين المحلي');
+        } catch (error) {
+            console.error('❌ خطأ في حفظ البيانات محلياً:', error);
+        }
+    }
+
+    renderData() {
+        // تحديث عنوان الصفحة
         document.getElementById('sectionHeader').textContent = this.section.name;
         document.getElementById('sectionName').textContent = this.section.name;
-        document.getElementById('sectionDescription').textContent = this.section.description || 'استمتع بمشاهدة القنوات المتاحة في هذا القسم';
         document.title = `${this.section.name} - Aseel TV`;
+        
+        // تحديث وصف القسم
+        const description = this.section.description || 
+                          `استمتع بمشاهدة ${this.channels.length} قناة متاحة في قسم ${this.section.name}`;
+        document.getElementById('sectionDescription').textContent = description;
+        
+        // عرض القنوات
+        this.renderChannels();
     }
 
     renderChannels() {
@@ -117,47 +220,42 @@ class SectionApp {
         if (this.channels.length === 0) {
             container.innerHTML = `
                 <div class="loading">
-                    <i class="uil uil-tv-retro"></i>
-                    <p>لا توجد قنوات في هذا القسم</p>
-                    <small>سيتم إضافة القنوات قريباً</small>
+                    <i class="uil uil-tv-retro" style="font-size: 4rem; color: #6c757d;"></i>
+                    <h4 class="mt-3 text-muted">لا توجد قنوات في هذا القسم</h4>
+                    <p>سيتم إضافة القنوات قريباً</p>
+                    <a href="index.html" class="btn btn-primary mt-3">
+                        <i class="uil uil-arrow-left"></i> العودة للأقسام
+                    </a>
                 </div>
             `;
             return;
         }
 
-        container.innerHTML = this.channels.map(channel => `
-            <div class="channel-card" data-channel-id="${channel.id}">
-                <div class="channel-logo">
-                    <img src="${channel.image || 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'}" 
-                         alt="${channel.name}"
-                         onerror="this.src='https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'">
-                </div>
-                <div class="channel-name">${channel.name}</div>
+        container.innerHTML = `
+            <div class="channels-grid">
+                ${this.channels.map(channel => `
+                    <div class="channel-card" data-channel-id="${channel.id}" onclick="sectionPageApp.openChannel('${channel.id}')">
+                        <div class="channel-logo">
+                            <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
+                                 alt="${channel.name}"
+                                 onerror="this.src='https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'">
+                        </div>
+                        <div class="channel-name">${channel.name}</div>
+                    </div>
+                `).join('')}
             </div>
-        `).join('');
-
-        this.setupChannelEventListeners();
+        `;
     }
 
-    setupChannelEventListeners() {
-        document.querySelectorAll('.channel-card').forEach(card => {
-            card.addEventListener('click', (e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                
-                const channelId = card.getAttribute('data-channel-id');
-                const channel = this.channels.find(c => c.id === channelId);
-                if (channel) {
-                    console.log('🔗 فتح القناة:', channel.name);
-                    this.openChannel(channel);
-                }
-            });
-        });
-    }
+    openChannel(channelId) {
+        const channel = this.channels.find(c => c.id === channelId);
+        if (!channel) return;
 
-    openChannel(channel) {
+        console.log('🔗 فتح القناة:', channel.name);
+        
         if (channel.url && channel.url !== '#' && channel.url.trim() !== '') {
             try {
+                // فتح الرابط في نافذة جديدة
                 window.open(channel.url, '_blank');
             } catch (error) {
                 console.error('❌ خطأ في فتح الرابط:', error);
@@ -186,6 +284,12 @@ class SectionApp {
     closeModal() {
         const modal = document.getElementById('installModal');
         if (modal) modal.style.display = "none";
+        
+        // إعادة تعيين الحدث
+        const confirmBtn = document.getElementById('confirmInstall');
+        if (confirmBtn) {
+            confirmBtn.onclick = null;
+        }
     }
 
     showError(message) {
@@ -193,10 +297,10 @@ class SectionApp {
         if (container) {
             container.innerHTML = `
                 <div class="loading">
-                    <i class="uil uil-exclamation-triangle"></i>
-                    <p>${message}</p>
-                    <a href="index.html" class="modal-button" style="margin-top: 15px; display: inline-block;">
-                        العودة للرئيسية
+                    <i class="uil uil-exclamation-triangle" style="font-size: 4rem; color: #dc3545;"></i>
+                    <h4 class="mt-3">${message}</h4>
+                    <a href="index.html" class="btn btn-primary mt-3">
+                        <i class="uil uil-arrow-left"></i> العودة للأقسام
                     </a>
                 </div>
             `;
@@ -204,6 +308,16 @@ class SectionApp {
     }
 
     setupEventListeners() {
+        console.log('🔧 إعداد مستمعي الأحداث...');
+
+        // إغلاق نافذة التثبيت عند النقر خارجها
+        window.addEventListener('click', (event) => {
+            if (event.target === document.getElementById('installModal')) {
+                this.closeModal();
+            }
+        });
+
+        // زر تأكيد التثبيت
         const confirmInstall = document.getElementById('confirmInstall');
         if (confirmInstall) {
             confirmInstall.addEventListener('click', () => {
@@ -212,23 +326,21 @@ class SectionApp {
             });
         }
 
+        // زر إلغاء التثبيت
         const cancelInstall = document.getElementById('cancelInstall');
         if (cancelInstall) {
             cancelInstall.addEventListener('click', () => {
                 this.closeModal();
             });
         }
-
-        window.addEventListener('click', (event) => {
-            if (event.target === document.getElementById('installModal')) {
-                this.closeModal();
-            }
-        });
     }
 }
 
-// بدء التطبيق
+// ===========================================
+// بدء تطبيق صفحة القسم
+// ===========================================
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('🏠 تهيئة صفحة القسم...');
-    window.sectionApp = new SectionApp();
+    window.sectionPageApp = new SectionPageApp();
 });
