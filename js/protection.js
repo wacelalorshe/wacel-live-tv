@@ -135,3 +135,8 @@ function decryptData(encrypted) {
         return null;
     }
 }
+
+// التحقق من الدومين عند تحميل الصفحة
+document.addEventListener('DOMContentLoaded', function() {
+    checkAllowedDomain();
+});
