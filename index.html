@@ -2,136 +2,369 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Aseel TV - قنوات بي إن سبورت</title>
     
-    <!-- CSS Libraries -->
+    <!-- CSS -->
     <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amita">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
     
     <style>
-        #loadingScreen {
-            position: fixed;
-            top: 0;
-            left: 0;
+        :root {
+            --primary-bg: #151825;
+            --secondary-bg: #322769;
+            --accent-color: #5d72d6;
+            --text-color: #ffffff;
+            --card-bg: rgba(47, 37, 98, 0.9);
+        }
+        
+        body {
+            background: var(--primary-bg);
+            color: var(--text-color);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        
+        header {
+            background: var(--secondary-bg);
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid var(--accent-color);
+        }
+        
+        .logo {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto 15px;
+            border-radius: 50%;
+            overflow: hidden;
+            border: 3px solid var(--accent-color);
+        }
+        
+        .logo img {
             width: 100%;
             height: 100%;
-            background: linear-gradient(to right, #322769, #151825, #322769);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            z-index: 9999;
+            object-fit: cover;
         }
         
-        .loading-text {
-            margin-top: 20px;
+        .app-title {
+            font-size: 28px;
+            font-weight: bold;
+            color: var(--accent-color);
+            margin-bottom: 5px;
+        }
+        
+        .app-subtitle {
+            color: #b8b8b8;
+            font-size: 16px;
+        }
+        
+        .page-title {
+            text-align: center;
+            margin: 40px 0 30px;
             color: white;
-            font-size: 18px;
+            font-size: 32px;
         }
         
-        #contentWrapper {
-            display: none;
+        .welcome-message {
+            text-align: center;
+            color: #b8b8b8;
+            font-size: 18px;
+            margin-bottom: 40px;
+        }
+        
+        .sections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 50px;
+        }
+        
+        .section-card {
+            background: linear-gradient(135deg, var(--card-bg), rgba(58, 66, 102, 0.9));
+            border-radius: 20px;
+            overflow: hidden;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+            text-decoration: none;
+            display: block;
+            color: inherit;
+        }
+        
+        .section-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.4);
+            border-color: var(--accent-color);
+            text-decoration: none;
+            color: inherit;
+        }
+        
+        .section-image {
+            height: 180px;
+            overflow: hidden;
+        }
+        
+        .section-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.5s ease;
+        }
+        
+        .section-card:hover .section-image img {
+            transform: scale(1.1);
+        }
+        
+        .section-content {
+            padding: 20px;
+        }
+        
+        .section-name {
+            font-size: 22px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: white;
+        }
+        
+        .section-description {
+            color: #b8b8b8;
+            font-size: 14px;
+            line-height: 1.5;
+            margin-bottom: 15px;
+            min-height: 60px;
+        }
+        
+        .section-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-top: 15px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .channel-count {
+            background: var(--accent-color);
+            color: white;
+            padding: 5px 15px;
+            border-radius: 20px;
+            font-size: 14px;
+            font-weight: bold;
+        }
+        
+        .open-btn {
+            color: var(--accent-color);
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        
+        .loading {
+            text-align: center;
+            padding: 50px;
+        }
+        
+        footer {
+            text-align: center;
+            padding: 30px;
+            background: var(--secondary-bg);
+            margin-top: 40px;
+            border-top: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        
+        .copyright {
+            color: #b8b8b8;
+            font-size: 14px;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: var(--secondary-bg);
+            display: flex;
+            justify-content: space-around;
+            padding: 15px 0;
+            border-top: 2px solid var(--accent-color);
+            z-index: 1000;
+        }
+        
+        .nav-item {
+            color: #b8b8b8;
+            text-decoration: none;
+            text-align: center;
+            transition: color 0.3s ease;
+            flex: 1;
+        }
+        
+        .nav-item:hover {
+            color: var(--accent-color);
+            text-decoration: none;
+        }
+        
+        .nav-item i {
+            display: block;
+            font-size: 24px;
+            margin-bottom: 5px;
+        }
+        
+        .nav-item span {
+            font-size: 12px;
+        }
+        
+        @media (max-width: 768px) {
+            .sections-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .page-title {
+                font-size: 24px;
+            }
+            
+            .section-name {
+                font-size: 20px;
+            }
         }
     </style>
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div id="loadingScreen">
-        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-            <span class="visually-hidden">جاري التحميل...</span>
-        </div>
-        <p class="loading-text">جاري تحميل التطبيق...</p>
-    </div>
-
-    <!-- المحتوى الرئيسي -->
-    <div id="contentWrapper">
-        <!-- Main Page (الأقسام) -->
-        <div id="mainPage">
-            <!-- Header -->
-            <header>
-                <div class="header-title">
-                    <a href="#" class="text-box">
-                        <span>وسيل لايف برو TV</span>
-                    </a>
-                </div>
-            </header>
-            
-            <!-- Main Content -->
-            <div class="content">
-                <h1 class="page-title">أقسام القنوات المتاحة</h1>
-                <div class="welcome-message">
-                    في تطبيق وسيل لايف برو
-                </div>
-                
-                <!-- Sections Grid -->
-                <div id="sectionsContainer" class="sections-container">
-                    <div class="loading">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">جاري التحميل...</span>
-                        </div>
-                        <p>جاري تحميل الأقسام...</p>
-                    </div>
-                </div>
+    <!-- Header -->
+    <header>
+        <div class="container">
+            <div class="logo">
+                <img src="https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png" alt="Logo">
             </div>
+            <div class="app-title">وسيل لايف برو TV</div>
+            <div class="app-subtitle">أفضل قنوات بي إن سبورت والرياضة</div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <div class="container">
+        <h1 class="page-title">أقسام القنوات المتاحة</h1>
+        <div class="welcome-message">
+            في تطبيق وسيل لايف برو
         </div>
         
-        <!-- Footer -->
-        <div class="footer">
+        <!-- Sections Container -->
+        <div id="sectionsContainer" class="sections-grid">
+            <!-- سيتم تعبئة الأقسام هنا -->
+        </div>
+    </div>
+    
+    <!-- Footer -->
+    <footer>
+        <div class="container">
             <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
         </div>
-        
-        <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <a href="#" class="nav-item">
-                <i class="uil uil-home"></i>
-                <span>الرئيسية</span>
-            </a>
-            <a href="matches.html" class="nav-item" target="_blank">
-                <i class="uil uil-schedule"></i>
-                <span>جدول المباريات</span>
-            </a>
-            <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
-                <i class="uil uil-telegram-alt"></i>
-                <span>تليجرام</span>
-            </a>
-            <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
-                <i class="uil uil-import"></i>
-                <span>تحميل المشغل</span>
-            </a>
-        </div>
-        
-        <!-- Install Modal -->
-        <div id="installModal" class="modal">
-            <div class="modal-content">
-                <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
-                <div class="dont-show-container">
-                    <input type="checkbox" id="dontShowAgain">
-                    <label for="dontShowAgain" style="margin-right: 10px;">عدم الإظهار مرة أخرى</label>
-                </div>
-                <div class="modal-buttons">
-                    <button id="confirmInstall" class="modal-button">تحميل مشغل القنوات</button>
-                    <button id="cancelInstall" class="modal-button cancel-button">الغاء التحميل</button>
-                </div>
-            </div>
-        </div>
+    </footer>
+    
+    <!-- Bottom Navigation -->
+    <div class="bottom-nav">
+        <a href="#" class="nav-item active">
+            <i class="uil uil-home"></i>
+            <span>الرئيسية</span>
+        </a>
+        <a href="matches.html" class="nav-item" target="_blank">
+            <i class="uil uil-schedule"></i>
+            <span>جدول المباريات</span>
+        </a>
+        <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
+            <i class="uil uil-telegram-alt"></i>
+            <span>تليجرام</span>
+        </a>
+        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
+            <i class="uil uil-import"></i>
+            <span>تحميل المشغل</span>
+        </a>
     </div>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-
-    <!-- Custom JS -->
-    <script src="js/protection.js"></script>
-    <script src="js/firebase-config-fixed.js"></script>
-    <script src="js/app.js"></script>
+    <!-- JavaScript -->
+    <script src="js/data.js"></script>
+    <script>
+        class MainApp {
+            constructor() {
+                this.init();
+            }
+            
+            init() {
+                console.log('🚀 بدء التطبيق الرئيسي...');
+                
+                // إعداد السنة الحالية
+                document.getElementById('currentYear').textContent = new Date().getFullYear();
+                
+                // تحميل وعرض الأقسام
+                this.loadAndDisplaySections();
+            }
+            
+            loadAndDisplaySections() {
+                const container = document.getElementById('sectionsContainer');
+                
+                // تحميل البيانات
+                const { sections, channels } = window.dataManager.loadDataFromStorage();
+                
+                if (sections.length === 0) {
+                    container.innerHTML = `
+                        <div class="loading">
+                            <i class="uil uil-folder" style="font-size: 3rem; color: #b8b8b8;"></i>
+                            <p>لا توجد أقسام متاحة</p>
+                        </div>
+                    `;
+                    return;
+                }
+                
+                // ترتيب الأقسام
+                const sortedSections = sections
+                    .filter(section => section.isActive !== false)
+                    .sort((a, b) => (a.order || 999) - (b.order || 999));
+                
+                // إنشاء HTML للأقسام
+                container.innerHTML = sortedSections.map(section => {
+                    const sectionChannels = channels.filter(ch => ch.sectionId === section.id);
+                    const channelCount = sectionChannels.length;
+                    const sectionLink = `section.html?id=${section.id}`;
+                    
+                    return `
+                        <a href="${sectionLink}" target="_blank" class="section-card">
+                            <div class="section-image">
+                                <img src="${section.image}" 
+                                     alt="${section.name}"
+                                     onerror="this.src='https://i.postimg.cc/Bb0WFJfJ/Picsart-25-01-18-03-49-12-620.png'">
+                            </div>
+                            <div class="section-content">
+                                <div class="section-name">${section.name}</div>
+                                <div class="section-description">${section.description}</div>
+                                <div class="section-footer">
+                                    <div class="channel-count">
+                                        ${channelCount} قناة
+                                    </div>
+                                    <div class="open-btn">
+                                        <i class="uil uil-external-link-alt"></i>
+                                        <span>فتح القسم</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </a>
+                    `;
+                }).join('');
+                
+                console.log(`✅ تم عرض ${sortedSections.length} قسم`);
+            }
+        }
+        
+        // بدء التطبيق عند تحميل الصفحة
+        document.addEventListener('DOMContentLoaded', () => {
+            window.mainApp = new MainApp();
+        });
+    </script>
 </body>
 </html>
