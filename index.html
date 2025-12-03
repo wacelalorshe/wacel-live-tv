@@ -823,6 +823,138 @@
             color: #E1E1E1;
             font-size: 14px;
         }
+
+/* Notification System Styles */
+.notification-bell {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    cursor: pointer;
+    font-size: 24px;
+    color: white;
+    z-index: 1002;
+    transition: all 0.3s ease;
+}
+
+.notification-bell:hover {
+    color: #FF5200;
+    transform: translateY(-50%) scale(1.1);
+}
+
+.notification-bell .notification-count {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    background: #ff4757;
+    color: white;
+    border-radius: 50%;
+    width: 18px;
+    height: 18px;
+    font-size: 11px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: bold;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+}
+
+.notification-item {
+    background: rgba(255,255,255,0.05);
+    border-radius: 10px;
+    padding: 15px;
+    margin-bottom: 15px;
+    border-left: 4px solid #3545FF;
+    transition: all 0.3s ease;
+    animation: fadeInUp 0.5s ease;
+}
+
+.notification-item:hover {
+    background: rgba(255,255,255,0.1);
+    transform: translateX(-5px);
+}
+
+.notification-item.success {
+    border-left-color: #2ecc71;
+}
+
+.notification-item.warning {
+    border-left-color: #f39c12;
+}
+
+.notification-item.important {
+    border-left-color: #e74c3c;
+}
+
+.notification-item.update {
+    border-left-color: #9b59b6;
+}
+
+.notification-date {
+    color: rgba(255,255,255,0.6);
+    font-size: 0.8rem;
+    margin-top: 5px;
+}
+
+.mark-read-btn {
+    background: rgba(255,255,255,0.1);
+    border: 1px solid rgba(255,255,255,0.2);
+    color: rgba(255,255,255,0.7);
+    padding: 4px 12px;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.mark-read-btn:hover {
+    background: rgba(255,255,255,0.2);
+    color: white;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideDown {
+    from {
+        transform: translateX(-50%) translateY(-100%);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+    }
+}
+
+/* Responsive notifications */
+@media (max-width: 768px) {
+    .notification-bell {
+        left: 10px;
+        font-size: 20px;
+    }
+    
+    .notification-bell .notification-count {
+        width: 16px;
+        height: 16px;
+        font-size: 10px;
+    }
+    
+    .notifications-container {
+        margin: 20px auto;
+        max-width: 95% !important;
+    }
+}
+
+
+        
     </style>
 </head>
 <body>
