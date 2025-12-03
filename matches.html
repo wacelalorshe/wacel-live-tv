@@ -101,6 +101,53 @@ body { background: var(--primary-bg); font-family: "Tajawal", sans-serif; color:
 .fade-in { animation: fadeInUp 0.6s ease-out; }
 @keyframes fadeInUp { from { opacity:0; transform:translateY(30px); } to { opacity:1; transform:translateY(0); } }
 
+/* أنماط للرسائل المتعلقة بالاتصال */
+.connection-error {
+    background: linear-gradient(135deg, #e74c3c, #c0392b);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.connection-warning {
+    background: linear-gradient(135deg, #f39c12, #e67e22);
+    color: white;
+    padding: 15px;
+    border-radius: 10px;
+    margin: 15px 0;
+    text-align: center;
+}
+
+.connection-success {
+    background: linear-gradient(135deg, #2ecc71, #27ae60);
+    color: white;
+    padding: 20px;
+    border-radius: 15px;
+    margin: 20px 0;
+    text-align: center;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+}
+
+.btn-retry {
+    background: linear-gradient(135deg, #3498db, #2980b9);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 25px;
+    cursor: pointer;
+    margin-top: 10px;
+    font-weight: bold;
+    transition: all 0.3s ease;
+}
+
+.btn-retry:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+}
+
 </style>
 </head>
 <body>
@@ -155,23 +202,84 @@ try {
     document.getElementById('matches-container').innerHTML = '<div class="error">❌ خطأ في تحميل البيانات.</div>';
 }
 
+// دالة للتحقق من الاتصال بالإنترنت
+async function checkInternetConnection() {
+    return new Promise((resolve, reject) => {
+        if (!navigator.onLine) {
+            reject(new Error("لا يوجد اتصال بالإنترنت"));
+            return;
+        }
+
+        const img = new Image();
+        img.src = "https://www.google.com/images/phd/px.gif?t=" + new Date().getTime();
+        let timer = setTimeout(() => {
+            reject(new Error("انتهت مهلة الاتصال بالإنترنت"));
+        }, 5000);
+
+        img.onload = () => {
+            clearTimeout(timer);
+            resolve(true);
+        };
+
+        img.onerror = () => {
+            clearTimeout(timer);
+            reject(new Error("فشل الاتصال بالإنترنت"));
+        };
+    });
+}
+
+// دالة لتحميل المباريات مع التحقق من الاتصال
+async function loadMatchesWithConnectionCheck() {
+    const container = document.getElementById('matches-container');
+    
+    // إضافة مؤشر تحميل
+    container.innerHTML = `
+        <div class="loading">
+            <div class="spinner-border text-primary mb-3" role="status">
+                <span class="visually-hidden">جاري التحقق...</span>
+            </div>
+            <p>جاري التحقق من الاتصال بالإنترنت...</p>
+        </div>
+    `;
+    
+    try {
+        // التحقق من الاتصال أولاً
+        await checkInternetConnection();
+        
+        // إذا كان هناك اتصال، قم بتحميل المباريات
+        if (!firebaseDb) {
+            container.innerHTML = '<div class="error">❌ خطأ في تحميل البيانات.</div>';
+            return;
+        }
+        
+        firebaseDb.ref('matches').on('value', snapshot => {
+            displayMatches(snapshot);
+        }, error => {
+            console.error(error);
+            container.innerHTML = '<div class="error">❌ حدث خطأ في تحميل المباريات</div>';
+        });
+        
+    } catch (error) {
+        console.error('Connection error:', error);
+        container.innerHTML = `
+            <div class="connection-error">
+                <i class="fa fa-wifi-slash mb-2" style="font-size: 2rem;"></i>
+                <h4>⚠️ لا يوجد اتصال بالإنترنت</h4>
+                <p>${error.message || "يرجى التحقق من اتصالك بالإنترنت"}</p>
+                <p>لا يمكن تحميل المباريات بدون اتصال بالإنترنت</p>
+                <button onclick="loadMatchesWithConnectionCheck()" class="btn-retry">
+                    <i class="fa fa-redo"></i> إعادة المحاولة
+                </button>
+            </div>
+        `;
+    }
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const today = new Date();
     document.getElementById('greg-date').textContent = today.toLocaleDateString('ar-AR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    loadMatches();
+    loadMatchesWithConnectionCheck();
 });
-
-function loadMatches() {
-    const container = document.getElementById('matches-container');
-    if (!firebaseDb) return;
-
-    firebaseDb.ref('matches').on('value', snapshot => {
-        displayMatches(snapshot);
-    }, error => {
-        console.error(error);
-        container.innerHTML = '<div class="error">❌ حدث خطأ في تحميل المباريات</div>';
-    });
-}
 
 function openXpolaApp(link) { if (link) window.location.href = link; }
 
