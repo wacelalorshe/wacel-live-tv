@@ -1637,6 +1637,27 @@
             console.log('🏠 تهيئة التطبيق...');
             window.app = new BeinSportApp();
         });
+
+
+// Auto-check for new notifications
+setInterval(() => {
+    if (window.notificationSystem) {
+        window.notificationSystem.checkForNewNotifications();
+    }
+}, 60000); // Check every minute
+
+// Show notifications modal on first visit
+let firstVisit = localStorage.getItem('firstVisit');
+if (!firstVisit) {
+    localStorage.setItem('firstVisit', 'true');
+    // Show notifications after 3 seconds
+    setTimeout(() => {
+        if (window.notificationSystem) {
+            window.notificationSystem.showNotificationsModal();
+        }
+    }, 3000);
+}
+        
     </script>
 </body>
 </html>
