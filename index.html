@@ -968,7 +968,32 @@
                 </a>
             </div>
         </header>
+        <header>
+    <div style="position: relative; width: 100%; height: 100%;">
+        <!-- المحتوى الأصلي للهيدر -->
         
+        <!-- زر الإشعارات -->
+        <div id="manualNotificationBell" style="position: absolute; left: 20px; top: 50%; 
+                                                transform: translateY(-50%); z-index: 1001;">
+            <div style="position: relative; width: 45px; height: 45px; 
+                        background: rgba(93, 114, 214, 0.2); border-radius: 50%; 
+                        display: flex; align-items: center; justify-content: center; 
+                        cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.3);
+                        transition: all 0.3s ease;"
+                 onclick="if(window.notificationSystem) notificationSystem.showNotificationsModal()">
+                <i class="uil uil-bell" style="font-size: 22px; color: white;"></i>
+                <span id="manualNotificationBadge" 
+                      style="position: absolute; top: -5px; right: -5px;
+                             background: #ff4757; color: white; border-radius: 50%; 
+                             width: 20px; height: 20px; font-size: 12px; 
+                             font-weight: bold; display: none;
+                             align-items: center; justify-content: center;">
+                    0
+                </span>
+            </div>
+        </div>
+    </div>
+</header>
         <!-- Main Content -->
         <div class="content">
             <h1 class="page-title">أقسام القنوات المتاحة</h1>
