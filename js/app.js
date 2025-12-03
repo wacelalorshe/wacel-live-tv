@@ -594,3 +594,539 @@ window.addEventListener('beforeunload', () => {
         window.app.destroy();
     }
 });
+
+
+// Notification System
+class NotificationSystem {
+    constructor() {
+        this.notifications = [];
+        this.unreadCount = 0;
+        this.notificationCheckInterval = null;
+        this.notificationModal = null;
+        this.notificationBell = null;
+        this.notificationBadge = null;
+        this.init();
+    }
+
+    async init() {
+        console.log('🔔 تهيئة نظام الإشعارات...');
+        
+        // Create notification elements
+        this.createNotificationElements();
+        
+        // Wait for Firebase to be ready
+        await this.waitForFirebase();
+        
+        // Start checking for notifications
+        this.startNotificationCheck();
+        
+        // Listen for new notifications
+        this.setupNotificationListener();
+    }
+
+    createNotificationElements() {
+        // Create notification bell in header
+        const header = document.querySelector('header');
+        if (header) {
+            this.notificationBell = document.createElement('div');
+            this.notificationBell.className = 'notification-bell';
+            this.notificationBell.innerHTML = `
+                <i class="uil uil-bell"></i>
+                <span class="notification-count">0</span>
+            `;
+            
+            this.notificationBell.style.cssText = `
+                position: relative;
+                cursor: pointer;
+                margin-right: 20px;
+                font-size: 24px;
+                color: white;
+            `;
+            
+            this.notificationBadge = this.notificationBell.querySelector('.notification-count');
+            this.notificationBadge.style.cssText = `
+                position: absolute;
+                top: -5px;
+                right: -5px;
+                background: #ff4757;
+                color: white;
+                border-radius: 50%;
+                width: 18px;
+                height: 18px;
+                font-size: 11px;
+                display: flex;
+                align-items: center;
+                justify-content: center;
+            `;
+            
+            this.notificationBell.addEventListener('click', () => {
+                this.showNotificationsModal();
+            });
+            
+            // Add to header
+            header.appendChild(this.notificationBell);
+        }
+
+        // Create notifications modal
+        this.notificationModal = document.createElement('div');
+        this.notificationModal.id = 'notificationsModal';
+        this.notificationModal.style.cssText = `
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 9999;
+            padding: 20px;
+            overflow-y: auto;
+        `;
+
+        this.notificationModal.innerHTML = `
+            <div class="notifications-container" style="
+                max-width: 500px;
+                margin: 50px auto;
+                background: linear-gradient(135deg, #151825, #2F2562);
+                border-radius: 15px;
+                overflow: hidden;
+                box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+            ">
+                <div class="notifications-header" style="
+                    background: linear-gradient(90deg, #3545FF, #FF5200);
+                    padding: 20px;
+                    color: white;
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                ">
+                    <h3 style="margin: 0; font-size: 1.2rem;">
+                        <i class="uil uil-bell"></i> الإشعارات
+                    </h3>
+                    <button id="closeNotifications" style="
+                        background: none;
+                        border: none;
+                        color: white;
+                        font-size: 24px;
+                        cursor: pointer;
+                    ">×</button>
+                </div>
+                <div class="notifications-body" style="padding: 20px; max-height: 500px; overflow-y: auto;">
+                    <div id="notificationsList" class="loading">
+                        <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+                            <div class="spinner-border text-primary mb-3" role="status">
+                                <span class="visually-hidden">جاري التحميل...</span>
+                            </div>
+                            <p>جاري تحميل الإشعارات...</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="notifications-footer" style="
+                    padding: 15px;
+                    border-top: 1px solid rgba(255,255,255,0.1);
+                    text-align: center;
+                ">
+                    <button id="markAllRead" style="
+                        background: linear-gradient(135deg, #2ecc71, #27ae60);
+                        color: white;
+                        border: none;
+                        padding: 8px 20px;
+                        border-radius: 25px;
+                        cursor: pointer;
+                        font-weight: bold;
+                    ">
+                        <i class="uil uil-check-circle"></i> تحديد الكل كمقروء
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(this.notificationModal);
+
+        // Setup event listeners for modal
+        document.getElementById('closeNotifications').addEventListener('click', () => {
+            this.hideNotificationsModal();
+        });
+
+        document.getElementById('markAllRead').addEventListener('click', () => {
+            this.markAllAsRead();
+        });
+
+        // Close modal when clicking outside
+        this.notificationModal.addEventListener('click', (e) => {
+            if (e.target === this.notificationModal) {
+                this.hideNotificationsModal();
+            }
+        });
+    }
+
+    async waitForFirebase() {
+        return new Promise((resolve) => {
+            const checkFirebase = () => {
+                if (typeof firebase !== 'undefined' && typeof db !== 'undefined') {
+                    resolve(true);
+                } else {
+                    setTimeout(checkFirebase, 100);
+                }
+            };
+            checkFirebase();
+        });
+    }
+
+    startNotificationCheck() {
+        // Check for notifications every 30 seconds
+        this.notificationCheckInterval = setInterval(() => {
+            this.checkForNewNotifications();
+        }, 30000);
+
+        // Initial check
+        this.checkForNewNotifications();
+    }
+
+    async checkForNewNotifications() {
+        try {
+            if (!db) {
+                console.log('Firestore not available for notifications');
+                return;
+            }
+
+            // Calculate date 3 days ago
+            const threeDaysAgo = new Date();
+            threeDaysAgo.setDate(threeDaysAgo.getDate() - 3);
+
+            // Get notifications from last 3 days
+            const snapshot = await db.collection('realtime_notifications')
+                .where('timestamp', '>=', threeDaysAgo)
+                .where('isRead', '==', false)
+                .orderBy('timestamp', 'desc')
+                .limit(10)
+                .get();
+
+            if (snapshot.empty) {
+                this.unreadCount = 0;
+                this.updateNotificationBadge();
+                return;
+            }
+
+            const newNotifications = [];
+            snapshot.forEach(doc => {
+                const data = doc.data();
+                newNotifications.push({
+                    id: doc.id,
+                    ...data,
+                    date: data.timestamp.toDate()
+                });
+            });
+
+            // Check if we have new notifications
+            const hasNew = this.hasNewNotifications(newNotifications);
+            if (hasNew) {
+                this.notifications = newNotifications;
+                this.unreadCount = this.notifications.length;
+                this.updateNotificationBadge();
+                this.renderNotifications();
+                
+                // Show modal if there are new notifications and user just opened the app
+                this.showNotificationsModal();
+            }
+
+        } catch (error) {
+            console.error('Error checking notifications:', error);
+        }
+    }
+
+    hasNewNotifications(newNotifications) {
+        if (this.notifications.length === 0 && newNotifications.length > 0) {
+            return true;
+        }
+
+        // Check if any notification ID is new
+        const existingIds = new Set(this.notifications.map(n => n.id));
+        return newNotifications.some(n => !existingIds.has(n.id));
+    }
+
+    updateNotificationBadge() {
+        if (this.notificationBadge) {
+            this.notificationBadge.textContent = this.unreadCount;
+            this.notificationBadge.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+        }
+    }
+
+    renderNotifications() {
+        const container = document.getElementById('notificationsList');
+        if (!container) return;
+
+        if (this.notifications.length === 0) {
+            container.innerHTML = `
+                <div style="text-align: center; padding: 40px; color: rgba(255,255,255,0.6);">
+                    <i class="uil uil-bell-slash" style="font-size: 3rem; margin-bottom: 15px;"></i>
+                    <p>لا توجد إشعارات جديدة</p>
+                </div>
+            `;
+            return;
+        }
+
+        container.innerHTML = this.notifications.map(notification => {
+            const dateStr = notification.date.toLocaleDateString('ar-AR', {
+                weekday: 'long',
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
+
+            let typeClass = '';
+            switch (notification.type) {
+                case 'success': typeClass = 'success'; break;
+                case 'warning': typeClass = 'warning'; break;
+                case 'important': typeClass = 'important'; break;
+                case 'update': typeClass = 'update'; break;
+                default: typeClass = 'info';
+            }
+
+            return `
+                <div class="notification-item" data-id="${notification.id}" style="
+                    background: rgba(255,255,255,0.05);
+                    border-radius: 10px;
+                    padding: 15px;
+                    margin-bottom: 15px;
+                    border-left: 4px solid var(--accent-color);
+                    transition: all 0.3s ease;
+                ">
+                    <div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px;">
+                        <h4 style="margin: 0; color: white; font-size: 1rem;">${notification.title}</h4>
+                        <span class="notification-date" style="color: rgba(255,255,255,0.6); font-size: 0.8rem;">
+                            ${dateStr}
+                        </span>
+                    </div>
+                    <p style="color: rgba(255,255,255,0.8); margin-bottom: 10px; line-height: 1.5;">
+                        ${notification.message}
+                    </p>
+                    ${notification.image ? `
+                        <img src="${notification.image}" alt="صورة الإشعار" 
+                             style="max-width: 100%; border-radius: 8px; margin-bottom: 10px;"
+                             onerror="this.style.display='none'">
+                    ` : ''}
+                    ${notification.link ? `
+                        <a href="${notification.link}" target="_blank" 
+                           style="display: inline-block; background: linear-gradient(135deg, #3545FF, #6a11cb);
+                                  color: white; padding: 8px 15px; border-radius: 5px; 
+                                  text-decoration: none; font-size: 0.9rem;">
+                           <i class="uil uil-external-link-alt"></i> عرض التفاصيل
+                        </a>
+                    ` : ''}
+                    <div style="margin-top: 10px; display: flex; justify-content: flex-end;">
+                        <button class="mark-read-btn" style="
+                            background: rgba(255,255,255,0.1);
+                            border: 1px solid rgba(255,255,255,0.2);
+                            color: rgba(255,255,255,0.7);
+                            padding: 4px 12px;
+                            border-radius: 15px;
+                            font-size: 0.8rem;
+                            cursor: pointer;
+                        ">
+                            <i class="uil uil-check"></i> تمت القراءة
+                        </button>
+                    </div>
+                </div>
+            `;
+        }).join('');
+
+        // Add event listeners to mark as read buttons
+        container.querySelectorAll('.mark-read-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const notificationItem = e.target.closest('.notification-item');
+                const notificationId = notificationItem.getAttribute('data-id');
+                this.markAsRead(notificationId);
+            });
+        });
+    }
+
+    async markAsRead(notificationId) {
+        try {
+            await db.collection('realtime_notifications').doc(notificationId).update({
+                isRead: true,
+                readAt: new Date()
+            });
+
+            // Remove from local array
+            this.notifications = this.notifications.filter(n => n.id !== notificationId);
+            this.unreadCount = this.notifications.length;
+            this.updateNotificationBadge();
+            this.renderNotifications();
+
+            // If all notifications are read, close modal
+            if (this.unreadCount === 0) {
+                this.hideNotificationsModal();
+            }
+
+        } catch (error) {
+            console.error('Error marking notification as read:', error);
+        }
+    }
+
+    async markAllAsRead() {
+        try {
+            const batch = db.batch();
+            this.notifications.forEach(notification => {
+                const notificationRef = db.collection('realtime_notifications').doc(notification.id);
+                batch.update(notificationRef, {
+                    isRead: true,
+                    readAt: new Date()
+                });
+            });
+
+            await batch.commit();
+
+            // Clear local array
+            this.notifications = [];
+            this.unreadCount = 0;
+            this.updateNotificationBadge();
+            this.renderNotifications();
+            this.hideNotificationsModal();
+
+        } catch (error) {
+            console.error('Error marking all as read:', error);
+        }
+    }
+
+    showNotificationsModal() {
+        if (this.notificationModal && this.unreadCount > 0) {
+            this.notificationModal.style.display = 'block';
+            document.body.style.overflow = 'hidden';
+        }
+    }
+
+    hideNotificationsModal() {
+        if (this.notificationModal) {
+            this.notificationModal.style.display = 'none';
+            document.body.style.overflow = 'auto';
+        }
+    }
+
+    setupNotificationListener() {
+        if (!db) return;
+
+        // Real-time listener for new notifications
+        db.collection('realtime_notifications')
+            .where('isRead', '==', false)
+            .orderBy('timestamp', 'desc')
+            .limit(1)
+            .onSnapshot((snapshot) => {
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === 'added') {
+                        // New notification arrived
+                        this.checkForNewNotifications();
+                        
+                        // Show notification toast
+                        const data = change.doc.data();
+                        this.showNotificationToast(data);
+                    }
+                });
+            });
+    }
+
+    showNotificationToast(notification) {
+        // Create toast element
+        const toast = document.createElement('div');
+        toast.className = 'notification-toast';
+        toast.style.cssText = `
+            position: fixed;
+            top: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, #151825, #2F2562);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+            z-index: 99999;
+            min-width: 300px;
+            max-width: 90%;
+            border-left: 4px solid #3545FF;
+            animation: slideDown 0.3s ease;
+        `;
+
+        toast.innerHTML = `
+            <div style="display: flex; align-items: center; gap: 10px;">
+                <i class="uil uil-bell" style="font-size: 1.5rem; color: #FF5200;"></i>
+                <div style="flex: 1;">
+                    <strong style="display: block; margin-bottom: 5px;">${notification.title}</strong>
+                    <p style="margin: 0; font-size: 0.9rem; color: rgba(255,255,255,0.8);">
+                        ${notification.message.substring(0, 100)}${notification.message.length > 100 ? '...' : ''}
+                    </p>
+                </div>
+                <button class="toast-close" style="
+                    background: none;
+                    border: none;
+                    color: rgba(255,255,255,0.5);
+                    font-size: 20px;
+                    cursor: pointer;
+                ">×</button>
+            </div>
+        `;
+
+        document.body.appendChild(toast);
+
+        // Add close button event
+        toast.querySelector('.toast-close').addEventListener('click', () => {
+            toast.remove();
+        });
+
+        // Auto remove after 5 seconds
+        setTimeout(() => {
+            if (toast.parentNode) {
+                toast.remove();
+            }
+        }, 5000);
+
+        // Add animation styles
+        const style = document.createElement('style');
+        if (!document.querySelector('#toast-animations')) {
+            style.id = 'toast-animations';
+            style.textContent = `
+                @keyframes slideDown {
+                    from {
+                        transform: translateX(-50%) translateY(-100%);
+                        opacity: 0;
+                    }
+                    to {
+                        transform: translateX(-50%) translateY(0);
+                        opacity: 1;
+                    }
+                }
+            `;
+            document.head.appendChild(style);
+        }
+    }
+
+    destroy() {
+        if (this.notificationCheckInterval) {
+            clearInterval(this.notificationCheckInterval);
+        }
+        
+        if (this.notificationModal && this.notificationModal.parentNode) {
+            this.notificationModal.parentNode.removeChild(this.notificationModal);
+        }
+        
+        if (this.notificationBell && this.notificationBell.parentNode) {
+            this.notificationBell.parentNode.removeChild(this.notificationBell);
+        }
+    }
+}
+
+// Initialize notification system when DOM is loaded
+document.addEventListener('DOMContentLoaded', () => {
+    setTimeout(() => {
+        window.notificationSystem = new NotificationSystem();
+    }, 2000); // Wait 2 seconds for app to initialize
+});
+
+// Cleanup
+window.addEventListener('beforeunload', () => {
+    if (window.notificationSystem) {
+        window.notificationSystem.destroy();
+    }
+});
+
