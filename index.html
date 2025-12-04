@@ -12,1093 +12,183 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     
-    <style>
-        :root {
-            --primary-color: #3545FF;
-            --secondary-color: #FF5200;
-            --dark-bg: #151825;
-            --darker-bg: #0d111c;
-            --card-bg: #2F2562;
-            --text-light: #F0F0F0;
-            --success-color: #80FF00;
-            --danger-color: #FF0005;
-        }
-
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        body, html {
-            margin: 0;
-            padding: 0;
-            overflow-x: hidden;
-            font-family: Arial, sans-serif;
-            background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
-            color: var(--text-light);
-            direction: rtl;
-            height: 100%;
-        }
-
-        /* Header Styles */
-        header {
-            position: fixed;
-            top: 0;
-            width: 100%;
-            background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
-            border-bottom: 11px double #000;
-            height: 80px;
-            z-index: 1000;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 0px 0px 0px 0px;
-            box-shadow: 0 0px 10px  rgba(0, 0, 0, 100);
-        }
-
-        .header-title {
-            text-align: center;
-        }
-
-        .header-title .text-box {
-            background-image: linear-gradient(to right, #000, #3A4266, #151825, #000, #3A4266, #151825);
-            display: inline-block;
-            padding: 5px 15px;
-            border-radius: 10px 100px 10px 100px;
-            border: 2px outset #fff;
-            border-bottom: 1px groove  #fff; 
-            border-top: 1px ridge  #fff; 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-            color: var(--text-light);
-            font-weight: bold;
-            text-decoration: none;
-            transition: all 0.3s ease;
-            font-size: 13px;
-            color: #fff;
-            box-shadow: 0 0px 10px  rgba(255, 255, 255, 100);
-        }
-
-        .header-title .text-box:hover {
-            transform: translateY(-2px);
-        }
-
-        /* Back Button */
-        .back-button {
-            position: absolute;
-            left: 20px;
-            top: 50%;
-            transform: translateY(-50%);
-            background: linear-gradient(45deg, #3545FF, #FF5200);
-            color: white;
-            border: none;
-            border-radius: 25px;
-            padding: 8px 20px;
-            font-size: 14px;
-            cursor: pointer;
-            z-index: 1001;
-            box-shadow: 0 3px 10px rgba(0, 0, 0, 0.3);
-            display: flex;
-            align-items: center;
-            gap: 5px;
-            transition: all 0.3s ease;
-            font-weight: bold;
-            text-decoration: none;
-        }
-
-        .back-button:hover {
-            transform: translateY(-50%) scale(1.05);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.4);
-            color: white;
-            text-decoration: none;
-        }
-
-        /* Main Content */
-        .content {
-            margin-top: 100px;
-            padding: 20px;
-            min-height: calc(100vh - 180px);
-            padding-bottom: 80px;
-        }
-
-        .page-title, .section-title {
-            text-align: center;
-            position: fixed;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            display: inline-block;
-            position: fixed;
-            top: 80px;
-            width: 100%;
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            padding: 1px 12px;
-            border-radius: 0px;
-            margin: 0 auto 20px;
-            color: white;
-            font-size: 1.4rem;
-            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-            max-width: 90%;
-        }
-
-        .welcome-message, .section-description {
-            position: fixed;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            display: inline-block;
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            border-radius: 0px;
-            top: 103px;
-            left: 0;
-            right: 0;
-            width: 90%;
-            padding: 15px;
-            z-index: 999;
-            margin: 0 auto 100px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            border: 0px solid rgba(255, 255, 255, 0.1);
-            font-size: 16px;
-            color: #b8d4f5;
-        }
-        
-        .ticker {
-            background: linear-gradient(to right, #503FA6, var(--dark-bg), #2F2562);
-            margin-top: 0.0rem;
-            display: flex;
-            overflow: hidden;
-            height: 31px;
-            padding-top: 13px;
-            text-align: center;
-            align-items: center;
-            border-bottom: 1px double  #fff; 
-            border-top: 1px double #fff; 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-        }
-
-        .ticker span {
-            background-image: linear-gradient(to right, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#231086, #2F2562, #322769, #654FD4, #372B74, #322769, #5A47BE, #654FD4, #372B74,#322769, #654FD4, #000);
-            padding: 0 15px;
-            border-radius: 30px 0 0 2px;
-            border-left: 8px ridge #fff;
-            font-size: 14px;
-            margin-bottom: 12px;
-            white-space: nowrap;
-            box-shadow: 0 0px 10px  rgba(255, 255, 255, 100);
-        }
-
-        .ticker ul {
-            list-style: none;
-            display: flex;
-            animation: ticker 15s linear infinite;
-            padding-right: 10px;
-            border-radius: 10px 20px 10px 20px;
-        }
-
-        .ticker:hover ul {
-            animation-play-state: paused;
-        }
-
-        .ticker li {
-            white-space: nowrap;
-            margin-left: 90px;
-        }
-
-        .ticker li a {
-            color: var(--text-light);
-            text-decoration: none;
-            font-size: 14px;
-        }
-
-        @keyframes ticker {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
-
-        /* Sections Grid */
-        .sections-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            padding: 20px 0;
-            justify-items: center;
-        }
-
-        .section-card {
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            padding: 15px;
-            background-size: cover;
-            background-position: top center;
-            background-repeat: no-repeat;
-            margin: 20px 10px;
-            height: 80%;
-            width: 80%;
-            border-bottom: 4px groove #fff;
-            border-top: 4px groove #fff;
-            border-left: 0px ridge rgb(255 0 0 / 100%);
-            border-right: 0px ridge #f1f8e9;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-decoration: none;
-            display: block;
-        }
-
-        .section-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-            text-decoration: none;
-        }
-
-        .section-card.active {
-            background-image: linear-gradient(to right, #000, #654FD4, #322769, #2F2562, #2F2562, #2F2562, #2F2562,#2F2562, #2F2562, #2F2562, #2F2562, #2F2562, #2F2562, #2F2562, #2F2562,#2F2562, #322769, #654FD4,#000);
-            border-color: #FF5200;
-        }
-
-        .section-card-link {
-            color: white;
-            text-decoration: none;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            width: 100%;
-            height: 100%;
-            padding: 20px;
-        }
-
-        .section-image {
-            width: 100%;
-            height: 10px;
-            margin: 0 auto 10px;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .section-image img {
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 10px;
-            border-radius: 10px 20px 10px 20px;
-            border-bottom: 5px double rgba(255, 255, 255, 0.7); 
-            border-top: 5px double rgba(255, 255, 255, 0.7); 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-            padding: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 0%;
-            margin-left: 0%;
-            pointer-events: none;
-        }
-
-        .section-card:hover .section-image {
-            border-color: #FF5200;
-            transform: scale(1.05);
-        }
-
-        .section-card:hover .section-image img {
-            transform: scale(1.1);
-        }
-
-        .section-card.active .section-image {
-            border-color: #FF5200;
-            box-shadow: 0 0 20px rgba(255, 82, 0, 0.5);
-        }
-
-        .section-icon {
-            font-size: 40px;
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 10px;
-            border-radius: 10px 20px 10px 20px;
-            border-bottom: 5px double rgba(255, 255, 255, 0.7); 
-            border-top: 5px double rgba(255, 255, 255, 0.7); 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-            padding: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 0%;
-            margin-left: 0%;
-            pointer-events: none;
-        }
-
-        .section-name {
-            background-image: linear-gradient(to right, #9C9689, #DED8CC, #F3EDEA, #FDFDFC, #fff, #fff, #fff,#fff, #fff, #fff, #fff, #fff, #fff, #fff, #fff,#fff, #fff, #fff, #fff, #fff, #FDFDFC, #F3EDEA, #DED8CC, #9C9689);
-            padding: 0px;
-            box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
-            border-top: 3px groove rgba(0, 0, 0, 100);
-            border-left:0px ridge #6D42B8;
-            border-right:0px groove #6D42B8;
-            border-bottom: 3px groove rgba(0, 0, 0, 5);
-            padding: 0px;
-            color: #000;
-            border-radius: 40px;
-            margin-top: 20px;
-            margin-right:12%;
-            width: 100%;
-            height: 100%;
-            font-weight: bold; 
-            font-family: Arial, sans-serif; 
-            padding-left: 5%; 
-            padding-right: 5%; 
-            box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
-            justify-content: center; 
-            text-align: center;
-        }
-
-        .section-description-card {
-            color: #E1E1E1;
-            font-size: 9px;
-            margin-top: 10px;
-            line-height: 1.4;
-            text-align: center;
-        }
-
-        .section-badge {
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            padding: 0px;
-            box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
-            border-top: 3px groove rgba(0, 0, 0, 100);
-            border-left:0px ridge #6D42B8;
-            border-right:0px groove #6D42B8;
-            border-bottom: 3px groove rgba(0, 0, 0, 5);
-            padding: 0px;
-            color: #fff;
-            border-radius: 40px;
-            margin-top: 10px;
-            font-size: 8px;
-            margin-right:12%;
-            width: 100%; 
-            font-weight: bold; 
-            font-family: Arial, sans-serif; 
-            padding-left: 5%; 
-            padding-right: 5%; 
-            box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
-            justify-content: center; 
-            text-align: center;
-        }
-
-        /* Channels Grid */
-        .channels-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 10fr));
-            gap: 20px;
-            padding: 20px 0;
-            justify-items: center;
-        }
-
-        .channel-card {
-            background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            padding: 15px;
-            background-size: cover;
-            background-position: top center;
-            background-repeat: no-repeat;
-            margin: 25px 5px;
-            height: 80%;
-            width: 90%;
-            border-bottom: 4px groove #fff;
-            border-top: 4px groove #fff;
-            border-left: 0px ridge rgb(255 0 0 / 100%);
-            border-right: 0px ridge #f1f8e9;
-            border-radius: 15px;
-        }
-
-        .channel-card:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.4);
-        }
-
-        .channel-logo {
-            width: 10px;
-            height: 10px;
-            margin: 0 auto 10px;
-            padding: 5px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 10px;
-        }
-
-        .channel-logo img {
-            width: 90px;
-            height: 90px;
-            margin: 0 auto 10px;
-            border-radius: 10px 20px 10px 20px;
-            border-bottom: 5px double rgba(255, 255, 255, 0.7); 
-            border-top: 5px double rgba(255, 255, 255, 0.7); 
-            border-left: 0px ridge #2F2562;
-            border-right: 0px groove #2F2562;
-            padding: 3px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-top: 80%;
-            pointer-events: none;
-        }
-
-        .channel-name {
-            background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
-            padding: 0px;
-            box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
-            border-top: 3px groove rgba(0, 0, 0, 100);
-            border-left:0px ridge #6D42B8;
-            border-right:0px groove #6D42B8;
-            border-bottom: 3px groove rgba(0, 0, 0, 5);
-            padding: 0px;
-            color: #fff;
-            border-radius: 40px;
-            margin-top: 50px;
-            margin-right:0%;
-            width: 100%; 
-            font-weight: bold; 
-            font-family: Arial, sans-serif; 
-            padding-left: 0%; 
-            padding-right: 0%; 
-            box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
-            justify-content: center; 
-            text-align: center;
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            padding-top: 100px;
-            animation: fadeIn 0.3s;
-        }
-
-        .modal-content {
-            background: linear-gradient(to right, var(--dark-bg), #3A4266);
-            margin: auto;
-            padding: 20px;
-            border: 3px groove #fff;
-            width: 90%;
-            max-width: 500px;
-            border-radius: 15px;
-            text-align: center;
-            color: var(--text-light);
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-            animation: slideIn 0.3s;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .modal-buttons {
-            display: flex;
-            justify-content: space-between;
-            margin-top: 20px;
-        }
-
-        .modal-button {
-            background-color: var(--success-color);
-            color: #000;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 10px;
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-            margin: 0 5px;
-        }
-
-        .cancel-button {
-            background-color: var(--danger-color);
-            color: white;
-        }
-
-        .dont-show-container {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 15px 0;
-        }
-
-        /* Footer */
-        .footer {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            text-align: center;
-            padding: 0.5rem;
-            background: linear-gradient(to right, #503FA6, var(--dark-bg), #2F2562);
-            border-top: 1px solid #fff;
-            font-family: Amita, cursive;
-            color: white;
-            z-index: 100;
-        }
-
-        .footer a {
-            text-decoration: none;
-            color: #ff4d4d;
-        }
-
-        /* Bottom Navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            background: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-            display: flex;
-            justify-content: space-around;
-            padding: 10px 0;
-            border-top: 1px solid rgba(255, 255, 255, 0.2);
-            z-index: 999;
-        }
-
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            color: #fff;
-            text-decoration: none;
-            font-size: 12px;
-            transition: all 0.3s ease;
-        }
-
-        .nav-item i {
-            font-size: 20px;
-            margin-bottom: 5px;
-        }
-
-        .nav-item:hover {
-            color: var(--secondary-color);
-            transform: translateY(-3px);
-        }
-
-        .loading {
-            text-align: center;
-            padding: 20px;
-            font-size: 18px;
-        }
-
-        /* Page Containers */
-        #mainPage, #sectionPage {
-            display: none;
-        }
-
-        #mainPage {
-            display: block;
-        }
-
-        /* أنماط للرسائل المتعلقة بالاتصال */
-        .connection-error {
-            background: linear-gradient(135deg, #e74c3c, #c0392b);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .connection-warning {
-            background: linear-gradient(135deg, #f39c12, #e67e22);
-            color: white;
-            padding: 15px;
-            border-radius: 10px;
-            margin: 15px 0;
-            text-align: center;
-        }
-
-        .connection-success {
-            background: linear-gradient(135deg, #2ecc71, #27ae60);
-            color: white;
-            padding: 20px;
-            border-radius: 15px;
-            margin: 20px 0;
-            text-align: center;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.3);
-        }
-
-        .btn-retry {
-            background: linear-gradient(135deg, #3498db, #2980b9);
-            color: white;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 25px;
-            cursor: pointer;
-            margin-top: 10px;
-            font-weight: bold;
-            transition: all 0.3s ease;
-        }
-
-        .btn-retry:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
-        }
-
-        /* تحسينات للعرض على الجوال */
-        @media (max-width: 768px) {
-            .sections-grid {
-                grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-                gap: 15px;
-                padding: 15px 0;
-            }
-            
-            .section-card {
-                min-height: 60px;
-                padding: 15px;
-            }
-            
-            .section-image {
-                width: 100px;
-                height: 100px;
-            }
-            
-            .section-icon {
-                font-size: 30px;
-                width: 60px;
-                height: 60px;
-            }
-            
-            .section-name {
-                font-size: 14px;
-                padding: 6px 12px;
-            }
-            
-            .channels-container {
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 15px;
-            }
-            
-            .channel-card {
-                max-width: 130px;
-            }
-            
-            .channel-logo {
-                width: 70px;
-                height: 70px;
-            }
-            
-            .ticker ul {
-                animation-duration: 20s;
-            }
-            
-            .back-button {
-                padding: 6px 15px;
-                font-size: 12px;
-                left: 10px;
-            }
-
-            .page-title, .section-title {
-                font-size: 200px;
-            }
-            
-            .welcome-message, .section-description {
-                font-size: 9px;
-                padding: 0 15px;
-            }
-        }
-
-        @media (max-width: 480px) {
-            .sections-grid {
-                grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
-                gap: 10px;
-                padding: 10px 0;
-            }
-            
-            .section-card {
-                min-height: 140px;
-                padding: 10px;
-            }
-            
-            .section-image {
-                width: 80px;
-                height: 80px;
-            }
-            
-            .section-icon {
-                font-size: 50px;
-                width: 60px;
-                height: 60px;
-                margin-bottom: 10px;
-                border-radius: 10px 20px 10px 20px;
-                border-bottom: 5px double rgba(255, 255, 255, 0.7); 
-                border-top: 5px double rgba(255, 255, 255, 0.7); 
-                border-left: 0px ridge #2F2562;
-                border-right: 0px groove #2F2562;
-            }
-            
-            .section-name {
-                font-size: 9px;
-                padding: 0px 5px;
-                margin-bottom: 10px;
-                width: 100%;
-                height: 100%;
-            }
-            
-            .channels-container {
-                grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-                gap: 10px;
-            }
-            
-            .channel-card {
-                max-width: 110px;
-                padding: 8px;
-            }
-            
-            .channel-logo {
-                width: 60px;
-                height: 60px;
-            }
-            
-            .channel-name {
-                font-size: 10px;
-            }
-            
-            .modal-content {
-                width: 95%;
-                padding: 15px;
-            }
-            
-            .modal-buttons {
-                flex-direction: column;
-            }
-            
-            .modal-button {
-                margin: 5px 0;
-            }
-            
-            .back-button {
-                padding: 5px 12px;
-                font-size: 11px;
-                left: 5px;
-            }
-            
-            .page-title, .section-title {
-                font-size: 18px;
-            }
-            
-            .welcome-message, .section-description {
-                font-size: 13px;
-            }
-            
-            .bottom-nav {
-                padding: 8px 0;
-            }
-            
-            .nav-item {
-                font-size: 10px;
-            }
-            
-            .nav-item i {
-                font-size: 16px;
-            }
-        }
-
-        .loading small {
-            display: block;
-            margin-top: 10px;
-            color: #E1E1E1;
-            font-size: 14px;
-        }
-
-/* Notification System Styles */
-.notification-bell {
-    position: absolute;
-    left: 20px;
-    top: 50%;
-    transform: translateY(-50%);
-    cursor: pointer;
-    font-size: 24px;
-    color: white;
-    z-index: 1002;
-    transition: all 0.3s ease;
-}
-
-.notification-bell:hover {
-    color: #FF5200;
-    transform: translateY(-50%) scale(1.1);
-}
-
-.notification-bell .notification-count {
-    position: absolute;
-    top: -5px;
-    right: -5px;
-    background: #ff4757;
-    color: white;
-    border-radius: 50%;
-    width: 18px;
-    height: 18px;
-    font-size: 11px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-weight: bold;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.3);
-}
-
-.notification-item {
-    background: rgba(255,255,255,0.05);
-    border-radius: 10px;
-    padding: 15px;
-    margin-bottom: 15px;
-    border-left: 4px solid #3545FF;
-    transition: all 0.3s ease;
-    animation: fadeInUp 0.5s ease;
-}
-
-.notification-item:hover {
-    background: rgba(255,255,255,0.1);
-    transform: translateX(-5px);
-}
-
-.notification-item.success {
-    border-left-color: #2ecc71;
-}
-
-.notification-item.warning {
-    border-left-color: #f39c12;
-}
-
-.notification-item.important {
-    border-left-color: #e74c3c;
-}
-
-.notification-item.update {
-    border-left-color: #9b59b6;
-}
-
-.notification-date {
-    color: rgba(255,255,255,0.6);
-    font-size: 0.8rem;
-    margin-top: 5px;
-}
-
-.mark-read-btn {
-    background: rgba(255,255,255,0.1);
-    border: 1px solid rgba(255,255,255,0.2);
-    color: rgba(255,255,255,0.7);
-    padding: 4px 12px;
-    border-radius: 15px;
-    font-size: 0.8rem;
-    cursor: pointer;
-    transition: all 0.3s ease;
-}
-
-.mark-read-btn:hover {
-    background: rgba(255,255,255,0.2);
-    color: white;
-}
-
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(10px);
-    }
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
-}
-
-@keyframes slideDown {
-    from {
-        transform: translateX(-50%) translateY(-100%);
-        opacity: 0;
-    }
-    to {
-        transform: translateX(-50%) translateY(0);
-        opacity: 1;
-    }
-}
-
-/* Responsive notifications */
-@media (max-width: 768px) {
-    .notification-bell {
-        left: 10px;
-        font-size: 20px;
-    }
-    
-    .notification-bell .notification-count {
-        width: 16px;
-        height: 16px;
-        font-size: 10px;
-    }
-    
-    .notifications-container {
-        margin: 20px auto;
-        max-width: 95% !important;
-    }
-}
-
-
-        
-    </style>
+    <!-- Custom CSS -->
+    <link rel="stylesheet" href="css/style.css">
+    <link rel="stylesheet" href="css/responsive.css">
 </head>
 <body>
-    <!-- Main Page (الأقسام) -->
-    <div id="mainPage">
-        <!-- Header -->
-        <header>
-            <div class="header-title">
-                <a href="#" class="text-box">
-                    <span>وسيل لايف برو TV</span>
-                </a>
-            </div>
-        </header>
-        <header>
-    <div style="position: relative; width: 100%; height: 100%;">
-        <!-- المحتوى الأصلي للهيدر -->
-        
-        <!-- زر الإشعارات -->
-        <div id="manualNotificationBell" style="position: absolute; left: 20px; top: 50%; 
-                                                transform: translateY(-50%); z-index: 1001;">
-            <div style="position: relative; width: 45px; height: 45px; 
-                        background: rgba(93, 114, 214, 0.2); border-radius: 50%; 
-                        display: flex; align-items: center; justify-content: center; 
-                        cursor: pointer; border: 2px solid rgba(255, 255, 255, 0.3);
-                        transition: all 0.3s ease;"
-                 onclick="if(window.notificationSystem) notificationSystem.showNotificationsModal()">
-                <i class="uil uil-bell" style="font-size: 22px; color: white;"></i>
-                <span id="manualNotificationBadge" 
-                      style="position: absolute; top: -5px; right: -5px;
-                             background: #ff4757; color: white; border-radius: 50%; 
-                             width: 20px; height: 20px; font-size: 12px; 
-                             font-weight: bold; display: none;
-                             align-items: center; justify-content: center;">
-                    0
-                </span>
-            </div>
+    <!-- شاشة التحميل -->
+    <div id="loadingScreen">
+        <div class="spinner-border text-primary mb-3" role="status">
+            <span class="visually-hidden">جاري التحميل...</span>
         </div>
-    </div>
-</header>
-        <!-- Main Content -->
-        <div class="content">
-            <h1 class="page-title">أقسام القنوات المتاحة</h1>
-            <div class="welcome-message">
-                في تطبيق وسيل لايف برو
-            </div>
-            
-            <!-- Sections Grid -->
-            <div id="sectionsContainer" class="sections-container">
-                <div class="loading">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">جاري التحميل...</span>
-                    </div>
-                    <p>جاري تحميل الأقسام من قاعدة البيانات...</p>
-                    <small>يرجى الانتظار</small>
-                </div>
-            </div>
-        </div>
+        <p>جاري تحميل التطبيق...</p>
     </div>
 
-    <!-- Section Page (القنوات) -->
-    <div id="sectionPage">
-        <!-- Header -->
-        <header>
-            <div class="header-title">
-                <a href="#" class="text-box">
-                    <span id="sectionHeader">قنوات القسم</span>
-                </a>
-            </div>
+    <!-- المحتوى الرئيسي -->
+    <div id="contentWrapper">
+        <!-- Main Page (الأقسام) -->
+        <div id="mainPage">
+            <!-- Header -->
+            <header>
+                <div class="header-title">
+                    <a href="#" class="text-box">
+                        <span>وسيل لايف برو TV</span>
+                    </a>
+                </div>
+            </header>
             
-            <!-- Back Button -->
-            <a href="#" class="back-button" onclick="showPage('mainPage')">
-                <i class="uil uil-arrow-left"></i> العودة للأقسام
-            </a>
-        </header>
-        
-        <!-- Ticker -->
-        <div class="ticker-container">
-            <div class="ticker">
-                <span>تنويه هام</span>
-                <ul>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">قم بتحديث مشغل الفيديو الخاص بالتطبيق</a></li>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">من متجر جوجل بلاي لضمان</a></li>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">تشغيل القنوات وعدم التقطيع</a></li>
-                    <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">شكرا لكم متابعينا الكرام</a></li>
-                </ul>
-            </div>
-        </div>
-        
-        <!-- Main Content -->
-        <div class="content">
-            <h1 class="section-title" id="sectionName">قنوات القسم</h1>
-            <div class="section-description" id="sectionDescription">
-                جاري تحميل القنوات...
-            </div>
-            
-            <!-- Channels Grid -->
-            <div id="channelsContainer" class="channels-container">
-                <div class="loading">
-                    <div class="spinner-border text-primary mb-3" role="status">
-                        <span class="visually-hidden">جاري التحميل...</span>
+            <!-- Main Content -->
+            <div class="content">
+                <h1 class="page-title">أقسام القنوات المتاحة</h1>
+                <div class="welcome-message">
+                    في تطبيق وسيل لايف برو
+                </div>
+                
+                <!-- Sections Grid -->
+                <div id="sectionsContainer" class="sections-container">
+                    <div class="loading">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p>جاري تحميل الأقسام من قاعدة البيانات...</p>
+                        <small>يرجى الانتظار</small>
                     </div>
-                    <p>جاري تحميل القنوات...</p>
-                    <small>يرجى الانتظار</small>
                 </div>
             </div>
         </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="footer">
-        <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
-    </div>
-    
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <a href="javascript:void(0)" class="nav-item" onclick="openWithConnectionCheck('index.html')">
-            <i class="uil uil-home"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="javascript:void(0)" class="nav-item" onclick="openMatchesWithCheck()">
-            <i class="uil uil-calendar-alt"></i>
-            <span>جدول المباريات</span>
-        </a>
-        <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
-            <i class="uil uil-telegram-alt"></i>
-            <span>تليجرام</span>
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
-            <i class="uil uil-download-alt"></i>
-            <span>تحميل المشغل</span>
-        </a>
-    </div>
-    
-    <!-- Install Modal -->
-    <div id="installModal" class="modal">
-        <div class="modal-content">
-            <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
-            <div class="dont-show-container">
-                <input type="checkbox" id="dontShowAgain">
-                <label for="dontShowAgain" style="margin-right: 10px;">عدم الإظهار مرة أخرى</label>
+
+        <!-- Section Page (القنوات) -->
+        <div id="sectionPage">
+            <!-- Header -->
+            <header>
+                <div class="header-title">
+                    <a href="#" class="text-box">
+                        <span id="sectionHeader">قنوات القسم</span>
+                    </a>
+                </div>
+                
+                <!-- Back Button -->
+                <a href="#" class="back-button" onclick="showPage('mainPage')">
+                    <i class="uil uil-arrow-left"></i> العودة للأقسام
+                </a>
+            </header>
+            
+            <!-- Ticker -->
+            <div class="ticker-container">
+                <div class="ticker">
+                    <span>تنويه هام</span>
+                    <ul>
+                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">قم بتحديث مشغل الفيديو الخاص بالتطبيق</a></li>
+                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">من متجر جوجل بلاي لضمان</a></li>
+                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">تشغيل القنوات وعدم التقطيع</a></li>
+                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">شكرا لكم متابعينا الكرام</a></li>
+                    </ul>
+                </div>
             </div>
-            <div class="modal-buttons">
-                <button id="confirmInstall" class="modal-button">تحميل مشغل القنوات</button>
-                <button id="cancelInstall" class="modal-button cancel-button">الغاء التحميل</button>
+            
+            <!-- Main Content -->
+            <div class="content">
+                <h1 class="section-title" id="sectionName">قنوات القسم</h1>
+                <div class="section-description" id="sectionDescription">
+                    جاري تحميل القنوات...
+                </div>
+                
+                <!-- Channels Grid -->
+                <div id="channelsContainer" class="channels-container">
+                    <div class="loading">
+                        <div class="spinner-border text-primary mb-3" role="status">
+                            <span class="visually-hidden">جاري التحميل...</span>
+                        </div>
+                        <p>جاري تحميل القنوات...</p>
+                        <small>يرجى الانتظار</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Matches Page (جدول المباريات) -->
+        <div id="matchesPage">
+            <!-- Header -->
+            <header>
+                <div class="header-title">
+                    <a href="#" class="text-box">
+                        <span>وسيل لايف برو - جدول المباريات</span>
+                    </a>
+                </div>
+                
+                <!-- Back Button -->
+                <a href="#" class="back-button" onclick="showPage('mainPage')">
+                    <i class="uil uil-arrow-left"></i> العودة للأقسام
+                </a>
+            </header>
+            
+            <!-- Bottom Navigation -->
+            <div class="bottom-nav">
+                <a href="#" class="nav-item" onclick="showPage('mainPage')">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAnElEQVQ4T2NkYGBg+M+ABxMyAiK4Mzv/yzmYGBgY8Q/JwMDEwMDDf//8/8rJz5xw2iGzk4eH/4gYGBkZGRkYvYFjvH4GBgaGVkZGRQYGJgZGRkZGRhZlAI0DZ4ABsDR0DAwMCuRAbzExMDJ4I6Q4GkRkZFQA0Snhj/0/6nwsLCwsXyPn9ZkDgAAt7QXo/tkX0AAAAASUVORK5CYII=" alt="الرئيسية" style="width:30px; height:30px;">
+                    <span>الرئيسية</span>
+                </a>
+                <a href="#" class="nav-item" onclick="showPage('matchesPage'); loadMatches();">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAlUlEQVQ4T2NkYGBg+M+ABxMyAiK4Mzv/yzmYGBgY8Q/JwMDEwMDDf//8/8rJz5xw2iGzk4eH/4gYGBkZGRkYvYFjvH4GBgaGVkZGRQYGJgZGRkZGRhZlAI0DZ4ABsDR0DAwMCuRAbzExMDJ4I6Q4GkRkZFQA0Snhj/0/6nwsLCwsXyPn9ZkDgAAslQXo/tkX0AAAAASUVORK5CYII=" alt="جدول المباريات" style="width:30px; height:30px;">
+                    <span>جدول المباريات</span>
+                </a>
+                <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAUUlEQVQ4T2NkoBAwUqifgX4GBgYGBgYGBgYFj/AEG4YWdnZ2Zm5iYGJhYGBgZGBoZGBgYGBg+Mf///8PBBgYGBj4z6SAgYGhgkCJgYGRkZGBgZ2DiBxkZEZGBgZGHgZwAADn2CFc8Op0rAAAAAElFTkSuQmCC" alt="تليجرام" style="width:30px; height:30px;">
+                    <span>تليجرام</span>
+                </a>
+                <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
+                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAZ0lEQVQ4T2NkoBAwUqifgX4GBgYGBgYGBgYFj/AEG4YWdnZ2Zm5iYGJhYGBgZGBoZGBgYGBg+Mf///8PBBgYGBj4z6SAgYGhgkCJgYGRkZGBgZ2DiBxkZEZGBgZGHgZwAAAg4Bcf+8GfDUAAAAAElFTkSuQmCC" alt="تحميل المشغل" style="width:30px; height:30px;">
+                    <span>تحميل المشغل</span>
+                </a>
+            </div>
+
+            <!-- Matches Grid -->
+            <div id="matchesContainer" class="matches-container">
+                <div class="loading">
+                    <i class="uil uil-refresh"></i>
+                    جاري تحميل المباريات...
+                </div>
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer">
+            <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
+        </div>
+        
+        <!-- Bottom Navigation -->
+        <div class="bottom-nav">
+            <a href="#" class="nav-item" onclick="showPage('mainPage')">
+                <i class="uil uil-home"></i>
+                <span>الرئيسية</span>
+            </a>
+            <a href="#" class="nav-item" onclick="showPage('matchesPage'); loadMatches();">
+                <i class="uil uil-schedule"></i>
+                <span>جدول المباريات</span>
+            </a>
+            <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
+                <i class="uil uil-telegram-alt"></i>
+                <span>تليجرام</span>
+            </a>
+            <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
+                <i class="uil uil-import"></i>
+                <span>تحميل المشغل</span>
+            </a>
+        </div>
+        
+        <!-- Install Modal -->
+        <div id="installModal" class="modal">
+            <div class="modal-content">
+                <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
+                <div class="dont-show-container">
+                    <input type="checkbox" id="dontShowAgain">
+                    <label for="dontShowAgain" style="margin-right: 10px;">عدم الإظهار مرة أخرى</label>
+                </div>
+                <div class="modal-buttons">
+                    <button id="confirmInstall" class="modal-button">تحميل مشغل القنوات</button>
+                    <button id="cancelInstall" class="modal-button cancel-button">الغاء التحميل</button>
+                </div>
             </div>
         </div>
     </div>
@@ -1106,583 +196,11 @@
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
 
-    <script>
-        // Firebase configuration
-        const firebaseConfig = {
-            apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
-            authDomain: "bein-42f9e.firebaseapp.com",
-            projectId: "bein-42f9e",
-            storageBucket: "bein-42f9e.firebasestorage.app",
-            messagingSenderId: "143741167050",
-            appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
-            measurementId: "G-JH198SKCFS"
-        };
-
-        // Initialize Firebase
-        let app;
-        let db;
-        let firebaseInitialized = false;
-
-        // دالة للتحقق من الاتصال بالإنترنت
-        async function checkInternetConnection() {
-            return new Promise((resolve, reject) => {
-                if (!navigator.onLine) {
-                    reject(new Error("لا يوجد اتصال بالإنترنت"));
-                    return;
-                }
-
-                const img = new Image();
-                img.src = "https://www.google.com/images/phd/px.gif?t=" + new Date().getTime();
-                let timer = setTimeout(() => {
-                    reject(new Error("انتهت مهلة الاتصال بالإنترنت"));
-                }, 5000);
-
-                img.onload = () => {
-                    clearTimeout(timer);
-                    resolve(true);
-                };
-
-                img.onerror = () => {
-                    clearTimeout(timer);
-                    reject(new Error("فشل الاتصال بالإنترنت"));
-                };
-            });
-        }
-
-        // دالة لفتح الصفحات مع التحقق من الاتصال
-        async function openWithConnectionCheck(url) {
-            try {
-                // إظهار مؤشر تحميل
-                const overlay = document.createElement('div');
-                overlay.style.position = 'fixed';
-                overlay.style.top = '0';
-                overlay.style.left = '0';
-                overlay.style.width = '100%';
-                overlay.style.height = '100%';
-                overlay.style.backgroundColor = 'rgba(0,0,0,0.8)';
-                overlay.style.zIndex = '9999';
-                overlay.style.display = 'flex';
-                overlay.style.flexDirection = 'column';
-                overlay.style.justifyContent = 'center';
-                overlay.style.alignItems = 'center';
-                overlay.style.color = 'white';
-                overlay.style.fontSize = '18px';
-                overlay.style.textAlign = 'center';
-                overlay.style.backdropFilter = 'blur(5px)';
-                overlay.innerHTML = `
-                    <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;" role="status">
-                        <span class="visually-hidden">جاري التحقق...</span>
-                    </div>
-                    <p>جاري التحقق من الاتصال بالإنترنت...</p>
-                `;
-                document.body.appendChild(overlay);
-
-                await checkInternetConnection();
-                
-                // إزالة المؤشر
-                overlay.remove();
-                
-                // الانتقال للصفحة
-                window.location.href = url;
-                
-            } catch (error) {
-                // إزالة المؤشر إذا كان موجوداً
-                if (overlay && overlay.parentNode) {
-                    overlay.innerHTML = `
-                        <i class="uil uil-wifi-slash mb-3" style="font-size: 3rem; color: #ff6b6b;"></i>
-                        <h4>⚠️ لا يوجد اتصال بالإنترنت</h4>
-                        <p>${error.message || "يرجى التحقق من اتصالك بالإنترنت"}</p>
-                        <div class="mt-4">
-                            <button onclick="window.location.reload()" class="btn btn-primary me-2">
-                                <i class="uil uil-redo"></i> إعادة المحاولة
-                            </button>
-                            <button onclick="this.parentElement.parentElement.remove()" class="btn btn-secondary">
-                                <i class="uil uil-times"></i> إغلاق
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-        }
-
-        // دالة خاصة لفتح جدول المباريات
-        async function openMatchesWithCheck() {
-            await openWithConnectionCheck('matches.html');
-        }
-
-        // Initialize Firebase function
-        function initializeFirebase() {
-            return new Promise((resolve, reject) => {
-                try {
-                    console.log('🚀 جاري تهيئة Firebase...');
-                    
-                    // Check if Firebase is available
-                    if (typeof firebase === 'undefined') {
-                        throw new Error('Firebase SDK لم يتم تحميله');
-                    }
-
-                    // Initialize Firebase
-                    app = firebase.initializeApp(firebaseConfig);
-                    console.log('✅ تم تهيئة Firebase بنجاح');
-
-                    // Initialize Firestore
-                    db = firebase.firestore();
-                    console.log('✅ تم تهيئة Firestore بنجاح');
-
-                    firebaseInitialized = true;
-                    resolve({ app, db });
-                    
-                } catch (error) {
-                    console.error('❌ فشل تهيئة Firebase:', error);
-                    reject(error);
-                }
-            });
-        }
-
-        // تطبيق Bein Sport - الصفحة الرئيسية
-        class BeinSportApp {
-            constructor() {
-                this.sections = [];
-                this.channels = [];
-                this.currentSection = null;
-                this.init();
-            }
-
-            async init() {
-                console.log('🚀 بدء تشغيل تطبيق Bein Sport...');
-                
-                document.getElementById('currentYear').textContent = new Date().getFullYear();
-                this.setupEventListeners();
-                
-                try {
-                    // تهيئة Firebase أولاً
-                    await initializeFirebase();
-                    console.log('✅ Firebase جاهز للاستخدام');
-                    
-                    // تحميل البيانات
-                    await this.loadData();
-                    
-                    console.log('✅ تم تهيئة التطبيق بنجاح');
-                } catch (error) {
-                    console.error('❌ فشل تهيئة التطبيق:', error);
-                    this.showErrorState('فشل في الاتصال بقاعدة البيانات. جاري استخدام البيانات المحلية...');
-                    await this.loadFromLocalStorage();
-                }
-            }
-
-            async loadData() {
-                console.log('📥 جاري تحميل البيانات...');
-                
-                try {
-                    // التحقق من الاتصال أولاً
-                    try {
-                        await checkInternetConnection();
-                    } catch (error) {
-                        this.showErrorState('لا يمكن تحميل البيانات بسبب عدم وجود اتصال بالإنترنت. يرجى التحقق من الاتصال وإعادة المحاولة.');
-                        return;
-                    }
-                    
-                    // محاولة التحميل من Firebase أولاً
-                    const firebaseLoaded = await this.loadFromFirebase();
-                    
-                    if (firebaseLoaded) {
-                        console.log('✅ تم تحميل البيانات من Firebase');
-                        this.renderData();
-                    } else {
-                        // إذا فشل Firebase، استخدم التخزين المحلي
-                        console.log('💾 تحميل البيانات من التخزين المحلي...');
-                        await this.loadFromLocalStorage();
-                        this.renderData();
-                    }
-                } catch (error) {
-                    console.error('❌ خطأ في تحميل البيانات:', error);
-                    await this.loadFromLocalStorage();
-                    this.renderData();
-                }
-            }
-
-            async loadFromFirebase() {
-                if (!db) {
-                    console.error('❌ Firestore غير مهيأ');
-                    return false;
-                }
-
-                try {
-                    console.log('📡 جاري جلب البيانات من Firebase...');
-                    
-                    // تحميل الأقسام - بدون شرط isActive أولاً
-                    let sectionsSnapshot;
-                    try {
-                        sectionsSnapshot = await db.collection('sections')
-                            .orderBy('order')
-                            .get();
-                    } catch (error) {
-                        console.warn('⚠️ فشل في ترتيب الأقسام، جاري جلب بدون ترتيب:', error);
-                        sectionsSnapshot = await db.collection('sections').get();
-                    }
-
-                    if (sectionsSnapshot.empty) {
-                        console.log('ℹ️ لا توجد أقسام في Firebase');
-                        return false;
-                    }
-
-                    this.sections = sectionsSnapshot.docs.map(doc => ({
-                        id: doc.id,
-                        ...doc.data()
-                    }));
-                    
-                    console.log(`✅ تم تحميل ${this.sections.length} قسم من Firebase`);
-                    console.log('تفاصيل الأقسام:', this.sections);
-                    
-                    // تحميل القنوات
-                    const channelsSnapshot = await db.collection('channels').get();
-                    if (!channelsSnapshot.empty) {
-                        this.channels = channelsSnapshot.docs.map(doc => ({
-                            id: doc.id,
-                            ...doc.data()
-                        }));
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
-                    }
-                    
-                    // حفظ في localStorage للاستخدام المستقبلي
-                    this.saveToLocalStorage();
-                    
-                    return true;
-
-                } catch (error) {
-                    console.error('❌ خطأ في تحميل البيانات من Firebase:', error);
-                    return false;
-                }
-            }
-
-            async loadFromLocalStorage() {
-                try {
-                    const savedSections = localStorage.getItem('bein_sections');
-                    const savedChannels = localStorage.getItem('bein_channels');
-                    
-                    if (savedSections) {
-                        this.sections = JSON.parse(savedSections);
-                        console.log(`✅ تم تحميل ${this.sections.length} قسم من localStorage`);
-                    }
-                    
-                    if (savedChannels) {
-                        this.channels = JSON.parse(savedChannels);
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
-                    }
-                    
-                    if (this.sections.length === 0) {
-                        this.loadDefaultData();
-                    }
-                } catch (error) {
-                    console.error('❌ خطأ في تحميل البيانات المحلية:', error);
-                    this.loadDefaultData();
-                }
-            }
-
-            showErrorState(message) {
-                const container = document.getElementById('sectionsContainer');
-                if (container) {
-                    container.innerHTML = `
-                        <div class="loading">
-                            <i class="uil uil-exclamation-triangle text-warning mb-3" style="font-size: 3rem;"></i>
-                            <p>${message}</p>
-                            <button class="btn btn-primary mt-2" onclick="app.retryLoadData()">
-                                <i class="uil uil-redo"></i> إعادة المحاولة
-                            </button>
-                        </div>
-                    `;
-                }
-            }
-
-            renderData() {
-                this.renderSections();
-            }
-
-            getActiveSections() {
-                // عرض جميع الأقسام بغض النظر عن حالة isActive
-                return this.sections
-                    .sort((a, b) => (a.order || 1) - (b.order || 1));
-            }
-
-            renderSections() {
-                const container = document.getElementById('sectionsContainer');
-                if (!container) {
-                    console.error('❌ حاوية الأقسام غير موجودة');
-                    return;
-                }
-
-                const activeSections = this.getActiveSections();
-                
-                if (activeSections.length === 0) {
-                    this.showErrorState('لا توجد أقسام متاحة حالياً');
-                    return;
-                }
-
-                console.log(`🎯 عرض ${activeSections.length} قسم في الواجهة`);
-                
-                // عرض الأقسام كبطاقات مع روابط فردية لكل قسم
-                container.innerHTML = `
-                    <div class="sections-grid">
-                        ${activeSections.map(section => {
-                            const channelCount = this.getChannelsCount(section.id);
-                            const sectionLink = `section.html?id=${section.id}`;
-                            
-                            return `
-                                <a href="javascript:void(0)" class="section-card" data-section-id="${section.id}" onclick="openWithConnectionCheck('${sectionLink}')">
-                                    <div class="section-card-link">
-                                        ${section.image ? `
-                                            <div class="section-image">
-                                                <img src="${section.image}" alt="${section.name}" 
-                                                     onerror="this.src='https://via.placeholder.com/200x150/2F2562/FFFFFF?text=No+Image'">
-                                            </div>
-                                        ` : `
-                                            <div class="section-icon">
-                                                <i class="uil uil-folder"></i>
-                                            </div>
-                                        `}
-                                        <div class="section-name">${section.name}</div>
-                                        ${section.description ? `<div class="section-description-card">${section.description}</div>` : ''}
-                                        <div class="section-badge">${channelCount} قناة</div>
-                                    </div>
-                                </a>
-                            `;
-                        }).join('')}
-                    </div>
-                `;
-            }
-
-            // دالة جديدة: الحصول على عدد القنوات في القسم
-            getChannelsCount(sectionId) {
-                return this.channels.filter(channel => channel.sectionId === sectionId).length;
-            }
-
-            showSection(sectionId) {
-                console.log('📂 محاولة عرض القسم:', sectionId);
-                
-                const section = this.sections.find(s => s.id === sectionId);
-                if (!section) {
-                    console.error('❌ القسم غير موجود:', sectionId);
-                    return;
-                }
-
-                this.currentSection = section;
-                
-                // تحديث واجهة قسم القنوات
-                document.getElementById('sectionHeader').textContent = section.name;
-                document.getElementById('sectionName').textContent = section.name;
-                document.getElementById('sectionDescription').textContent = section.description || 'استمتع بمشاهدة القنوات المتاحة في هذا القسم';
-                
-                // عرض القنوات
-                this.renderSectionChannels(sectionId);
-                
-                // الانتقال لصفحة القسم
-                showPage('sectionPage');
-            }
-
-            renderSectionChannels(sectionId) {
-                const container = document.getElementById('channelsContainer');
-                if (!container) {
-                    console.error('❌ حاوية القنوات غير موجودة');
-                    return;
-                }
-
-                const sectionChannels = this.channels
-                    .filter(channel => channel.sectionId === sectionId)
-                    .sort((a, b) => (a.order || 1) - (b.order || 1));
-
-                console.log(`📺 عرض ${sectionChannels.length} قناة في قسم ${sectionId}`);
-
-                if (sectionChannels.length === 0) {
-                    container.innerHTML = '<div class="loading">لا توجد قنوات في هذا القسم</div>';
-                    return;
-                }
-
-                container.innerHTML = sectionChannels.map(channel => `
-                    <div class="channel-card" data-channel-id="${channel.id}">
-                        <div class="channel-logo">
-                            <img src="${channel.image || 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'}" 
-                                 alt="${channel.name}"
-                                 onerror="this.src='https://via.placeholder.com/200x100/2F2562/FFFFFF?text=No+Image'">
-                        </div>
-                        <div class="channel-name">${channel.name}</div>
-                    </div>
-                `).join('');
-
-                this.setupChannelEventListeners(sectionChannels);
-            }
-
-            setupChannelEventListeners(sectionChannels) {
-                document.querySelectorAll('.channel-card').forEach(card => {
-                    card.addEventListener('click', (e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        
-                        const channelId = card.getAttribute('data-channel-id');
-                        const channel = sectionChannels.find(c => c.id === channelId);
-                        if (channel) {
-                            console.log('🔗 فتح القناة:', channel.name);
-                            this.openChannel(channel);
-                        }
-                    });
-                });
-            }
-
-            openChannel(channel) {
-                if (channel.url && channel.url !== '#' && channel.url.trim() !== '') {
-                    try {
-                        window.open(channel.url, '_blank');
-                    } catch (error) {
-                        console.error('❌ خطأ في فتح الرابط:', error);
-                        this.showInstallModal(channel);
-                    }
-                } else {
-                    this.showInstallModal(channel);
-                }
-            }
-
-            showInstallModal(channel) {
-                const modal = document.getElementById('installModal');
-                if (modal) {
-                    modal.style.display = "block";
-                    const confirmBtn = document.getElementById('confirmInstall');
-                    if (confirmBtn) {
-                        confirmBtn.onclick = () => {
-                            const downloadUrl = channel.downloadUrl || channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
-                            window.open(downloadUrl, '_blank');
-                            this.closeModal();
-                        };
-                    }
-                }
-            }
-
-            closeModal() {
-                const modal = document.getElementById('installModal');
-                if (modal) modal.style.display = "none";
-            }
-
-            setupEventListeners() {
-                console.log('🔧 إعداد مستمعي الأحداث...');
-
-                window.addEventListener('click', (event) => {
-                    if (event.target === document.getElementById('installModal')) {
-                        this.closeModal();
-                    }
-                });
-
-                const confirmInstall = document.getElementById('confirmInstall');
-                if (confirmInstall) {
-                    confirmInstall.addEventListener('click', () => {
-                        window.open('https://play.google.com/store/apps/details?id=com.xpola.player', '_blank');
-                        this.closeModal();
-                    });
-                }
-
-                const cancelInstall = document.getElementById('cancelInstall');
-                if (cancelInstall) {
-                    cancelInstall.addEventListener('click', () => {
-                        this.closeModal();
-                    });
-                }
-            }
-
-            saveToLocalStorage() {
-                try {
-                    localStorage.setItem('bein_sections', JSON.stringify(this.sections));
-                    localStorage.setItem('bein_channels', JSON.stringify(this.channels));
-                    console.log('💾 تم حفظ البيانات في التخزين المحلي');
-                } catch (error) {
-                    console.error('❌ خطأ في حفظ البيانات محلياً:', error);
-                }
-            }
-
-            loadDefaultData() {
-                console.log('📋 استخدام البيانات الافتراضية...');
-                
-                this.sections = [{
-                    id: 'default-1',
-                    name: 'قنوات بي إن سبورت',
-                    order: 1,
-                    isActive: true,
-                    description: 'جميع قنوات بي إن سبورت الرياضية',
-                    image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=BEIN+SPORT'
-                }, {
-                    id: 'default-2', 
-                    name: 'القنوات الرياضية',
-                    order: 2,
-                    isActive: true,
-                    description: 'أفضل القنوات الرياضية',
-                    image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=SPORTS'
-                }];
-                
-                this.channels = [
-                    {
-                        id: 'default-1',
-                        name: 'bein sport 1',
-                        image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+1',
-                        url: '#',
-                        appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                        downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                        order: 1,
-                        sectionId: 'default-1'
-                    },
-                    {
-                        id: 'default-2',
-                        name: 'bein sport 2', 
-                        image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+2',
-                        url: '#',
-                        appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                        downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                        order: 2,
-                        sectionId: 'default-1'
-                    }
-                ];
-                
-                this.saveToLocalStorage();
-            }
-
-            async retryLoadData() {
-                console.log('🔄 إعادة محاولة تحميل البيانات...');
-                await this.loadData();
-            }
-        }
-
-        // Global Functions
-        function showPage(pageId) {
-            // إخفاء جميع الصفحات
-            document.getElementById('mainPage').style.display = 'none';
-            document.getElementById('sectionPage').style.display = 'none';
-            
-            // إظهار الصفحة المطلوبة
-            document.getElementById(pageId).style.display = 'block';
-        }
-
-        // بدء التطبيق
-        document.addEventListener('DOMContentLoaded', () => {
-            console.log('🏠 تهيئة التطبيق...');
-            window.app = new BeinSportApp();
-        });
-
-
-// Auto-check for new notifications
-setInterval(() => {
-    if (window.notificationSystem) {
-        window.notificationSystem.checkForNewNotifications();
-    }
-}, 60000); // Check every minute
-
-// Show notifications modal on first visit
-let firstVisit = localStorage.getItem('firstVisit');
-if (!firstVisit) {
-    localStorage.setItem('firstVisit', 'true');
-    // Show notifications after 3 seconds
-    setTimeout(() => {
-        if (window.notificationSystem) {
-            window.notificationSystem.showNotificationsModal();
-        }
-    }, 3000);
-}
-        
-    </script>
+    <!-- Custom JS -->
+    <script src="js/protection.js"></script>
+    <script src="js/firebase-config.js"></script>
+    <script src="js/app.js"></script>
 </body>
 </html>
