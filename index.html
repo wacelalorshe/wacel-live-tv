@@ -67,18 +67,38 @@
         </a>
     </div>
     
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK (يجب أن يكون أولاً) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
 
     <!-- Bootstrap JS -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
     
-    <!-- Custom JS -->
+    <!-- Firebase Configuration (يجب أن يكون قبل أي ملف يستخدم Firebase) -->
     <script src="js/firebase-config.js"></script>
+    
+    <!-- Main App (يجب أن يكون قبل notifications) -->
     <script src="js/main.js"></script>
     
-    <!-- نظام الإشعارات -->
+    <!-- Notifications System (يجب أن يكون آخراً) -->
     <script src="js/notifications.js"></script>
+    
+    <!-- Debug Script -->
+    <script>
+        // إضافة بعض رسائل التصحيح
+        console.log('🏠 الصفحة الرئيسية محملة');
+        
+        // التحقق من أن الإشعارات محملة بعد 3 ثوان
+        setTimeout(() => {
+            console.log('🔍 فحص نظام الإشعارات:');
+            console.log('- نظام الإشعارات:', window.notificationSystem ? 'موجود' : 'غير موجود');
+            
+            if (window.notificationSystem) {
+                console.log('- عدد الإشعارات:', window.notificationSystem.notifications.length);
+                console.log('- Firebase متاح:', window.notificationSystem.firestoreAvailable);
+                console.log('- الإشعارات:', window.notificationSystem.notifications);
+            }
+        }, 3000);
+    </script>
 </body>
 </html>
