@@ -2,205 +2,125 @@
 <html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aseel TV - قنوات بي إن سبورت</title>
-    
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Amita">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/responsive.css">
+    <title>موقع الأقسام المتعددة</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <!-- شاشة التحميل -->
-    <div id="loadingScreen">
-        <div class="spinner-border text-primary mb-3" role="status">
-            <span class="visually-hidden">جاري التحميل...</span>
-        </div>
-        <p>جاري تحميل التطبيق...</p>
-    </div>
-
-    <!-- المحتوى الرئيسي -->
-    <div id="contentWrapper">
-        <!-- Main Page (الأقسام) -->
-        <div id="mainPage">
-            <!-- Header -->
-            <header>
-                <div class="header-title">
-                    <a href="#" class="text-box">
-                        <span>وسيل لايف برو TV</span>
-                    </a>
-                </div>
-            </header>
-            
-            <!-- Main Content -->
-            <div class="content">
-                <h1 class="page-title">أقسام القنوات المتاحة</h1>
-                <div class="welcome-message">
-                    في تطبيق وسيل لايف برو
-                </div>
-                
-                <!-- Sections Grid -->
-                <div id="sectionsContainer" class="sections-container">
-                    <div class="loading">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">جاري التحميل...</span>
-                        </div>
-                        <p>جاري تحميل الأقسام من قاعدة البيانات...</p>
-                        <small>يرجى الانتظار</small>
-                    </div>
-                </div>
+    <!-- شريط التنقل العلوي -->
+    <nav class="navbar">
+        <div class="nav-container">
+            <div class="logo">
+                <i class="fas fa-layer-group"></i>
+                <span>موقع الأقسام</span>
+            </div>
+            <ul class="nav-menu">
+                <li><a href="index.html" class="active"><i class="fas fa-home"></i> الرئيسية</a></li>
+                <li><a href="section1.html"><i class="fas fa-book"></i> القسم الأول</a></li>
+                <li><a href="section2.html"><i class="fas fa-chart-bar"></i> القسم الثاني</a></li>
+                <li><a href="section3.html"><i class="fas fa-image"></i> القسم الثالث</a></li>
+                <li><a href="section4.html"><i class="fas fa-users"></i> القسم الرابع</a></li>
+                <li><a href="section5.html"><i class="fas fa-cogs"></i> القسم الخامس</a></li>
+            </ul>
+            <div class="hamburger">
+                <span class="bar"></span>
+                <span class="bar"></span>
+                <span class="bar"></span>
             </div>
         </div>
+    </nav>
 
-        <!-- Section Page (القنوات) -->
-        <div id="sectionPage">
-            <!-- Header -->
-            <header>
-                <div class="header-title">
-                    <a href="#" class="text-box">
-                        <span id="sectionHeader">قنوات القسم</span>
-                    </a>
-                </div>
-                
-                <!-- Back Button -->
-                <a href="#" class="back-button" onclick="showPage('mainPage')">
-                    <i class="uil uil-arrow-left"></i> العودة للأقسام
-                </a>
-            </header>
-            
-            <!-- Ticker -->
-            <div class="ticker-container">
-                <div class="ticker">
-                    <span>تنويه هام</span>
-                    <ul>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">قم بتحديث مشغل الفيديو الخاص بالتطبيق</a></li>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">من متجر جوجل بلاي لضمان</a></li>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">تشغيل القنوات وعدم التقطيع</a></li>
-                        <li><a href="https://play.google.com/store/apps/details?id=com.xpola.player" target="_blank">شكرا لكم متابعينا الكرام</a></li>
-                    </ul>
-                </div>
-            </div>
-            
-            <!-- Main Content -->
-            <div class="content">
-                <h1 class="section-title" id="sectionName">قنوات القسم</h1>
-                <div class="section-description" id="sectionDescription">
-                    جاري تحميل القنوات...
-                </div>
-                
-                <!-- Channels Grid -->
-                <div id="channelsContainer" class="channels-container">
-                    <div class="loading">
-                        <div class="spinner-border text-primary mb-3" role="status">
-                            <span class="visually-hidden">جاري التحميل...</span>
-                        </div>
-                        <p>جاري تحميل القنوات...</p>
-                        <small>يرجى الانتظار</small>
-                    </div>
-                </div>
-            </div>
+    <!-- محتوى الصفحة الرئيسية -->
+    <header class="hero">
+        <div class="hero-content">
+            <h1>مرحباً بكم في موقع الأقسام</h1>
+            <p>يحتوي هذا الموقع على أقسام متعددة، كل قسم يفتح في صفحة منفصلة مع رابط خاص به</p>
+            <a href="#sections" class="cta-button">استعرض الأقسام</a>
         </div>
+    </header>
 
-        <!-- Matches Page (جدول المباريات) -->
-        <div id="matchesPage">
-            <!-- Header -->
-            <header>
-                <div class="header-title">
-                    <a href="#" class="text-box">
-                        <span>وسيل لايف برو - جدول المباريات</span>
-                    </a>
-                </div>
-                
-                <!-- Back Button -->
-                <a href="#" class="back-button" onclick="showPage('mainPage')">
-                    <i class="uil uil-arrow-left"></i> العودة للأقسام
-                </a>
-            </header>
-            
-            <!-- Bottom Navigation -->
-            <div class="bottom-nav">
-                <a href="#" class="nav-item" onclick="showPage('mainPage')">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAnElEQVQ4T2NkYGBg+M+ABxMyAiK4Mzv/yzmYGBgY8Q/JwMDEwMDDf//8/8rJz5xw2iGzk4eH/4gYGBkZGRkYvYFjvH4GBgaGVkZGRQYGJgZGRkZGRhZlAI0DZ4ABsDR0DAwMCuRAbzExMDJ4I6Q4GkRkZFQA0Snhj/0/6nwsLCwsXyPn9ZkDgAAt7QXo/tkX0AAAAASUVORK5CYII=" alt="الرئيسية" style="width:30px; height:30px;">
-                    <span>الرئيسية</span>
-                </a>
-                <a href="#" class="nav-item" onclick="showPage('matchesPage'); loadMatches();">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAA7EAAAOxAGVKw4bAAAAlUlEQVQ4T2NkYGBg+M+ABxMyAiK4Mzv/yzmYGBgY8Q/JwMDEwMDDf//8/8rJz5xw2iGzk4eH/4gYGBkZGRkYvYFjvH4GBgaGVkZGRQYGJgZGRkZGRhZlAI0DZ4ABsDR0DAwMCuRAbzExMDJ4I6Q4GkRkZFQA0Snhj/0/6nwsLCwsXyPn9ZkDgAAslQXo/tkX0AAAAASUVORK5CYII=" alt="جدول المباريات" style="width:30px; height:30px;">
-                    <span>جدول المباريات</span>
-                </a>
-                <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAUUlEQVQ4T2NkoBAwUqifgX4GBgYGBgYGBgYFj/AEG4YWdnZ2Zm5iYGJhYGBgZGBoZGBgYGBg+Mf///8PBBgYGBj4z6SAgYGhgkCJgYGRkZGBgZ2DiBxkZEZGBgZGHgZwAADn2CFc8Op0rAAAAAElFTkSuQmCC" alt="تليجرام" style="width:30px; height:30px;">
-                    <span>تليجرام</span>
-                </a>
-                <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
-                    <img src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAB4AAAASCAYAAAB0Y3bPAAAACXBIWXMAAAsTAAALEwEAmpwYAAAAZ0lEQVQ4T2NkoBAwUqifgX4GBgYGBgYGBgYFj/AEG4YWdnZ2Zm5iYGJhYGBgZGBoZGBgYGBg+Mf///8PBBgYGBj4z6SAgYGhgkCJgYGRkZGBgZ2DiBxkZEZGBgZGHgZwAAAg4Bcf+8GfDUAAAAAElFTkSuQmCC" alt="تحميل المشغل" style="width:30px; height:30px;">
-                    <span>تحميل المشغل</span>
-                </a>
-            </div>
-
-            <!-- Matches Grid -->
-            <div id="matchesContainer" class="matches-container">
-                <div class="loading">
-                    <i class="uil uil-refresh"></i>
-                    جاري تحميل المباريات...
-                </div>
-            </div>
-        </div>
+    <!-- قسم عرض الأقسام -->
+    <main class="container" id="sections">
+        <h2 class="section-title">أقسام الموقع</h2>
+        <p class="section-subtitle">انقر على أي قسم لفتحه في صفحة جديدة</p>
         
-        <!-- Footer -->
-        <div class="footer">
-            <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> Aseel TV</p>
-        </div>
-        
-        <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <a href="#" class="nav-item" onclick="showPage('mainPage')">
-                <i class="uil uil-home"></i>
-                <span>الرئيسية</span>
-            </a>
-            <a href="#" class="nav-item" onclick="showPage('matchesPage'); loadMatches();">
-                <i class="uil uil-schedule"></i>
-                <span>جدول المباريات</span>
-            </a>
-            <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
-                <i class="uil uil-telegram-alt"></i>
-                <span>تليجرام</span>
-            </a>
-            <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
-                <i class="uil uil-import"></i>
-                <span>تحميل المشغل</span>
-            </a>
-        </div>
-        
-        <!-- Install Modal -->
-        <div id="installModal" class="modal">
-            <div class="modal-content">
-                <p>لمشاهدة القنوات يجب عليك أولاً تثبيت تطبيق مشغل القنوات الخاص بالتطبيق</p>
-                <div class="dont-show-container">
-                    <input type="checkbox" id="dontShowAgain">
-                    <label for="dontShowAgain" style="margin-right: 10px;">عدم الإظهار مرة أخرى</label>
+        <div class="sections-grid">
+            <!-- قسم 1 -->
+            <div class="section-card" data-section="1">
+                <div class="section-icon">
+                    <i class="fas fa-book"></i>
                 </div>
-                <div class="modal-buttons">
-                    <button id="confirmInstall" class="modal-button">تحميل مشغل القنوات</button>
-                    <button id="cancelInstall" class="modal-button cancel-button">الغاء التحميل</button>
+                <h3>القسم الأول</h3>
+                <p>محتوى تعريفي عن القسم الأول وأهميته وما يحتويه من معلومات مفيدة.</p>
+                <a href="section1.html" class="section-link" target="_blank">فتح القسم</a>
+            </div>
+            
+            <!-- قسم 2 -->
+            <div class="section-card" data-section="2">
+                <div class="section-icon">
+                    <i class="fas fa-chart-bar"></i>
                 </div>
+                <h3>القسم الثاني</h3>
+                <p>تحليلات وإحصائيات وأدوات تفاعلية لعرض البيانات بطريقة مرئية.</p>
+                <a href="section2.html" class="section-link" target="_blank">فتح القسم</a>
+            </div>
+            
+            <!-- قسم 3 -->
+            <div class="section-card" data-section="3">
+                <div class="section-icon">
+                    <i class="fas fa-image"></i>
+                </div>
+                <h3>القسم الثالث</h3>
+                <p>معرض للصور والفيديوهات مع إمكانية التصفح والتفاعل مع الوسائط.</p>
+                <a href="section3.html" class="section-link" target="_blank">فتح القسم</a>
+            </div>
+            
+            <!-- قسم 4 -->
+            <div class="section-card" data-section="4">
+                <div class="section-icon">
+                    <i class="fas fa-users"></i>
+                </div>
+                <h3>القسم الرابع</h3>
+                <p>مجتمع تفاعلي للمناقشات وتبادل الخبرات بين المستخدمين.</p>
+                <a href="section4.html" class="section-link" target="_blank">فتح القسم</a>
+            </div>
+            
+            <!-- قسم 5 -->
+            <div class="section-card" data-section="5">
+                <div class="section-icon">
+                    <i class="fas fa-cogs"></i>
+                </div>
+                <h3>القسم الخامس</h3>
+                <p>إعدادات وأدوات متقدمة لتخصيص تجربة المستخدم حسب احتياجاته.</p>
+                <a href="section5.html" class="section-link" target="_blank">فتح القسم</a>
+            </div>
+            
+            <!-- قسم 6 -->
+            <div class="section-card" data-section="6">
+                <div class="section-icon">
+                    <i class="fas fa-question-circle"></i>
+                </div>
+                <h3>القسم السادس</h3>
+                <p>الدعم الفني والمساعدة والإجابة على الأسئلة الشائعة للمستخدمين.</p>
+                <a href="section6.html" class="section-link" target="_blank">فتح القسم</a>
             </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- تذييل الصفحة -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-logo">
+                <i class="fas fa-layer-group"></i>
+                <span>موقع الأقسام</span>
+            </div>
+            <p>جميع الحقوق محفوظة &copy; <span id="currentYear"></span></p>
+            <p class="footer-note">تم تصميم هذا الموقع لعرض الأقسام في صفحات منفصلة مع روابط خاصة بكل قسم</p>
+        </div>
+    </footer>
 
-    <!-- Custom JS -->
-    <script src="js/protection.js"></script>
-    <script src="js/firebase-config.js"></script>
-    <script src="js/app.js"></script>
+    <script src="script.js"></script>
 </body>
 </html>
