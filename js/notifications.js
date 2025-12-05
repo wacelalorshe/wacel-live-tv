@@ -9,8 +9,22 @@ class NotificationSystem {
     }
 
     async init() {
-        console.log('🔔 بدء تشغيل نظام الإشعارات...');
-        
+    console.log('🔔 بدء تشغيل نظام الإشعارات...');
+    console.log('📍 عنوان الصفحة:', window.location.href);
+    console.log('📍 الوقت:', new Date().toLocaleString());
+    
+    // التحقق من أننا في الصفحة الرئيسية
+    const isHomePage = window.location.pathname === '/' || 
+                      window.location.pathname === '/index.html' || 
+                      window.location.pathname.endsWith('/index.html');
+    
+    if (!isHomePage) {
+        console.log('⚠️ نحن لسنا في الصفحة الرئيسية، تخطي تهيئة الإشعارات');
+        return;
+    }
+    
+    // ... باقي الكود
+}
         try {
             // 1. إعداد واجهة المستخدم
             this.setupUI();
