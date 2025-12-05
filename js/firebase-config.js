@@ -1,10 +1,6 @@
-// ===========================================
-// تهيئة Firebase - إصدار مصحح
-// ===========================================
-
-// إعدادات Firebase مباشرة (للاختبار)
+// Firebase configuration للصفحة الرئيسية
 const firebaseConfig = {
-    apiKey: "AIzaSyAKgEiYYlmpMe0NLewulheovlTQMzVC7980",
+    apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
     authDomain: "bein-42f9e.firebaseapp.com",
     projectId: "bein-42f9e",
     storageBucket: "bein-42f9e.firebasestorage.app",
@@ -13,161 +9,228 @@ const firebaseConfig = {
     measurementId: "G-JH198SKCFS"
 };
 
-const matchesFirebaseConfig = {
-    apiKey: "AIzaSyCqE7ZwveHg1dIhYf1Hlo7OpHyCZudeZvM",
-    authDomain: "wacel-live.firebaseapp.com",
-    databaseURL: "https://wacel-live-default-rtdb.asia-southeast1.firebasedatabase.app",
-    projectId: "wacel-live",
-    storageBucket: "wacel-live.firebasestorage.app",
-    messagingSenderId: "185108554006",
-    appId: "1:185108554006:web:93171895b1d4bb07c6f037"
-};
+// Global Firebase variables
+let firebaseApp = null;
+let db = null;
+let firebaseInitialized = false;
 
-// تهيئة Firebase بشكل مباشر
-function initializeFirebaseDirect() {
+// Initialize Firebase function
+async function initializeFirebase() {
     return new Promise((resolve, reject) => {
         try {
-            console.log('🚀 تهيئة Firebase مباشرة...');
+            console.log('🚀 جاري تهيئة Firebase...');
             
-            // التحقق من وجود Firebase
+            // Check if Firebase is available
             if (typeof firebase === 'undefined') {
-                throw new Error('Firebase SDK غير محمل');
+                throw new Error('Firebase SDK لم يتم تحميله');
             }
-            
-            // Initialize Apps
-            let app, matchesApp;
-            
-            try {
-                app = firebase.initializeApp(firebaseConfig);
-                console.log('✅ تم تهيئة Firebase الرئيسي');
-            } catch (error) {
-                if (error.code === 'app/duplicate-app') {
-                    console.log('⚠️ تطبيق Firebase مهيأ بالفعل');
-                    app = firebase.app();
-                } else {
-                    throw error;
-                }
+
+            // Check if Firebase is already initialized
+            if (!firebase.apps.length) {
+                firebaseApp = firebase.initializeApp(firebaseConfig);
+                console.log('✅ تم تهيئة Firebase بنجاح');
+            } else {
+                firebaseApp = firebase.apps[0];
+                console.log('✅ Firebase مهيأ مسبقاً');
             }
-            
-            try {
-                matchesApp = firebase.initializeApp(matchesFirebaseConfig, 'matchesApp');
-                console.log('✅ تم تهيئة تطبيق المباريات');
-            } catch (error) {
-                if (error.code === 'app/duplicate-app') {
-                    console.log('⚠️ تطبيق المباريات مهيأ بالفعل');
-                    matchesApp = firebase.app('matchesApp');
-                } else {
-                    throw error;
-                }
-            }
-            
-            // الحصول على خدمات Firebase
-            const db = firebase.firestore(app);
-            const matchesDb = firebase.database(matchesApp);
-            
-            // اختبار الاتصال
-            testFirestoreConnection(db).then(success => {
-                if (success) {
-                    console.log('✅ اتصال Firestore ناجح');
-                    
-                    // حفظ المتغيرات العامة
-                    window.firebaseApp = app;
-                    window.db = db;
-                    window.matchesDb = matchesDb;
-                    
-                    resolve({ app, db, matchesApp, matchesDb });
-                } else {
-                    reject(new Error('فشل اختبار اتصال Firestore'));
-                }
-            }).catch(err => {
-                reject(err);
-            });
+
+            // Initialize Firestore
+            db = firebase.firestore();
+            console.log('✅ تم تهيئة Firestore بنجاح');
+
+            firebaseInitialized = true;
+            resolve({ app: firebaseApp, db: db });
             
         } catch (error) {
-            console.error('❌ خطأ في تهيئة Firebase:', error);
+            console.error('❌ فشل تهيئة Firebase:', error);
             reject(error);
         }
     });
 }
 
-// اختبار اتصال Firestore
-async function testFirestoreConnection(db) {
+// Test Firebase connection
+async function testFirebaseConnection() {
     try {
-        console.log('🧪 اختبار اتصال Firestore...');
+        if (!db) {
+            await initializeFirebase();
+        }
         
-        // محاولة قراءة مجموعة test
-        const testCollection = db.collection('test');
-        const snapshot = await testCollection.limit(1).get();
+        const testDoc = db.collection('test_connection').doc('test');
+        await testDoc.set({ 
+            test: true, 
+            timestamp: new Date(),
+            message: 'Testing Firestore connection'
+        });
         
-        console.log('✅ اتصال Firestore يعمل');
+        await testDoc.delete();
+        
+        console.log('✅ اختبار اتصال Firebase ناجح');
         return true;
     } catch (error) {
-        console.warn('⚠️ تحذير اتصال Firestore:', error.code, error.message);
-        
-        // قد يكون السبب عدم وجود مجموعة test، لكن هذا لا يعني أن الاتصال فاشل
-        if (error.code === 'permission-denied') {
-            console.log('🔓 تحتاج إلى تعديل قواعد Firestore');
-            return false;
-        } else if (error.code === 'failed-precondition') {
-            console.log('🔧 Firestore غير مفعل لهذا المشروع');
-            return false;
-        } else {
-            // محاولة أخرى - جلب الأقسام مباشرة
-            try {
-                const sectionsSnapshot = await db.collection('sections').limit(1).get();
-                console.log('✅ يمكن الوصول إلى بيانات الأقسام');
-                return true;
-            } catch (secondError) {
-                console.error('❌ فشل الوصول إلى البيانات:', secondError);
-                return false;
-            }
-        }
+        console.error('❌ فشل اختبار اتصال Firebase:', error);
+        return false;
     }
 }
 
-// تهيئة Firebase مع إعادة المحاولة
-function initializeFirebaseWithRetry() {
-    return new Promise((resolve, reject) => {
-        const maxRetries = 3;
-        let retries = 0;
-        
-        function attempt() {
-            console.log(`🔄 محاولة الاتصال بـ Firebase (${retries + 1}/${maxRetries})`);
-            
-            initializeFirebaseDirect()
-                .then(result => resolve(result))
-                .catch(error => {
-                    retries++;
-                    
-                    if (retries < maxRetries) {
-                        console.log(`⏳ إعادة المحاولة بعد 2 ثواني...`);
-                        setTimeout(attempt, 2000);
-                    } else {
-                        reject(new Error(`فشل جميع محاولات الاتصال بـ Firebase: ${error.message}`));
-                    }
-                });
+// Load data from Firebase with error handling
+async function loadFirebaseData(collectionName) {
+    try {
+        if (!firebaseInitialized || !db) {
+            await initializeFirebase();
         }
         
-        attempt();
-    });
+        const snapshot = await db.collection(collectionName).get();
+        
+        if (snapshot.empty) {
+            console.log(`ℹ️ لا توجد بيانات في ${collectionName}`);
+            return [];
+        }
+        
+        const data = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log(`✅ تم تحميل ${data.length} عنصر من ${collectionName}`);
+        return data;
+        
+    } catch (error) {
+        console.error(`❌ خطأ في تحميل ${collectionName}:`, error);
+        throw error;
+    }
 }
 
-// دالة مبسطة للاستخدام
-async function initializeFirebase() {
-    return initializeFirebaseWithRetry();
+// Save data to Firebase
+async function saveFirebaseData(collectionName, data) {
+    try {
+        if (!firebaseInitialized || !db) {
+            await initializeFirebase();
+        }
+        
+        const docRef = await db.collection(collectionName).add(data);
+        console.log(`✅ تم حفظ البيانات في ${collectionName} مع ID: ${docRef.id}`);
+        return docRef.id;
+        
+    } catch (error) {
+        console.error(`❌ خطأ في حفظ البيانات في ${collectionName}:`, error);
+        throw error;
+    }
 }
 
-// دالة للحصول على قاعدة البيانات
-function getFirebaseDb() {
-    return window.db || null;
+// Update data in Firebase
+async function updateFirebaseData(collectionName, docId, data) {
+    try {
+        if (!firebaseInitialized || !db) {
+            await initializeFirebase();
+        }
+        
+        await db.collection(collectionName).doc(docId).update(data);
+        console.log(`✅ تم تحديث الوثيقة ${docId} في ${collectionName}`);
+        
+    } catch (error) {
+        console.error(`❌ خطأ في تحديث البيانات في ${collectionName}:`, error);
+        throw error;
+    }
 }
 
-// دالة للتحقق من حالة Firebase
-function isFirebaseAvailable() {
-    return window.db !== undefined && window.db !== null;
+// Delete data from Firebase
+async function deleteFirebaseData(collectionName, docId) {
+    try {
+        if (!firebaseInitialized || !db) {
+            await initializeFirebase();
+        }
+        
+        await db.collection(collectionName).doc(docId).delete();
+        console.log(`✅ تم حذف الوثيقة ${docId} من ${collectionName}`);
+        
+    } catch (error) {
+        console.error(`❌ خطأ في حذف البيانات من ${collectionName}:`, error);
+        throw error;
+    }
 }
 
-// تهيئة تلقائية عند تحميل الصفحة
-document.addEventListener('DOMContentLoaded', () => {
-    console.log('📄 الصفحة محملة، جاهز لتهيئة Firebase عند الحاجة');
-});
+// Save notification to Firebase
+async function saveNotification(data) {
+    try {
+        if (!firebaseInitialized || !db) {
+            await initializeFirebase();
+        }
+        
+        const docRef = await db.collection('notifications').add(data);
+        console.log('✅ تم حفظ الإشعار في Firebase مع ID:', docRef.id);
+        return docRef.id;
+        
+    } catch (error) {
+        console.error('❌ خطأ في حفظ الإشعار:', error);
+        throw error;
+    }
+}
+
+// Load notifications from Firebase
+async function loadNotifications(days = 3) {
+    try {
+        if (!firebaseInitialized || !db) {
+            await initializeFirebase();
+        }
+        
+        const date = new Date();
+        date.setDate(date.getDate() - days);
+        
+        const snapshot = await db.collection('notifications')
+            .where('createdAt', '>=', date)
+            .orderBy('createdAt', 'desc')
+            .get();
+        
+        const data = snapshot.docs.map(doc => ({
+            id: doc.id,
+            ...doc.data()
+        }));
+        
+        console.log(`✅ تم تحميل ${data.length} إشعار من آخر ${days} أيام`);
+        return data;
+        
+    } catch (error) {
+        console.error('❌ خطأ في تحميل الإشعارات:', error);
+        throw error;
+    }
+}
+
+// Save data to localStorage as backup
+function saveToLocalStorage(key, data) {
+    try {
+        localStorage.setItem(key, JSON.stringify(data));
+        console.log(`💾 تم حفظ البيانات في localStorage تحت مفتاح: ${key}`);
+    } catch (error) {
+        console.error('❌ خطأ في حفظ البيانات في localStorage:', error);
+    }
+}
+
+// Load data from localStorage
+function loadFromLocalStorage(key) {
+    try {
+        const data = localStorage.getItem(key);
+        if (data) {
+            return JSON.parse(data);
+        }
+        return null;
+    } catch (error) {
+        console.error('❌ خطأ في تحميل البيانات من localStorage:', error);
+        return null;
+    }
+}
+
+// Export Firebase utilities for use in other files
+window.firebaseUtils = {
+    initializeFirebase,
+    testFirebaseConnection,
+    loadFirebaseData,
+    saveFirebaseData,
+    updateFirebaseData,
+    deleteFirebaseData,
+    saveToLocalStorage,
+    loadFromLocalStorage,
+    saveNotification,
+    loadNotifications,
+    getDB: () => db,
+    isInitialized: () => firebaseInitialized
+};
