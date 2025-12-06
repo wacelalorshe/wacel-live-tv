@@ -1,0 +1,858 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>إدارة الإشعارات - وسيل لايف برو</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
+    <link rel="stylesheet" href="css/admin.css">
+    <link rel="stylesheet" href="css/notifications.css">
+</head>
+<body>
+    <div class="admin-container">
+        <div class="row">
+            <div class="col-12">
+                <!-- Header -->
+                <div class="text-center mb-5">
+                    <h1 style="color: #E1E1E1; text-shadow: 0 2px 4px rgba(0,0,0,0.5); font-size: 2.5rem;">
+                        <i class="uil uil-bell"></i> إدارة الإشعارات
+                    </h1>
+                    <p class="text-muted">إرسال إشعارات للمستخدمين وإدارتها</p>
+                </div>
+
+                <!-- Add Notification Form -->
+                <div class="card mb-5" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                    <div class="card-header card-header-custom">
+                        <h4 class="mb-0 text-white">
+                            <i class="uil uil-plus-circle"></i> إرسال إشعار جديد
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <form id="notificationForm">
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">عنوان الإشعار *</label>
+                                        <input type="text" id="notificationTitle" class="form-control" required 
+                                               placeholder="أدخل عنوان الإشعار">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">نوع الإشعار</label>
+                                        <select id="notificationType" class="form-control">
+                                            <option value="info">معلومات</option>
+                                            <option value="warning">تحذير</option>
+                                            <option value="success">نجاح</option>
+                                            <option value="update">تحديث</option>
+                                            <option value="promotion">عرض ترويجي</option>
+                                        </select>
+                                    </div>
+                                </div>
+                                <div class="col-md-6">
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">رابط الإجراء (اختياري)</label>
+                                        <input type="text" id="notificationActionUrl" class="form-control" 
+                                               placeholder="https://example.com">
+                                    </div>
+                                    <div class="form-group mb-3">
+                                        <label class="form-label">تاريخ انتهاء الصلاحية</label>
+                                        <input type="date" id="notificationExpiry" class="form-control">
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="form-group mb-3">
+                                <label class="form-label">نص الإشعار *</label>
+                                <textarea id="notificationMessage" class="form-control" rows="4" required 
+                                          placeholder="أدخل نص الإشعار..."></textarea>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="sendImmediately" checked>
+                                <label class="form-check-label">
+                                    إرسال فوري
+                                </label>
+                            </div>
+                            <div class="form-check mb-3">
+                                <input class="form-check-input" type="checkbox" id="isImportant">
+                                <label class="form-check-label">
+                                    إشعار مهم (سيظهر باللون الأحمر)
+                                </label>
+                            </div>
+                            <div class="d-flex gap-2">
+                                <button type="button" class="btn btn-success flex-fill py-3" onclick="sendNotification()">
+                                    <i class="uil uil-paper-plane"></i> إرسال الإشعار
+                                </button>
+                                <button type="button" class="btn btn-primary" onclick="scheduleNotification()">
+                                    <i class="uil uil-clock"></i> جدولة
+                                </button>
+                                <a href="admin.html" class="btn btn-secondary">
+                                    <i class="uil uil-arrow-right"></i> العودة للإدارة
+                                </a>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Bulk Actions -->
+                <div class="card mb-4" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                    <div class="card-header card-header-custom">
+                        <h4 class="mb-0 text-white">
+                            <i class="uil uil-trash-alt"></i> إجراءات جماعية
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <button class="btn btn-danger w-100 mb-2" onclick="deleteAllNotifications()">
+                                    <i class="uil uil-trash-alt"></i> حذف جميع الإشعارات
+                                </button>
+                                <small class="text-warning d-block">سيحذف كل الإشعارات نهائياً</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-warning w-100 mb-2" onclick="deleteExpiredNotifications()">
+                                    <i class="uil uil-clock"></i> حذف الإشعارات المنتهية
+                                </button>
+                                <small class="text-muted">يحذف الإشعارات المنتهية الصلاحية فقط</small>
+                            </div>
+                            <div class="col-md-4">
+                                <button class="btn btn-info w-100 mb-2" onclick="markAllAsRead()">
+                                    <i class="uil uil-check-circle"></i> تحديد الكل كمقروء
+                                </button>
+                                <small class="text-muted">يحدد جميع الإشعارات كمقروءة</small>
+                            </div>
+                        </div>
+                        <div class="row mt-3">
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-warning w-100 mb-2" onclick="deleteOldNotifications()">
+                                    <i class="uil uil-calendar-slash"></i> حذف الإشعارات القديمة
+                                </button>
+                                <small class="text-muted">يحذف الإشعارات الأقدم من 30 يوم</small>
+                            </div>
+                            <div class="col-md-6">
+                                <button class="btn btn-outline-danger w-100 mb-2" onclick="deleteInactiveNotifications()">
+                                    <i class="uil uil-power"></i> حذف الإشعارات المعطلة
+                                </button>
+                                <small class="text-muted">يحذف الإشعارات غير النشطة فقط</small>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Notifications List -->
+                <div class="card" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
+                    <div class="card-header card-header-custom">
+                        <h4 class="mb-0 text-white">
+                            <i class="uil uil-list-ui-alt"></i> الإشعارات المرسلة
+                            <span id="notificationsCount" class="badge bg-primary ms-2">0</span>
+                        </h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="row">
+                                <div class="col-md-8">
+                                    <input type="text" id="notificationsSearch" class="form-control" 
+                                           placeholder="🔍 بحث في الإشعارات..." oninput="filterNotifications()">
+                                </div>
+                                <div class="col-md-4">
+                                    <select id="notificationsFilter" class="form-control" onchange="filterNotifications()">
+                                        <option value="all">جميع الإشعارات</option>
+                                        <option value="active">نشطة فقط</option>
+                                        <option value="expired">منتهية</option>
+                                        <option value="important">مهمة</option>
+                                        <option value="unread">غير مقروءة</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Bulk Selection -->
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <div class="form-check">
+                                <input class="form-check-input" type="checkbox" id="selectAllNotifications" 
+                                       onchange="toggleSelectAll()">
+                                <label class="form-check-label text-white" for="selectAllNotifications">
+                                    تحديد الكل
+                                </label>
+                            </div>
+                            <div>
+                                <button class="btn btn-sm btn-danger me-2" onclick="deleteSelectedNotifications()" 
+                                        id="deleteSelectedBtn" disabled>
+                                    <i class="uil uil-trash-alt"></i> حذف المحدد
+                                </button>
+                                <button class="btn btn-sm btn-warning" onclick="toggleSelectedStatus()">
+                                    <i class="uil uil-power"></i> تبديل الحالة
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div id="notificationsList">
+                            <div class="text-center py-5">
+                                <div class="spinner-border text-primary" role="status">
+                                    <span class="visually-hidden">جاري التحميل...</span>
+                                </div>
+                                <p class="mt-3 text-muted">جاري تحميل الإشعارات...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
+    
+    <!-- Scripts -->
+    <script src="js/firebase-config.js"></script>
+    <script>
+        let notifications = [];
+        let filteredNotifications = [];
+        let selectedNotifications = new Set();
+
+        async function loadNotifications() {
+            try {
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const snapshot = await db.collection('notifications')
+                    .orderBy('createdAt', 'desc')
+                    .limit(100)
+                    .get();
+                
+                notifications = snapshot.docs.map(doc => ({
+                    id: doc.id,
+                    ...doc.data()
+                }));
+                
+                filteredNotifications = [...notifications];
+                renderNotifications();
+                
+            } catch (error) {
+                console.error('❌ فشل تحميل الإشعارات:', error);
+                showAlert('فشل تحميل الإشعارات: ' + error.message, 'error');
+            }
+        }
+
+        function renderNotifications() {
+            const container = document.getElementById('notificationsList');
+            const countElement = document.getElementById('notificationsCount');
+            
+            if (!container) return;
+            
+            if (filteredNotifications.length === 0) {
+                container.innerHTML = `
+                    <div class="text-center py-5">
+                        <i class="uil uil-bell-slash" style="font-size: 80px; color: #6c757d;"></i>
+                        <h5 class="mt-3 text-muted">لا توجد إشعارات</h5>
+                    </div>
+                `;
+                if (countElement) countElement.textContent = '0';
+                return;
+            }
+            
+            container.innerHTML = filteredNotifications.map(notification => {
+                const createdAt = notification.createdAt?.toDate ? 
+                    notification.createdAt.toDate() : new Date(notification.createdAt);
+                const expiryDate = notification.expiryDate?.toDate ? 
+                    notification.expiryDate.toDate() : new Date(notification.expiryDate);
+                
+                const isExpired = expiryDate && expiryDate < new Date();
+                const isActive = notification.isActive && !isExpired;
+                const isSelected = selectedNotifications.has(notification.id);
+                const isUnread = !notification.isRead;
+                
+                return `
+                <div class="notification-item-admin ${isActive ? 'active' : 'inactive'} ${isSelected ? 'selected' : ''}">
+                    <div class="d-flex">
+                        <div class="me-3">
+                            <input class="form-check-input notification-checkbox" 
+                                   type="checkbox" 
+                                   value="${notification.id}"
+                                   ${isSelected ? 'checked' : ''}
+                                   onchange="toggleNotificationSelection('${notification.id}')">
+                        </div>
+                        <div class="flex-grow-1">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div class="flex-grow-1">
+                                    <h5 class="text-white mb-1">
+                                        ${notification.title}
+                                        ${notification.isImportant ? '<span class="badge bg-danger ms-2">مهم</span>' : ''}
+                                        <span class="badge ${isActive ? 'bg-success' : 'bg-secondary'} ms-2">
+                                            ${isActive ? 'نشط' : 'غير نشط'}
+                                        </span>
+                                        ${isExpired ? '<span class="badge bg-warning ms-2">منتهي</span>' : ''}
+                                        ${isUnread ? '<span class="badge bg-info ms-2">غير مقروء</span>' : ''}
+                                    </h5>
+                                    <p class="text-muted mb-2">${notification.message}</p>
+                                    <div class="notification-meta">
+                                        <small class="text-info">
+                                            <i class="uil uil-calendar-alt"></i> 
+                                            ${createdAt.toLocaleString('ar-SA')}
+                                        </small>
+                                        ${notification.type ? `
+                                            <span class="mx-2">•</span>
+                                            <small class="badge bg-info">${notification.type}</small>
+                                        ` : ''}
+                                        ${notification.actionUrl ? `
+                                            <span class="mx-2">•</span>
+                                            <small class="text-primary">
+                                                <i class="uil uil-link"></i> رابط
+                                            </small>
+                                        ` : ''}
+                                    </div>
+                                    ${expiryDate ? `
+                                        <small class="text-warning d-block mt-1">
+                                            <i class="uil uil-clock"></i> 
+                                            ينتهي في: ${expiryDate.toLocaleString('ar-SA')}
+                                        </small>
+                                    ` : ''}
+                                </div>
+                                <div class="action-buttons">
+                                    <button class="btn btn-sm ${isActive ? 'btn-warning' : 'btn-success'}" 
+                                            onclick="toggleNotificationStatus('${notification.id}', ${!isActive})">
+                                        <i class="uil uil-power"></i> ${isActive ? 'تعطيل' : 'تفعيل'}
+                                    </button>
+                                    <button class="btn btn-sm btn-danger" onclick="deleteNotification('${notification.id}')">
+                                        <i class="uil uil-trash-alt"></i> حذف
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            `}).join('');
+            
+            if (countElement) countElement.textContent = filteredNotifications.length;
+            
+            // تحديث حالة زر حذف المحدد
+            updateDeleteSelectedButton();
+        }
+
+        // وظيفة حذف جميع الإشعارات
+        async function deleteAllNotifications() {
+            if (!confirm('⚠️ تحذير: هل أنت متأكد من حذف جميع الإشعارات؟\n\nهذا الإجراء لا يمكن التراجع عنه وسيحذف كل الإشعارات بشكل نهائي.')) {
+                return;
+            }
+            
+            try {
+                const password = prompt('للتأكيد، أدخل كلمة "حذف" للحذف الكامل:');
+                if (password !== 'حذف') {
+                    showAlert('تم إلغاء عملية الحذف', 'warning');
+                    return;
+                }
+                
+                showAlert('جاري حذف جميع الإشعارات...', 'info');
+                
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                // جلب جميع الإشعارات
+                const snapshot = await db.collection('notifications').get();
+                
+                if (snapshot.empty) {
+                    showAlert('لا توجد إشعارات لحذفها', 'warning');
+                    return;
+                }
+                
+                // استخدام batch لحذف جميع المستندات
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                
+                // مسح البيانات المحلية
+                notifications = [];
+                filteredNotifications = [];
+                selectedNotifications.clear();
+                
+                // إعادة التحميل
+                await loadNotifications();
+                
+                showAlert(`✅ تم حذف ${snapshot.size} إشعار بنجاح`, 'success');
+                
+            } catch (error) {
+                console.error('❌ فشل حذف جميع الإشعارات:', error);
+                showAlert('فشل حذف الإشعارات: ' + error.message, 'error');
+            }
+        }
+
+        // وظيفة حذف الإشعارات المنتهية
+        async function deleteExpiredNotifications() {
+            try {
+                const count = await getExpiredNotificationsCount();
+                
+                if (count === 0) {
+                    showAlert('لا توجد إشعارات منتهية الصلاحية', 'info');
+                    return;
+                }
+                
+                if (!confirm(`هل تريد حذف ${count} إشعار منتهي الصلاحية؟`)) {
+                    return;
+                }
+                
+                showAlert('جاري حذف الإشعارات المنتهية...', 'info');
+                
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const snapshot = await db.collection('notifications').get();
+                const now = new Date();
+                
+                const batch = db.batch();
+                let deletedCount = 0;
+                
+                snapshot.docs.forEach(doc => {
+                    const data = doc.data();
+                    const expiryDate = data.expiryDate?.toDate ? 
+                        data.expiryDate.toDate() : new Date(data.expiryDate);
+                    
+                    if (expiryDate && expiryDate < now) {
+                        batch.delete(doc.ref);
+                        deletedCount++;
+                    }
+                });
+                
+                if (deletedCount > 0) {
+                    await batch.commit();
+                    await loadNotifications();
+                    showAlert(`✅ تم حذف ${deletedCount} إشعار منتهي`, 'success');
+                } else {
+                    showAlert('لم يتم العثور على إشعارات منتهية', 'info');
+                }
+                
+            } catch (error) {
+                console.error('❌ فشل حذف الإشعارات المنتهية:', error);
+                showAlert('فشل حذف الإشعارات المنتهية: ' + error.message, 'error');
+            }
+        }
+
+        // وظيفة حذف الإشعارات القديمة
+        async function deleteOldNotifications() {
+            try {
+                const days = prompt('أدخل عدد الأيام (سيتم حذف الإشعارات الأقدم من هذا العدد):', '30');
+                if (!days || isNaN(days)) return;
+                
+                const daysAgo = new Date();
+                daysAgo.setDate(daysAgo.getDate() - parseInt(days));
+                
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const snapshot = await db.collection('notifications')
+                    .where('createdAt', '<', daysAgo)
+                    .get();
+                
+                if (snapshot.empty) {
+                    showAlert(`لا توجد إشعارات أقدم من ${days} يوم`, 'info');
+                    return;
+                }
+                
+                if (!confirm(`هل تريد حذف ${snapshot.size} إشعار أقدم من ${days} يوم؟`)) {
+                    return;
+                }
+                
+                showAlert(`جاري حذف ${snapshot.size} إشعار قديم...`, 'info');
+                
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                await loadNotifications();
+                
+                showAlert(`✅ تم حذف ${snapshot.size} إشعار قديم`, 'success');
+                
+            } catch (error) {
+                console.error('❌ فشل حذف الإشعارات القديمة:', error);
+                showAlert('فشل حذف الإشعارات القديمة: ' + error.message, 'error');
+            }
+        }
+
+        // وظيفة حذف الإشعارات المعطلة
+        async function deleteInactiveNotifications() {
+            try {
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const snapshot = await db.collection('notifications')
+                    .where('isActive', '==', false)
+                    .get();
+                
+                if (snapshot.empty) {
+                    showAlert('لا توجد إشعارات معطلة', 'info');
+                    return;
+                }
+                
+                if (!confirm(`هل تريد حذف ${snapshot.size} إشعار معطل؟`)) {
+                    return;
+                }
+                
+                showAlert(`جاري حذف ${snapshot.size} إشعار معطل...`, 'info');
+                
+                const batch = db.batch();
+                snapshot.docs.forEach(doc => {
+                    batch.delete(doc.ref);
+                });
+                
+                await batch.commit();
+                await loadNotifications();
+                
+                showAlert(`✅ تم حذف ${snapshot.size} إشعار معطل`, 'success');
+                
+            } catch (error) {
+                console.error('❌ فشل حذف الإشعارات المعطلة:', error);
+                showAlert('فشل حذف الإشعارات المعطلة: ' + error.message, 'error');
+            }
+        }
+
+        // وظيفة تحديد جميع الإشعارات كمقروءة
+        async function markAllAsRead() {
+            try {
+                const unreadCount = notifications.filter(n => !n.isRead).length;
+                
+                if (unreadCount === 0) {
+                    showAlert('لا توجد إشعارات غير مقروءة', 'info');
+                    return;
+                }
+                
+                if (!confirm(`هل تريد تحديد ${unreadCount} إشعار كمقروء؟`)) {
+                    return;
+                }
+                
+                showAlert('جاري تحديث جميع الإشعارات...', 'info');
+                
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const batch = db.batch();
+                notifications.forEach(notification => {
+                    if (!notification.isRead) {
+                        const ref = db.collection('notifications').doc(notification.id);
+                        batch.update(ref, {
+                            isRead: true,
+                            readAt: new Date()
+                        });
+                    }
+                });
+                
+                await batch.commit();
+                await loadNotifications();
+                
+                showAlert(`✅ تم تحديد ${unreadCount} إشعار كمقروء`, 'success');
+                
+            } catch (error) {
+                console.error('❌ فشل تحديد جميع الإشعارات كمقروءة:', error);
+                showAlert('فشل تحديث الإشعارات: ' + error.message, 'error');
+            }
+        }
+
+        // وظائف الإدارة المحددة
+        function toggleSelectAll() {
+            const selectAll = document.getElementById('selectAllNotifications');
+            const checkboxes = document.querySelectorAll('.notification-checkbox');
+            
+            if (selectAll.checked) {
+                filteredNotifications.forEach(notif => {
+                    selectedNotifications.add(notif.id);
+                });
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = true;
+                });
+            } else {
+                selectedNotifications.clear();
+                checkboxes.forEach(checkbox => {
+                    checkbox.checked = false;
+                });
+            }
+            
+            updateDeleteSelectedButton();
+        }
+
+        function toggleNotificationSelection(notificationId) {
+            if (selectedNotifications.has(notificationId)) {
+                selectedNotifications.delete(notificationId);
+            } else {
+                selectedNotifications.add(notificationId);
+            }
+            
+            updateDeleteSelectedButton();
+        }
+
+        function updateDeleteSelectedButton() {
+            const button = document.getElementById('deleteSelectedBtn');
+            const selectAllCheckbox = document.getElementById('selectAllNotifications');
+            
+            if (selectedNotifications.size > 0) {
+                button.disabled = false;
+                button.textContent = `حذف المحدد (${selectedNotifications.size})`;
+            } else {
+                button.disabled = true;
+                button.textContent = 'حذف المحدد';
+            }
+            
+            // تحديث حالة تحديد الكل
+            if (filteredNotifications.length > 0 && 
+                selectedNotifications.size === filteredNotifications.length) {
+                selectAllCheckbox.checked = true;
+                selectAllCheckbox.indeterminate = false;
+            } else if (selectedNotifications.size > 0) {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = true;
+            } else {
+                selectAllCheckbox.checked = false;
+                selectAllCheckbox.indeterminate = false;
+            }
+        }
+
+        async function deleteSelectedNotifications() {
+            const selectedCount = selectedNotifications.size;
+            
+            if (selectedCount === 0) {
+                showAlert('لم يتم تحديد أي إشعارات', 'warning');
+                return;
+            }
+            
+            if (!confirm(`هل تريد حذف ${selectedCount} إشعار محدد؟`)) {
+                return;
+            }
+            
+            try {
+                showAlert(`جاري حذف ${selectedCount} إشعار...`, 'info');
+                
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const batch = db.batch();
+                selectedNotifications.forEach(id => {
+                    const ref = db.collection('notifications').doc(id);
+                    batch.delete(ref);
+                });
+                
+                await batch.commit();
+                
+                // إعادة تحميل القائمة
+                selectedNotifications.clear();
+                await loadNotifications();
+                
+                showAlert(`✅ تم حذف ${selectedCount} إشعار بنجاح`, 'success');
+                
+            } catch (error) {
+                console.error('❌ فشل حذف الإشعارات المحددة:', error);
+                showAlert('فشل حذف الإشعارات المحددة: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleSelectedStatus() {
+            const selectedCount = selectedNotifications.size;
+            
+            if (selectedCount === 0) {
+                showAlert('لم يتم تحديد أي إشعارات', 'warning');
+                return;
+            }
+            
+            if (!confirm(`هل تريد تبديل حالة ${selectedCount} إشعار محدد؟`)) {
+                return;
+            }
+            
+            try {
+                showAlert(`جاري تحديث ${selectedCount} إشعار...`, 'info');
+                
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                const batch = db.batch();
+                const notificationsToUpdate = notifications.filter(n => selectedNotifications.has(n.id));
+                
+                notificationsToUpdate.forEach(notification => {
+                    const ref = db.collection('notifications').doc(notification.id);
+                    const newStatus = !notification.isActive;
+                    
+                    batch.update(ref, {
+                        isActive: newStatus,
+                        updatedAt: new Date()
+                    });
+                });
+                
+                await batch.commit();
+                await loadNotifications();
+                
+                showAlert(`✅ تم تحديث ${selectedCount} إشعار`, 'success');
+                
+            } catch (error) {
+                console.error('❌ فشل تحديث الإشعارات المحددة:', error);
+                showAlert('فشل تحديث الإشعارات المحددة: ' + error.message, 'error');
+            }
+        }
+
+        // وظائف مساعدة
+        async function getExpiredNotificationsCount() {
+            await firebaseUtils.initializeFirebase();
+            const db = firebaseUtils.getDB();
+            
+            const snapshot = await db.collection('notifications').get();
+            const now = new Date();
+            let count = 0;
+            
+            snapshot.docs.forEach(doc => {
+                const data = doc.data();
+                const expiryDate = data.expiryDate?.toDate ? 
+                    data.expiryDate.toDate() : new Date(data.expiryDate);
+                
+                if (expiryDate && expiryDate < now) {
+                    count++;
+                }
+            });
+            
+            return count;
+        }
+
+        function filterNotifications() {
+            const searchTerm = document.getElementById('notificationsSearch').value.toLowerCase();
+            const filterType = document.getElementById('notificationsFilter').value;
+            const now = new Date();
+            
+            filteredNotifications = notifications.filter(notification => {
+                // البحث النصي
+                const matchesSearch = searchTerm === '' || 
+                    (notification.title && notification.title.toLowerCase().includes(searchTerm)) ||
+                    (notification.message && notification.message.toLowerCase().includes(searchTerm));
+                
+                if (!matchesSearch) return false;
+                
+                // التصفية حسب النوع
+                const expiryDate = notification.expiryDate?.toDate ? 
+                    notification.expiryDate.toDate() : new Date(notification.expiryDate);
+                const isExpired = expiryDate && expiryDate < now;
+                
+                switch (filterType) {
+                    case 'active':
+                        return notification.isActive && !isExpired;
+                    case 'expired':
+                        return isExpired;
+                    case 'important':
+                        return notification.isImportant;
+                    case 'unread':
+                        return !notification.isRead;
+                    default:
+                        return true;
+                }
+            });
+            
+            renderNotifications();
+        }
+
+        async function deleteNotification(id) {
+            if (!confirm('هل أنت متأكد من حذف هذا الإشعار؟')) return;
+            
+            try {
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                await db.collection('notifications').doc(id).delete();
+                
+                showAlert('تم حذف الإشعار بنجاح', 'success');
+                await loadNotifications();
+                
+            } catch (error) {
+                console.error('❌ فشل حذف الإشعار:', error);
+                showAlert('فشل حذف الإشعار: ' + error.message, 'error');
+            }
+        }
+
+        async function toggleNotificationStatus(id, newStatus) {
+            try {
+                await firebaseUtils.initializeFirebase();
+                const db = firebaseUtils.getDB();
+                
+                await db.collection('notifications').doc(id).update({
+                    isActive: newStatus,
+                    updatedAt: new Date()
+                });
+                
+                showAlert(`تم ${newStatus ? 'تفعيل' : 'تعطيل'} الإشعار`, 'success');
+                await loadNotifications();
+                
+            } catch (error) {
+                console.error('❌ فشل تغيير حالة الإشعار:', error);
+                showAlert('فشل تغيير حالة الإشعار: ' + error.message, 'error');
+            }
+        }
+
+        function showAlert(message, type) {
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show mt-3`;
+            alertDiv.innerHTML = `
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            `;
+            
+            const container = document.querySelector('.admin-container');
+            if (container) {
+                container.insertBefore(alertDiv, container.firstChild);
+            }
+            
+            setTimeout(() => {
+                if (alertDiv.parentNode) {
+                    alertDiv.remove();
+                }
+            }, 5000);
+        }
+
+        // تحميل الإشعارات عند بدء التشغيل
+        document.addEventListener('DOMContentLoaded', loadNotifications);
+    </script>
+    
+    <style>
+        .notification-item-admin {
+            background: linear-gradient(135deg, #2F2562, #3A4266);
+            border-radius: 10px;
+            border: 1px solid #42318F;
+            margin-bottom: 15px;
+            padding: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .notification-item-admin.active {
+            border-left: 4px solid #28a745;
+        }
+        
+        .notification-item-admin.inactive {
+            border-left: 4px solid #6c757d;
+        }
+        
+        .notification-item-admin.selected {
+            background: linear-gradient(135deg, #322769, #654FD4);
+            border: 2px solid #FF5200;
+        }
+        
+        .notification-item-admin:hover {
+            transform: translateX(-5px);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+        }
+        
+        .notification-meta {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .notification-checkbox {
+            margin-top: 10px;
+        }
+        
+        .btn-danger {
+            background: linear-gradient(45deg, #dc3545, #c82333);
+            border: none;
+        }
+        
+        .btn-danger:hover {
+            background: linear-gradient(45deg, #c82333, #bd2130);
+            transform: translateY(-2px);
+        }
+    </style>
+</body>
+</html>
