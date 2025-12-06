@@ -1,14 +1,3 @@
-// Firebase configuration
-const firebaseConfig = {
-    apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
-    authDomain: "bein-42f9e.firebaseapp.com",
-    projectId: "bein-42f9e",
-    storageBucket: "bein-42f9e.firebasestorage.app",
-    messagingSenderId: "143741167050",
-    appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
-    measurementId: "G-JH198SKCFS"
-};
-
 // تطبيق Bein Sport - الصفحة الرئيسية مع نظام الإشعارات
 class BeinSportApp {
     constructor() {
@@ -18,8 +7,6 @@ class BeinSportApp {
         this.activeNotifications = [];
         this.firebaseInitialized = false;
         this.notificationsLoaded = false;
-        this.retryCount = 0;
-        this.maxRetries = 3;
         this.init();
     }
 
@@ -44,33 +31,37 @@ class BeinSportApp {
         try {
             // المحاولة الأولى: من Firebase
             try {
-                await this.loadFromFirebase();
-                console.log('✅ تم تحميل البيانات من Firebase');
-                this.showSuccessMessage('تم تحميل البيانات بنجاح');
-                return;
+                const loaded = await this.loadFromFirebase();
+                if (loaded) {
+                    console.log('✅ تم تحميل البيانات من Firebase');
+                    this.showSuccessMessage('تم تحميل البيانات بنجاح');
+                    return;
+                }
             } catch (firebaseError) {
                 console.warn('⚠️ فشل تحميل Firebase:', firebaseError.message);
-                
-                // إذا فشل Firebase، حاول استخدام localStorage تلقائياً
-                try {
-                    await this.loadFromLocalStorage();
+            }
+            
+            // المحاولة الثانية: من localStorage
+            try {
+                const loaded = await this.loadFromLocalStorage();
+                if (loaded) {
                     console.log('✅ تم تحميل البيانات من localStorage');
                     this.showInfoMessage('تم تحميل البيانات المحلية');
                     return;
-                } catch (localStorageError) {
-                    console.warn('⚠️ فشل تحميل localStorage:', localStorageError.message);
-                    
-                    // إذا فشل localStorage، استخدم البيانات الافتراضية تلقائياً
-                    this.loadDefaultData();
-                    console.log('✅ تم تحميل البيانات الافتراضية');
-                    this.showWarningMessage('تم تحميل البيانات الافتراضية. تحقق من اتصال الإنترنت.');
                 }
+            } catch (localStorageError) {
+                console.warn('⚠️ فشل تحميل localStorage:', localStorageError.message);
             }
+            
+            // المحاولة الثالثة: البيانات الافتراضية
+            this.loadDefaultData();
+            console.log('✅ تم تحميل البيانات الافتراضية');
+            this.showWarningMessage('تم تحميل البيانات الافتراضية. تحقق من اتصال الإنترنت.');
             
         } catch (error) {
             console.error('❌ خطأ غير متوقع:', error);
-            // في حالة حدوث خطأ غير متوقع، استخدم البيانات الافتراضية
             this.loadDefaultData();
+            this.showWarningMessage('حدث خطأ غير متوقع. جاري تحميل البيانات الافتراضية.');
         }
     }
 
@@ -79,26 +70,39 @@ class BeinSportApp {
             try {
                 console.log('📡 جاري جلب البيانات من Firebase...');
                 
-                // 1. التحقق من وجود Firebase
+                // التحقق من وجود Firebase SDK
                 if (typeof firebase === 'undefined') {
                     console.error('❌ Firebase SDK غير محمل');
                     reject(new Error('Firebase SDK غير محمل'));
                     return;
                 }
                 
-                // 2. تهيئة Firebase
-                let db;
+                // تحميل Firebase Config
+                const firebaseConfig = {
+                    apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
+                    authDomain: "bein-42f9e.firebaseapp.com",
+                    projectId: "bein-42f9e",
+                    storageBucket: "bein-42f9e.firebasestorage.app",
+                    messagingSenderId: "143741167050",
+                    appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
+                    measurementId: "G-JH198SKCFS"
+                };
+                
+                let app, db;
+                
+                // تهيئة Firebase
                 try {
-                    // تهيئة Firebase إذا لم يكن مهيأ
                     if (!firebase.apps.length) {
-                        firebase.initializeApp(firebaseConfig);
+                        app = firebase.initializeApp(firebaseConfig);
                         console.log('✅ تم تهيئة Firebase بنجاح');
                     } else {
+                        app = firebase.apps[0];
                         console.log('✅ Firebase مهيأ مسبقاً');
                     }
                     
-                    db = firebase.firestore();
+                    db = firebase.firestore(app);
                     this.firebaseInitialized = true;
+                    console.log('✅ Firestore جاهز للاستخدام');
                     
                 } catch (initError) {
                     console.error('❌ فشل تهيئة Firebase:', initError);
@@ -111,95 +115,104 @@ class BeinSportApp {
                     return;
                 }
                 
-                console.log('✅ Firestore جاهز للاستخدام');
+                // جلب البيانات مع معالجة الأخطاء
+                let sections = [];
+                let channels = [];
+                let notifications = [];
                 
-                // إضافة timeout لتجنب الانتظار الطويل
-                const timeoutPromise = new Promise((_, rejectTimeout) => {
-                    setTimeout(() => rejectTimeout(new Error('انتهت مهلة الاتصال بقاعدة البيانات')), 10000);
-                });
-                
-                // 3. جلب الأقسام مع timeout
-                let sectionsSnapshot;
                 try {
-                    sectionsSnapshot = await Promise.race([
-                        db.collection('sections').orderBy('order').get(),
-                        timeoutPromise
-                    ]);
-                } catch (orderError) {
-                    // إذا فشل الترتيب أو انتهت المهلة
-                    console.warn('⚠️ فشل ترتيب الأقسام، جاري جلب بدون ترتيب:', orderError);
-                    sectionsSnapshot = await Promise.race([
-                        db.collection('sections').get(),
-                        timeoutPromise
-                    ]);
-                }
-                
-                if (sectionsSnapshot.empty) {
-                    console.log('ℹ️ لا توجد أقسام في Firebase');
-                    reject(new Error('لا توجد أقسام في قاعدة البيانات'));
-                    return;
-                }
-                
-                this.sections = sectionsSnapshot.docs.map(doc => ({
-                    id: doc.id,
-                    ...doc.data()
-                }));
-                
-                console.log(`✅ تم تحميل ${this.sections.length} قسم من Firebase`);
-                
-                // 4. جلب القنوات مع timeout
-                try {
-                    const channelsSnapshot = await Promise.race([
-                        db.collection('channels').get(),
-                        timeoutPromise
-                    ]);
+                    // جلب الأقسام
+                    const sectionsSnapshot = await db.collection('sections')
+                        .where('isActive', '==', true)
+                        .orderBy('order')
+                        .get();
                     
-                    if (!channelsSnapshot.empty) {
-                        this.channels = channelsSnapshot.docs.map(doc => ({
+                    if (!sectionsSnapshot.empty) {
+                        sections = sectionsSnapshot.docs.map(doc => ({
                             id: doc.id,
                             ...doc.data()
                         }));
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة من Firebase`);
+                        console.log(`✅ تم تحميل ${sections.length} قسم من Firebase`);
+                    }
+                } catch (sectionsError) {
+                    console.warn('⚠️ فشل تحميل الأقسام:', sectionsError);
+                    // حاول تحميل بدون ترتيب
+                    try {
+                        const sectionsSnapshot = await db.collection('sections')
+                            .where('isActive', '==', true)
+                            .get();
+                        
+                        if (!sectionsSnapshot.empty) {
+                            sections = sectionsSnapshot.docs.map(doc => ({
+                                id: doc.id,
+                                ...doc.data()
+                            }));
+                            console.log(`✅ تم تحميل ${sections.length} قسم من Firebase (بدون ترتيب)`);
+                        }
+                    } catch (error) {
+                        console.error('❌ فشل تحميل الأقسام تماماً:', error);
+                    }
+                }
+                
+                try {
+                    // جلب القنوات
+                    const channelsSnapshot = await db.collection('channels')
+                        .orderBy('order')
+                        .get();
+                    
+                    if (!channelsSnapshot.empty) {
+                        channels = channelsSnapshot.docs.map(doc => ({
+                            id: doc.id,
+                            ...doc.data()
+                        }));
+                        console.log(`✅ تم تحميل ${channels.length} قناة من Firebase`);
                     }
                 } catch (channelsError) {
                     console.warn('⚠️ فشل تحميل القنوات:', channelsError);
-                    this.channels = [];
                 }
                 
-                // 5. جلب الإشعارات النشطة
                 try {
+                    // جلب الإشعارات النشطة
                     const now = new Date();
                     const notificationsSnapshot = await db.collection('notifications')
                         .where('status', '==', 'active')
                         .orderBy('createdAt', 'desc')
+                        .limit(5)
                         .get();
                     
                     if (!notificationsSnapshot.empty) {
-                        this.notifications = notificationsSnapshot.docs.map(doc => ({
+                        notifications = notificationsSnapshot.docs.map(doc => ({
                             id: doc.id,
                             ...doc.data()
                         }));
                         
                         // تصفية الإشعارات غير المنتهية
-                        this.activeNotifications = this.notifications.filter(notification => 
+                        this.activeNotifications = notifications.filter(notification => 
                             !notification.expiryDate || new Date(notification.expiryDate) > now
                         );
                         
                         console.log(`📢 تم تحميل ${this.activeNotifications.length} إشعار نشط`);
                         this.notificationsLoaded = true;
-                        
-                        // عرض الإشعارات بعد تحميل الصفحة
-                        setTimeout(() => this.displayNotifications(), 1000);
                     }
                 } catch (notificationsError) {
                     console.warn('⚠️ فشل تحميل الإشعارات:', notificationsError);
                 }
                 
-                // 6. حفظ في localStorage كنسخة احتياطية
+                // تخزين البيانات
+                this.sections = sections;
+                this.channels = channels;
+                this.notifications = notifications;
+                
+                // حفظ نسخة احتياطية في localStorage
                 this.saveToLocalStorage();
                 
-                // 7. عرض البيانات
+                // عرض البيانات
                 this.renderSections();
+                
+                // عرض الإشعارات بعد ثانية
+                if (this.activeNotifications.length > 0) {
+                    setTimeout(() => this.displayNotifications(), 1000);
+                }
                 
                 resolve(true);
                 
@@ -215,7 +228,7 @@ class BeinSportApp {
             try {
                 console.log('💾 جاري تحميل البيانات من التخزين المحلي...');
                 
-                // 1. جلب الأقسام من localStorage
+                // جلب الأقسام
                 const savedSections = localStorage.getItem('bein_sections');
                 if (!savedSections) {
                     reject(new Error('لا توجد بيانات محلية للأقسام'));
@@ -225,14 +238,14 @@ class BeinSportApp {
                 this.sections = JSON.parse(savedSections);
                 console.log(`✅ تم تحميل ${this.sections.length} قسم من localStorage`);
                 
-                // 2. جلب القنوات من localStorage
+                // جلب القنوات
                 const savedChannels = localStorage.getItem('bein_channels');
                 if (savedChannels) {
                     this.channels = JSON.parse(savedChannels);
                     console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
                 }
                 
-                // 3. جلب الإشعارات من localStorage
+                // جلب الإشعارات
                 const savedNotifications = localStorage.getItem('bein_notifications');
                 if (savedNotifications) {
                     this.notifications = JSON.parse(savedNotifications);
@@ -246,13 +259,15 @@ class BeinSportApp {
                     
                     console.log(`📢 تم تحميل ${this.activeNotifications.length} إشعار نشط من localStorage`);
                     this.notificationsLoaded = true;
-                    
-                    // عرض الإشعارات
-                    setTimeout(() => this.displayNotifications(), 1000);
                 }
                 
-                // 4. عرض البيانات
+                // عرض البيانات
                 this.renderSections();
+                
+                // عرض الإشعارات
+                if (this.activeNotifications.length > 0) {
+                    setTimeout(() => this.displayNotifications(), 1000);
+                }
                 
                 resolve(true);
                 
@@ -282,22 +297,6 @@ class BeinSportApp {
                 isActive: true,
                 description: 'أفضل القنوات الرياضية العالمية',
                 image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=SPORTS'
-            },
-            {
-                id: 'arabic-channels',
-                name: 'القنوات العربية',
-                order: 3,
-                isActive: true,
-                description: 'القنوات العربية المشهورة',
-                image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=ARABIC'
-            },
-            {
-                id: 'entertainment',
-                name: 'قنوات الترفيه',
-                order: 4,
-                isActive: true,
-                description: 'قنوات الأفلام والمسلسلات',
-                image: 'https://via.placeholder.com/200x150/2F2562/FFFFFF?text=ENTERTAIN'
             }
         ];
         
@@ -319,15 +318,6 @@ class BeinSportApp {
                 order: 2,
                 sectionId: 'bein-sports',
                 appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player'
-            },
-            {
-                id: 'bein-3',
-                name: 'بي إن سبورت 3',
-                image: 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=BEIN+3',
-                url: '#',
-                order: 3,
-                sectionId: 'bein-sports',
-                appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player'
             }
         ];
         
@@ -342,16 +332,6 @@ class BeinSportApp {
                 createdAt: new Date(),
                 link: 'https://t.me/wacelalorshepro',
                 linkText: 'انضم لقناتنا'
-            },
-            {
-                id: 'update-notification',
-                title: 'تحديث جديد متوفر!',
-                message: 'تحديث التطبيق متوفر الآن مع ميزات جديدة وتحسينات في الأداء',
-                type: 'update',
-                status: 'active',
-                createdAt: new Date(Date.now() - 86400000), // قبل يوم
-                link: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-                linkText: 'تحديث الآن'
             }
         ];
         
@@ -360,7 +340,9 @@ class BeinSportApp {
         
         this.saveToLocalStorage();
         this.renderSections();
-        this.displayNotifications();
+        
+        // عرض الإشعارات بعد تحميل الصفحة
+        setTimeout(() => this.displayNotifications(), 1000);
     }
 
     saveToLocalStorage() {
@@ -549,58 +531,54 @@ class BeinSportApp {
     }
 
     getRelativeTime(dateString) {
-        const date = new Date(dateString);
-        const now = new Date();
-        const diffMs = now - date;
-        const diffSec = Math.floor(diffMs / 1000);
-        const diffMin = Math.floor(diffSec / 60);
-        const diffHour = Math.floor(diffMin / 60);
-        const diffDay = Math.floor(diffHour / 24);
+        if (!dateString) return 'قريباً';
         
-        if (diffSec < 60) return 'الآن';
-        if (diffMin < 60) return `قبل ${diffMin} دقيقة`;
-        if (diffHour < 24) return `قبل ${diffHour} ساعة`;
-        if (diffDay < 7) return `قبل ${diffDay} يوم`;
-        
-        return date.toLocaleDateString('ar-SA');
+        try {
+            const date = new Date(dateString);
+            const now = new Date();
+            const diffMs = now - date;
+            const diffSec = Math.floor(diffMs / 1000);
+            const diffMin = Math.floor(diffSec / 60);
+            const diffHour = Math.floor(diffMin / 60);
+            const diffDay = Math.floor(diffHour / 24);
+            
+            if (diffSec < 60) return 'الآن';
+            if (diffMin < 60) return `قبل ${diffMin} دقيقة`;
+            if (diffHour < 24) return `قبل ${diffHour} ساعة`;
+            if (diffDay < 7) return `قبل ${diffDay} يوم`;
+            
+            return date.toLocaleDateString('ar-SA');
+        } catch (error) {
+            return 'قريباً';
+        }
     }
 
     showSuccessMessage(message) {
-        // إزالة أي تنبيهات سابقة
-        const oldAlerts = document.querySelectorAll('.custom-alert');
-        oldAlerts.forEach(alert => alert.remove());
-        
-        // عرض رسالة النجاح مؤقتة
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `custom-alert alert alert-success alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            <i class="uil uil-check-circle me-2"></i> ${message}
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-        `;
-        
-        const content = document.querySelector('.content');
-        if (content) {
-            content.insertBefore(alertDiv, content.firstChild);
-        }
-        
-        // إزالة الرسالة بعد 3 ثواني
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 3000);
+        this.showMessage(message, 'success');
     }
 
     showInfoMessage(message) {
+        this.showMessage(message, 'info');
+    }
+
+    showWarningMessage(message) {
+        this.showMessage(message, 'warning');
+    }
+
+    showMessage(message, type) {
         // إزالة أي تنبيهات سابقة
         const oldAlerts = document.querySelectorAll('.custom-alert');
         oldAlerts.forEach(alert => alert.remove());
         
-        // عرض رسالة معلومات مؤقتة
+        // إنشاء رسالة جديدة
         const alertDiv = document.createElement('div');
-        alertDiv.className = `custom-alert alert alert-info alert-dismissible fade show`;
+        alertDiv.className = `custom-alert alert alert-${type} alert-dismissible fade show`;
         alertDiv.innerHTML = `
-            <i class="uil uil-info-circle me-2"></i> ${message}
+            <i class="uil uil-${type === 'success' ? 'check-circle' : 
+                                 type === 'info' ? 'info-circle' : 
+                                 type === 'warning' ? 'exclamation-triangle' : 'info-circle'} 
+                me-2"></i> 
+            ${message}
             <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
         `;
         
@@ -615,32 +593,6 @@ class BeinSportApp {
                 alertDiv.remove();
             }
         }, 3000);
-    }
-
-    showWarningMessage(message) {
-        // إزالة أي تنبيهات سابقة
-        const oldAlerts = document.querySelectorAll('.custom-alert');
-        oldAlerts.forEach(alert => alert.remove());
-        
-        // عرض رسالة تحذير مؤقتة
-        const alertDiv = document.createElement('div');
-        alertDiv.className = `custom-alert alert alert-warning alert-dismissible fade show`;
-        alertDiv.innerHTML = `
-            <i class="uil uil-exclamation-triangle me-2"></i> ${message}
-            <button type="button" class="btn-close" onclick="this.parentElement.remove()"></button>
-        `;
-        
-        const content = document.querySelector('.content');
-        if (content) {
-            content.insertBefore(alertDiv, content.firstChild);
-        }
-        
-        // إزالة الرسالة بعد 5 ثواني
-        setTimeout(() => {
-            if (alertDiv.parentNode) {
-                alertDiv.remove();
-            }
-        }, 5000);
     }
 
     async retryLoadData() {
@@ -665,6 +617,6 @@ window.reloadAppData = function() {
 // تحديث الإشعارات عند التركيز على الصفحة
 document.addEventListener('visibilitychange', function() {
     if (!document.hidden && window.app && window.app.notificationsLoaded) {
-        window.app.displayNotifications();
+        setTimeout(() => window.app.displayNotifications(), 500);
     }
 });
