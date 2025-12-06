@@ -222,44 +222,56 @@ body {
         margin-bottom: 10px;
     }
 }
-
-
-/* إضافات لوحة تحكم الإشعارات */
-.notification-item-admin {
-    padding: 15px;
-    border-radius: 10px;
-    margin-bottom: 10px;
-    background: rgba(255,255,255,0.05);
-    border: 1px solid rgba(255,255,255,0.1);
+/* أنماط الإشعارات في لوحة التحكم */
+.notification-item {
+    background: rgba(255, 255, 255, 0.05);
+    border: 1px solid rgba(255, 255, 255, 0.1);
     transition: all 0.3s ease;
 }
 
-.notification-item-admin:hover {
-    background: rgba(255,255,255,0.08);
-    transform: translateX(-5px);
+.notification-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    transform: translateY(-2px);
 }
 
-.notification-item-admin .action-buttons {
-    opacity: 0;
-    transition: opacity 0.3s ease;
+/* ألوان أنواع الإشعارات */
+.info-bg {
+    background: linear-gradient(135deg, rgba(13, 110, 253, 0.2), rgba(13, 110, 253, 0.1));
+    border-left: 4px solid #0d6efd;
 }
 
-.notification-item-admin:hover .action-buttons {
-    opacity: 1;
+.success-bg {
+    background: linear-gradient(135deg, rgba(25, 135, 84, 0.2), rgba(25, 135, 84, 0.1));
+    border-left: 4px solid #198754;
 }
 
-.notification-item-admin h6 {
-    color: #FFD700;
-    margin-bottom: 8px;
+.warning-bg {
+    background: linear-gradient(135deg, rgba(255, 193, 7, 0.2), rgba(255, 193, 7, 0.1));
+    border-left: 4px solid #ffc107;
 }
 
-.notification-item-admin p {
-    color: #E1E1E1;
-    margin-bottom: 10px;
-    font-size: 14px;
-    line-height: 1.5;
+.error-bg {
+    background: linear-gradient(135deg, rgba(220, 53, 69, 0.2), rgba(220, 53, 69, 0.1));
+    border-left: 4px solid #dc3545;
 }
 
-.notification-item-admin small.text-info {
-    color: #6ECBF5 !important;
+.update-bg {
+    background: linear-gradient(135deg, rgba(111, 66, 193, 0.2), rgba(111, 66, 193, 0.1));
+    border-left: 4px solid #6f42c1;
+}
+
+/* أنماط أزرار الإشعارات */
+.notification-badge {
+    position: absolute;
+    top: -8px;
+    right: -8px;
+    background: #dc3545;
+    color: white;
+    border-radius: 50%;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
