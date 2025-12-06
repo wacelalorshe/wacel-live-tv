@@ -12,6 +12,109 @@
     
     <!-- Custom CSS -->
     <link rel="stylesheet" href="css/style.css">
+    <style>
+        /* أنماط الإشعارات */
+        .notification-container {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 9999;
+            max-width: 400px;
+            width: 90%;
+            animation: slideIn 0.5s ease-out;
+        }
+        
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification {
+            margin-bottom: 10px;
+            backdrop-filter: blur(10px);
+            background: rgba(255, 255, 255, 0.95) !important;
+            border: none !important;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+            animation: notificationFadeIn 0.3s ease-out;
+            color: #000 !important;
+        }
+        
+        .notification.alert-info {
+            background: linear-gradient(135deg, rgba(13, 110, 253, 0.9), rgba(13, 110, 253, 0.7)) !important;
+            color: white !important;
+        }
+        
+        .notification.alert-success {
+            background: linear-gradient(135deg, rgba(25, 135, 84, 0.9), rgba(25, 135, 84, 0.7)) !important;
+            color: white !important;
+        }
+        
+        .notification.alert-warning {
+            background: linear-gradient(135deg, rgba(255, 193, 7, 0.9), rgba(255, 193, 7, 0.7)) !important;
+            color: #000 !important;
+        }
+        
+        .notification.alert-danger {
+            background: linear-gradient(135deg, rgba(220, 53, 69, 0.9), rgba(220, 53, 69, 0.7)) !important;
+            color: white !important;
+        }
+        
+        .notification.alert-primary {
+            background: linear-gradient(135deg, rgba(111, 66, 193, 0.9), rgba(111, 66, 193, 0.7)) !important;
+            color: white !important;
+        }
+        
+        @keyframes notificationFadeIn {
+            from {
+                transform: translateY(-20px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+        
+        .notification-time {
+            font-size: 0.8rem;
+            opacity: 0.8;
+        }
+        
+        .custom-alert {
+            margin: 10px;
+            position: fixed;
+            top: 80px;
+            left: 20px;
+            right: 20px;
+            z-index: 9998;
+        }
+        
+        /* زر الإشعارات في التذييل */
+        .notifications-btn {
+            position: relative;
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -5px;
+            right: -5px;
+            background: #dc3545;
+            color: white;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            font-size: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
@@ -59,6 +162,11 @@
             <i class="uil uil-calendar-alt"></i>
             <span>جدول المباريات</span>
         </a>
+        <a href="#" class="nav-item notifications-btn" onclick="window.app.displayNotifications()" id="notificationsBtn">
+            <i class="uil uil-bell"></i>
+            <span>الإشعارات</span>
+            <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+        </a>
         <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
             <i class="uil uil-telegram-alt"></i>
             <span>تليجرام</span>
@@ -78,5 +186,56 @@
     
     <!-- Custom JS -->
     <script src="js/main.js"></script>
+    
+    <script>
+        // تحديث عداد الإشعارات في زر الإشعارات
+        function updateNotificationBadge(count) {
+            const badge = document.getElementById('notificationBadge');
+            const btn = document.getElementById('notificationsBtn');
+            
+            if (badge && btn) {
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.style.display = 'flex';
+                    
+                    // إضافة اهتزاز للزر
+                    btn.style.animation = 'shake 0.5s';
+                    setTimeout(() => {
+                        btn.style.animation = '';
+                    }, 500);
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+        }
+        
+        // إضافة أنيميشن للاهتزاز
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes shake {
+                0%, 100% {transform: translateX(0);}
+                10%, 30%, 50%, 70%, 90% {transform: translateX(-5px);}
+                20%, 40%, 60%, 80% {transform: translateX(5px);}
+            }
+        `;
+        document.head.appendChild(style);
+        
+        // تحديث العداد عند تحميل الإشعارات
+        document.addEventListener('DOMContentLoaded', function() {
+            // تحديث كل 30 ثانية
+            setInterval(() => {
+                if (window.app && window.app.activeNotifications) {
+                    updateNotificationBadge(window.app.activeNotifications.length);
+                }
+            }, 30000);
+            
+            // تحديث أولي بعد 2 ثانية
+            setTimeout(() => {
+                if (window.app && window.app.activeNotifications) {
+                    updateNotificationBadge(window.app.activeNotifications.length);
+                }
+            }, 2000);
+        });
+    </script>
 </body>
 </html>
