@@ -25,6 +25,16 @@ class NotificationSystem {
         setInterval(() => this.checkForNewNotifications(), 60000);
         
         console.log('✅ نظام الإشعارات جاهز');
+        
+        // التحقق من الإشعارات الجديدة للنظام المنبثق
+        setTimeout(() => {
+            if (window.notificationPopup) {
+                const unreadNotifications = this.notifications.filter(n => !n.isRead);
+                if (unreadNotifications.length > 0) {
+                    window.notificationPopup.showPopup(unreadNotifications[0]);
+                }
+            }
+        }, 3500);
     }
 
     async initializeFirebase() {
@@ -84,6 +94,9 @@ class NotificationSystem {
                     
                     // عرض الإشعارات في القائمة
                     this.renderNotifications();
+                    
+                    // تحقق من وجود إشعارات جديدة للنافذة المنبثقة
+                    this.checkPopupNotifications();
                     return;
                 } else {
                     console.log('ℹ️ لا توجد إشعارات في Firebase');
@@ -96,11 +109,52 @@ class NotificationSystem {
                 this.notifications = JSON.parse(savedNotifications);
                 console.log(`📱 تم تحميل ${this.notifications.length} إشعار من التخزين المحلي`);
                 this.renderNotifications();
+                this.checkPopupNotifications();
             }
             
         } catch (error) {
             console.warn('⚠️ فشل تحميل الإشعارات:', error);
             this.loadDefaultNotifications();
+        }
+    }
+
+    checkPopupNotifications() {
+        // تحقق من وجود إشعارات جديدة لعرضها في النافذة المنبثقة
+        if (window.notificationPopup && this.notifications.length > 0) {
+            const unreadNotifications = this.notifications.filter(n => !n.isRead);
+            
+            // تحقق من التفضيلات
+            const preferences = window.notificationPopup.userPreferences;
+            if (!preferences.showPopup) {
+                console.log('ℹ️ عرض الإشعارات المنبثقة معطل حسب تفضيلات المستخدم');
+                return;
+            }
+            
+            // تحقق من التردد
+            const lastPopupTime = localStorage.getItem('last_popup_time');
+            if (lastPopupTime) {
+                const now = Date.now();
+                const diff = now - parseInt(lastPopupTime);
+                
+                switch (preferences.showFrequency) {
+                    case 'once_per_day':
+                        if (diff < 24 * 60 * 60 * 1000) return;
+                        break;
+                    case 'once_per_hour':
+                        if (diff < 60 * 60 * 1000) return;
+                        break;
+                }
+            }
+            
+            // عرض أول إشعار غير مقروء
+            if (unreadNotifications.length > 0) {
+                setTimeout(() => {
+                    const notification = unreadNotifications[0];
+                    if (!window.notificationPopup.hasNotificationBeenShown(notification.id)) {
+                        window.notificationPopup.showPopup(notification);
+                    }
+                }, 2000);
+            }
         }
     }
 
@@ -114,7 +168,8 @@ class NotificationSystem {
                 message: 'أهلاً بك في تطبيق وسيل لايف برو. استمتع بمشاهدة أفضل القنوات.',
                 createdAt: new Date(),
                 isRead: false,
-                isActive: true
+                isActive: true,
+                type: 'welcome'
             },
             {
                 id: 'update-1',
@@ -122,11 +177,13 @@ class NotificationSystem {
                 message: 'تم إضافة قنوات رياضية جديدة. تابعنا للبقاء على اطلاع.',
                 createdAt: new Date(Date.now() - 3600000),
                 isRead: true,
-                isActive: true
+                isActive: true,
+                type: 'update'
             }
         ];
         
         this.renderNotifications();
+        this.checkPopupNotifications();
     }
 
     renderNotifications() {
@@ -197,6 +254,11 @@ class NotificationSystem {
         if (badge) {
             badge.textContent = this.unreadCount;
             badge.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+            
+            // عرض مؤشر الإشعارات الجديدة
+            if (window.notificationPopup && this.unreadCount > 0) {
+                window.notificationPopup.showNewNotificationIndicator(this.unreadCount);
+            }
         }
     }
 
@@ -328,6 +390,14 @@ class NotificationSystem {
                     // عرض إشعار عائم
                     this.showFloatingNotification(newNotifications[0]);
                     
+                    // عرض نافذة منبثقة إذا كان النظام متاحاً
+                    if (window.notificationPopup && newNotifications[0]) {
+                        const preferences = window.notificationPopup.userPreferences;
+                        if (preferences.showPopup) {
+                            window.notificationPopup.showPopup(newNotifications[0]);
+                        }
+                    }
+                    
                     // تحديث الواجهة
                     this.updateBadge();
                     this.renderNotifications();
@@ -376,6 +446,16 @@ class NotificationSystem {
                 floatingDiv.remove();
             }
         }, 5000);
+    }
+    
+    // دالة جديدة لدعم النظام المنبثق
+    showNotificationPopup(notification) {
+        if (window.notificationPopup) {
+            window.notificationPopup.showPopup(notification);
+        } else {
+            // استخدم النظام القديم كبديل
+            this.showFloatingNotification(notification);
+        }
     }
 }
 
