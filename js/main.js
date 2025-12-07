@@ -41,6 +41,11 @@ class BeinSportApp {
         setTimeout(() => this.checkForNewNotifications(), 10000);
         
         console.log('✅ تم تهيئة التطبيق والإشعارات بنجاح');
+        
+        // التحقق من الإشعارات الجديدة للنظام المنبثق
+        setTimeout(() => {
+            this.checkPopupNotifications();
+        }, 3000);
     }
 
     async loadData() {
@@ -529,12 +534,57 @@ class BeinSportApp {
         }
     }
 
+    checkPopupNotifications() {
+        // التحقق من وجود إشعارات جديدة لعرضها في النافذة المنبثقة
+        if (window.notificationPopup && this.notifications.length > 0) {
+            const unreadNotifications = this.notifications.filter(n => !n.isRead);
+            
+            // تحقق من التفضيلات
+            const preferences = window.notificationPopup.userPreferences;
+            if (!preferences.showPopup) {
+                console.log('ℹ️ عرض الإشعارات المنبثقة معطل حسب تفضيلات المستخدم');
+                return;
+            }
+            
+            // تحقق من التردد
+            const lastPopupTime = localStorage.getItem('last_popup_time');
+            if (lastPopupTime) {
+                const now = Date.now();
+                const diff = now - parseInt(lastPopupTime);
+                
+                switch (preferences.showFrequency) {
+                    case 'once_per_day':
+                        if (diff < 24 * 60 * 60 * 1000) return;
+                        break;
+                    case 'once_per_hour':
+                        if (diff < 60 * 60 * 1000) return;
+                        break;
+                }
+            }
+            
+            // عرض أول إشعار غير مقروء
+            if (unreadNotifications.length > 0) {
+                setTimeout(() => {
+                    const notification = unreadNotifications[0];
+                    if (!window.notificationPopup.hasNotificationBeenShown(notification.id)) {
+                        window.notificationPopup.showPopup(notification);
+                    }
+                }, 2000);
+            }
+        }
+    }
+
     updateUnreadCount() {
         this.unreadCount = this.notifications.filter(n => !n.isRead).length;
         const badge = document.getElementById('unreadCount');
         if (badge) {
             badge.textContent = this.unreadCount;
             badge.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+            
+            // عرض مؤشر الإشعارات الجديدة للنظام المنبثق
+            if (window.notificationPopup && this.unreadCount > 0) {
+                window.notificationPopup.showNewNotificationIndicator(this.unreadCount);
+            }
         }
     }
 
@@ -726,6 +776,16 @@ class BeinSportApp {
             }
         }, 5000);
     }
+    
+    // دالة جديدة لدعم النظام المنبثق
+    showNotificationPopup(notification) {
+        if (window.notificationPopup) {
+            window.notificationPopup.showPopup(notification);
+        } else {
+            // استخدم النظام القديم كبديل
+            this.showFloatingNotification(notification);
+        }
+    }
 
     async checkForNewNotifications() {
         try {
@@ -758,6 +818,14 @@ class BeinSportApp {
                     
                     // عرض إشعار عائم للإشعار الأول
                     this.showFloatingNotification(unreadNew[0]);
+                    
+                    // عرض نافذة منبثقة إذا كان النظام متاحاً
+                    if (window.notificationPopup && unreadNew[0]) {
+                        const preferences = window.notificationPopup.userPreferences;
+                        if (preferences.showPopup) {
+                            window.notificationPopup.showPopup(unreadNew[0]);
+                        }
+                    }
                     
                     // تحديث العداد
                     this.updateUnreadCount();
