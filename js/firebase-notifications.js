@@ -21,9 +21,14 @@ class FirebaseNotifications {
                 await this.initializeFirebase();
                 await this.loadNotifications();
                 this.renderNotifications();
+                
+                // التحقق من الإشعارات الجديدة للنظام المنبثق
+                this.checkPopupNotifications();
+                
             } catch (error) {
                 console.error('❌ فشل تحميل الإشعارات:', error);
                 this.loadFallbackNotifications();
+                this.checkPopupNotifications();
             }
         }, 1000);
     }
@@ -110,7 +115,9 @@ class FirebaseNotifications {
                         isRead: data.isRead || false,
                         isActive: data.isActive || true,
                         actionUrl: data.actionUrl || null,
-                        type: data.type || 'info'
+                        type: data.type || 'info',
+                        url: data.url || null,
+                        linkText: data.linkText || 'عرض التفاصيل'
                     });
                 }
             });
@@ -127,9 +134,53 @@ class FirebaseNotifications {
             // حفظ نسخة محلية
             this.saveToLocalStorage();
             
+            return this.notifications;
+            
         } catch (error) {
             console.error('❌ فشل تحميل الإشعارات:', error);
             throw error;
+        }
+    }
+
+    checkPopupNotifications() {
+        // التحقق من وجود إشعارات جديدة لعرضها في النافذة المنبثقة
+        if (window.notificationPopup && this.notifications.length > 0) {
+            const unreadNotifications = this.notifications.filter(n => !n.isRead);
+            
+            if (unreadNotifications.length > 0) {
+                // تأخير العرض لضمان تحميل الصفحة بالكامل
+                setTimeout(() => {
+                    const preferences = window.notificationPopup.userPreferences;
+                    
+                    // التحقق من تفضيلات المستخدم
+                    if (!preferences.showPopup) {
+                        console.log('ℹ️ عرض الإشعارات المنبثقة معطل حسب تفضيلات المستخدم');
+                        return;
+                    }
+                    
+                    // التحقق من التردد
+                    const lastPopupTime = localStorage.getItem('last_popup_time');
+                    if (lastPopupTime) {
+                        const now = Date.now();
+                        const diff = now - parseInt(lastPopupTime);
+                        
+                        switch (preferences.showFrequency) {
+                            case 'once_per_day':
+                                if (diff < 24 * 60 * 60 * 1000) return;
+                                break;
+                            case 'once_per_hour':
+                                if (diff < 60 * 60 * 1000) return;
+                                break;
+                        }
+                    }
+                    
+                    // عرض أول إشعار غير مقروء
+                    const notification = unreadNotifications[0];
+                    if (!window.notificationPopup.hasNotificationBeenShown(notification.id)) {
+                        window.notificationPopup.showPopup(notification);
+                    }
+                }, 2500);
+            }
         }
     }
 
@@ -206,10 +257,10 @@ class FirebaseNotifications {
                     <div class="notification-message">
                         ${notification.message}
                     </div>
-                    ${notification.actionUrl ? `
+                    ${notification.actionUrl || notification.url ? `
                         <div class="notification-actions">
-                            <button onclick="event.stopPropagation(); window.open('${notification.actionUrl}', '_blank')">
-                                <i class="uil uil-external-link-alt"></i> زيارة الرابط
+                            <button onclick="event.stopPropagation(); window.open('${notification.actionUrl || notification.url}', '_blank')">
+                                <i class="uil uil-external-link-alt"></i> ${notification.linkText || 'زيارة الرابط'}
                             </button>
                         </div>
                     ` : ''}
@@ -248,6 +299,11 @@ class FirebaseNotifications {
         if (badge) {
             badge.textContent = this.unreadCount;
             badge.style.display = this.unreadCount > 0 ? 'flex' : 'none';
+            
+            // عرض مؤشر الإشعارات الجديدة للنظام المنبثق
+            if (window.notificationPopup && this.unreadCount > 0) {
+                window.notificationPopup.showNewNotificationIndicator(this.unreadCount);
+            }
         }
     }
 
@@ -334,6 +390,7 @@ class FirebaseNotifications {
             
             await this.loadNotifications();
             this.renderNotifications();
+            this.checkPopupNotifications();
             
         } catch (error) {
             console.error('❌ فشل إعادة تحميل الإشعارات:', error);
@@ -352,6 +409,33 @@ class FirebaseNotifications {
                 this.reloadNotifications();
             }
         }
+    }
+    
+    // دالة جديدة لدعم النظام المنبثق
+    showNotificationPopup(notification) {
+        if (window.notificationPopup) {
+            window.notificationPopup.showPopup(notification);
+        } else {
+            // بديل بسيط
+            this.showSimplePopup(notification);
+        }
+    }
+    
+    showSimplePopup(notification) {
+        // بديل بسيط للنافذة المنبثقة إذا لم يكن النظام المنبثق متاحاً
+        const popup = document.createElement('div');
+        popup.className = 'simple-notification-popup';
+        popup.innerHTML = `
+            <div class="simple-popup-content">
+                <h5>${notification.title}</h5>
+                <p>${notification.message}</p>
+                <button onclick="this.parentElement.parentElement.remove()">موافق</button>
+            </div>
+        `;
+        
+        document.body.appendChild(popup);
+        
+        setTimeout(() => popup.remove(), 5000);
     }
 }
 
