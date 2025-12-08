@@ -1,5 +1,6 @@
 // ===========================================
 // تطبيق صفحة القسم - إصدار مصحح
+// يدعم الترتيب التلقائي للقنوات حسب الترتيب في Admin
 // ===========================================
 
 class SectionPageApp {
@@ -161,11 +162,12 @@ class SectionPageApp {
             console.log('✅ تم تحميل بيانات القسم:', this.section.name);
             
             // تحديث رسالة التحميل
-            if (details) details.textContent = 'جاري جلب القنوات...';
+            if (details) details.textContent = 'جاري جلب القنوات مرتبة حسب الترتيب...';
             
-            // جلب القنوات
+            // جلب القنوات مرتبة حسب الترتيب
             const channelsSnapshot = await this.db.collection('channels')
                 .where('sectionId', '==', this.sectionId)
+                .orderBy('order', 'asc')
                 .get();
             
             this.channels = channelsSnapshot.docs.map(doc => ({
@@ -173,7 +175,7 @@ class SectionPageApp {
                 ...doc.data()
             }));
             
-            console.log(`✅ تم تحميل ${this.channels.length} قناة`);
+            console.log(`✅ تم تحميل ${this.channels.length} قناة مرتبة حسب الترتيب`);
             
             // حفظ نسخة في localStorage للاستخدام المستقبلي
             this.saveToLocalStorage();
@@ -297,6 +299,7 @@ class SectionPageApp {
             try {
                 const allChannels = source();
                 if (allChannels && Array.isArray(allChannels)) {
+                    // فرز القنوات حسب الترتيب
                     this.channels = allChannels
                         .filter(channel => channel.sectionId === this.sectionId)
                         .sort((a, b) => (a.order || 999) - (b.order || 999));
@@ -310,7 +313,7 @@ class SectionPageApp {
             }
         }
         
-        console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
+        console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage مرتبة حسب الترتيب`);
         
         // إذا لم توجد قنوات، نستخدم بيانات تجريبية
         if (this.channels.length === 0) {
@@ -400,7 +403,7 @@ class SectionPageApp {
         // ترتيب القنوات حسب الترتيب
         const sortedChannels = this.channels.sort((a, b) => (a.order || 999) - (b.order || 999));
         
-        console.log(`📺 جاري عرض ${sortedChannels.length} قناة`);
+        console.log(`📺 جاري عرض ${sortedChannels.length} قناة مرتبة حسب الترتيب`);
         
         if (sortedChannels.length === 0) {
             container.innerHTML = `
@@ -416,13 +419,14 @@ class SectionPageApp {
             return;
         }
         
-        // إنشاء HTML للقنوات
+        // إنشاء HTML للقنوات مع عرض الأرقام حسب الترتيب
         container.innerHTML = `
             <div class="channels-grid">
                 ${sortedChannels.map((channel, index) => `
                     <div class="channel-card" data-channel-id="${channel.id}" 
                          onclick="sectionPageApp.openChannel(${index})"
                          style="animation-delay: ${index * 0.1}s">
+                        <div class="order-badge">${index + 1}</div>
                         <div class="channel-logo">
                             <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
                                  alt="${channel.name}"
@@ -468,6 +472,9 @@ class SectionPageApp {
                     opacity: 0;
                     transform: translateY(20px);
                     animation: fadeInUp 0.5s ease forwards;
+                    display: flex;
+                    flex-direction: column;
+                    align-items: center;
                 }
                 
                 @keyframes fadeInUp {
@@ -481,6 +488,24 @@ class SectionPageApp {
                     transform: translateY(-10px) scale(1.03);
                     box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
                     border-color: #654FD4;
+                }
+                
+                .order-badge {
+                    position: absolute;
+                    top: -10px;
+                    right: -10px;
+                    background: linear-gradient(135deg, #FF5200, #FF8C00);
+                    color: white;
+                    width: 30px;
+                    height: 30px;
+                    border-radius: 50%;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    font-size: 14px;
+                    font-weight: bold;
+                    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+                    z-index: 1;
                 }
                 
                 .channel-logo {
@@ -508,6 +533,7 @@ class SectionPageApp {
                     font-weight: bold;
                     margin-top: 10px;
                     text-shadow: 0 1px 2px rgba(0,0,0,0.5);
+                    text-align: center;
                 }
                 
                 .channel-overlay {
@@ -688,6 +714,37 @@ if (typeof decryptData === 'undefined') {
             return null;
         }
     };
+}
+
+// إضافة شاشة التحميل ديناميكياً إذا لم تكن موجودة
+if (!document.getElementById('pageLoadingScreen')) {
+    const loadingScreen = document.createElement('div');
+    loadingScreen.id = 'pageLoadingScreen';
+    loadingScreen.style.position = 'fixed';
+    loadingScreen.style.top = '0';
+    loadingScreen.style.left = '0';
+    loadingScreen.style.right = '0';
+    loadingScreen.style.bottom = '0';
+    loadingScreen.style.background = 'linear-gradient(to right, #000, #151825, #000)';
+    loadingScreen.style.display = 'flex';
+    loadingScreen.style.flexDirection = 'column';
+    loadingScreen.style.alignItems = 'center';
+    loadingScreen.style.justifyContent = 'center';
+    loadingScreen.style.zIndex = '9999';
+    loadingScreen.innerHTML = `
+        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
+        <p class="text-white">جاري تحميل القسم...</p>
+        <small id="loadingDetails" class="text-muted">جاري التهيئة...</small>
+    `;
+    document.body.appendChild(loadingScreen);
+}
+
+// إضافة محتوى الصفحة ديناميكياً إذا لم يكن موجوداً
+if (!document.getElementById('pageContentWrapper')) {
+    const contentWrapper = document.createElement('div');
+    contentWrapper.id = 'pageContentWrapper';
+    contentWrapper.style.display = 'none';
+    document.body.appendChild(contentWrapper);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
