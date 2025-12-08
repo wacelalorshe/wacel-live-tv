@@ -12,6 +12,7 @@ class AdminManager {
         this.editingNotification = null;
         this.filteredChannels = null;
         this.filteredNotifications = null;
+        this.currentSectionFilter = ''; // فلترة القسم الحالية
         this.init();
     }
 
@@ -351,8 +352,9 @@ class AdminManager {
                                     <textarea id="channelUrl" class="form-control" rows="3" required placeholder="أدخل رابط البث"></textarea>
                                 </div>
                                 <div class="form-group mb-3">
-                                    <label class="form-label">ترتيب العرض</label>
-                                    <input type="number" id="channelOrder" class="form-control" value="1" min="1">
+                                    <label class="form-label">ترتيب العرض <small>(للإضافة: تلقائي، للتعديل: يدوي)</small></label>
+                                    <input type="number" id="channelOrder" class="form-control" value="1" min="1" disabled>
+                                    <small class="text-muted" id="orderHelpText">سيتم تعيين الترتيب تلقائياً عند الحفظ</small>
                                 </div>
                                 <div class="form-group mb-3">
                                     <label class="form-label">رابط التطبيق</label>
@@ -375,16 +377,43 @@ class AdminManager {
             
             <!-- Channels List -->
             <div class="card" style="background: rgba(0,0,0,0.7); border: 1px solid #42318F;">
-                <div class="card-header card-header-custom">
+                <div class="card-header card-header-custom d-flex justify-content-between align-items-center">
                     <h4 class="mb-0 text-white">
                         <i class="uil uil-list-ui-alt"></i> القنوات المضافة
                         <span id="channelsCount" class="badge bg-primary ms-2">0</span>
                     </h4>
+                    <div>
+                        <button class="btn btn-info me-2" onclick="adminManager.reorderAllChannels()">
+                            <i class="uil uil-sort-amount-down"></i> إعادة ترتيب جميع القنوات
+                        </button>
+                    </div>
                 </div>
                 <div class="card-body">
-                    <div class="mb-3">
-                        <input type="text" id="channelSearch" class="form-control" placeholder="🔍 بحث في القنوات..." oninput="adminManager.filterChannels()">
+                    <!-- Search and Filter Section -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <input type="text" id="channelSearch" class="form-control" placeholder="🔍 بحث في القنوات..." oninput="adminManager.filterChannels()">
+                        </div>
+                        <div class="col-md-6">
+                            <select id="channelSectionFilter" class="form-control" onchange="adminManager.filterChannelsBySection()">
+                                <option value="">جميع الأقسام</option>
+                            </select>
+                        </div>
                     </div>
+                    
+                    <!-- Filter Info -->
+                    <div id="filterInfo" style="display: none;" class="mb-3">
+                        <div class="alert alert-info d-flex justify-content-between align-items-center">
+                            <div>
+                                <i class="uil uil-filter"></i>
+                                <span id="filterInfoText">جاري عرض قنوات قسم معين</span>
+                            </div>
+                            <button class="btn btn-sm btn-light" onclick="adminManager.clearSectionFilter()">
+                                <i class="uil uil-times"></i> إزالة الفلترة
+                            </button>
+                        </div>
+                    </div>
+                    
                     <div id="channelsList">
                         <div class="text-center py-5">
                             <div class="spinner-border text-primary" role="status">
@@ -638,6 +667,7 @@ service cloud.firestore {
         this.renderNotificationsList();
         this.updateStats();
         this.populateSectionDropdown();
+        this.populateSectionFilter();
     }
 
     renderSectionsList() {
@@ -681,14 +711,21 @@ service cloud.firestore {
                                     ${section.isActive !== false ? 'نشط' : 'غير نشط'}
                                 </small>
                                 ${section.description ? `<span class="mx-2">•</span><small>${section.description}</small>` : ''}
+                                <span class="mx-2">•</span>
+                                <small class="badge bg-primary">
+                                    ${this.getSectionChannelsCount(section.id)} قنوات
+                                </small>
                             </div>
                         </div>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn btn-warning btn-sm" onclick="adminManager.editSection('${section.id}')">
+                        <button class="btn btn-info btn-sm me-1" onclick="adminManager.viewSectionChannels('${section.id}')" title="عرض قنوات القسم">
+                            <i class="uil uil-eye"></i> عرض القنوات
+                        </button>
+                        <button class="btn btn-warning btn-sm me-1" onclick="adminManager.editSection('${section.id}')" title="تعديل القسم">
                             <i class="uil uil-edit"></i> تعديل
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="adminManager.deleteSection('${section.id}')">
+                        <button class="btn btn-danger btn-sm" onclick="adminManager.deleteSection('${section.id}')" title="حذف القسم">
                             <i class="uil uil-trash-alt"></i> حذف
                         </button>
                     </div>
@@ -716,42 +753,89 @@ service cloud.firestore {
             return;
         }
         
-        const filteredChannels = this.filteredChannels || this.channels;
+        // تحديد القنوات المراد عرضها بناءً على الفلترة
+        let channelsToDisplay = this.channels;
         
-        container.innerHTML = filteredChannels.map(channel => {
+        if (this.filteredChannels) {
+            channelsToDisplay = this.filteredChannels;
+        }
+        
+        // إذا كان هناك فلترة حسب القسم
+        if (this.currentSectionFilter) {
+            channelsToDisplay = channelsToDisplay.filter(channel => channel.sectionId === this.currentSectionFilter);
+        }
+        
+        // فرز القنوات حسب الترتيب
+        const sortedChannels = [...channelsToDisplay].sort((a, b) => (a.order || 999) - (b.order || 999));
+        
+        container.innerHTML = sortedChannels.map(channel => {
             const section = this.sections.find(s => s.id === channel.sectionId);
+            
+            // تحديد إذا كانت القناة في الأعلى أو الأسفل
+            const sectionChannels = this.channels.filter(c => c.sectionId === channel.sectionId);
+            const sortedSectionChannels = [...sectionChannels].sort((a, b) => (a.order || 999) - (b.order || 999));
+            const currentIndex = sortedSectionChannels.findIndex(c => c.id === channel.id);
+            const isFirst = currentIndex === 0;
+            const isLast = currentIndex === sortedSectionChannels.length - 1;
+            
             return `
-            <div class="channel-item">
+            <div class="channel-item" data-channel-id="${channel.id}" data-order="${channel.order}">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center">
+                        <div class="channel-order-badge me-2" title="الترتيب الحالي">
+                            <span class="badge bg-primary">${channel.order || 1}</span>
+                        </div>
                         <img src="${channel.image || 'https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'}" 
                              alt="${channel.name}" 
-                             class="rounded me-3"
-                             style="width: 60px; height: 40px; object-fit: cover;"
+                             class="rounded me-3 channel-thumbnail"
                              onerror="this.src='https://via.placeholder.com/60x40/2F2562/FFFFFF?text=TV'">
                         <div>
                             <h6 class="text-white mb-1">${channel.name}</h6>
                             <div class="text-muted">
                                 <small>الترتيب: ${channel.order || 1}</small>
-                                ${section ? `<span class="mx-2">•</span><small>${section.name}</small>` : ''}
+                                ${section ? `
+                                    <span class="mx-2">•</span>
+                                    <small class="section-badge" onclick="adminManager.filterBySection('${section.id}')" style="cursor: pointer;" title="عرض قنوات هذا القسم فقط">
+                                        ${section.name}
+                                    </small>
+                                ` : ''}
                                 <span class="mx-2">•</span>
-                                <small>${channel.url ? '🔗' : '❌'}</small>
+                                <small class="${channel.url ? 'text-success' : 'text-danger'}">
+                                    ${channel.url ? '🔗 رابط متاح' : '❌ بدون رابط'}
+                                </small>
                             </div>
                         </div>
                     </div>
                     <div class="action-buttons">
-                        <button class="btn btn-warning btn-sm" onclick="adminManager.editChannel('${channel.id}')">
-                            <i class="uil uil-edit"></i> تعديل
+                        <button class="btn btn-info btn-sm move-up-btn ${isFirst ? 'disabled' : ''}" 
+                                onclick="${isFirst ? '' : `adminManager.moveChannelUp('${channel.id}')`}" 
+                                title="${isFirst ? 'القناة في الأعلى' : 'تحريك للأعلى'}" ${isFirst ? 'disabled' : ''}>
+                            <i class="uil uil-arrow-up"></i>
                         </button>
-                        <button class="btn btn-danger btn-sm" onclick="adminManager.deleteChannel('${channel.id}')">
-                            <i class="uil uil-trash-alt"></i> حذف
+                        <button class="btn btn-info btn-sm move-down-btn ${isLast ? 'disabled' : ''}" 
+                                onclick="${isLast ? '' : `adminManager.moveChannelDown('${channel.id}')`}" 
+                                title="${isLast ? 'القناة في الأسفل' : 'تحريك للأسفل'}" ${isLast ? 'disabled' : ''}>
+                            <i class="uil uil-arrow-down"></i>
+                        </button>
+                        <button class="btn btn-warning btn-sm" onclick="adminManager.editChannel('${channel.id}')" title="تعديل القناة">
+                            <i class="uil uil-edit"></i>
+                        </button>
+                        <button class="btn btn-danger btn-sm" onclick="adminManager.deleteChannel('${channel.id}')" title="حذف القناة">
+                            <i class="uil uil-trash-alt"></i>
                         </button>
                     </div>
+                </div>
+                <div class="mt-2 text-muted small">
+                    <span class="badge bg-secondary">#${channel.id.substring(0, 8)}</span>
+                    ${channel.createdAt ? `<span class="mx-2">•</span><small>تم الإنشاء: ${new Date(channel.createdAt).toLocaleDateString('ar-SA')}</small>` : ''}
                 </div>
             </div>
         `}).join('');
         
-        if (countElement) countElement.textContent = filteredChannels.length;
+        if (countElement) countElement.textContent = sortedChannels.length;
+        
+        // تحديث معلومات الفلترة
+        this.updateFilterInfo();
     }
 
     renderNotificationsList() {
@@ -863,8 +947,24 @@ service cloud.firestore {
         
         dropdown.innerHTML = '<option value="">اختر القسم</option>' +
             this.sections.map(section => 
-                `<option value="${section.id}">${section.name}</option>`
+                `<option value="${section.id}">${section.name} (${this.getSectionChannelsCount(section.id)} قنوات)</option>`
             ).join('');
+    }
+
+    // دالة جديدة لتعبئة فلتر القسم
+    populateSectionFilter() {
+        const filter = document.getElementById('channelSectionFilter');
+        if (!filter) return;
+        
+        filter.innerHTML = '<option value="">جميع الأقسام</option>' +
+            this.sections.map(section => 
+                `<option value="${section.id}" ${this.currentSectionFilter === section.id ? 'selected' : ''}>${section.name} (${this.getSectionChannelsCount(section.id)} قنوات)</option>`
+            ).join('');
+    }
+
+    // دالة جديدة للحصول على عدد القنوات في قسم معين
+    getSectionChannelsCount(sectionId) {
+        return this.channels.filter(channel => channel.sectionId === sectionId).length;
     }
 
     updateStats() {
@@ -992,7 +1092,6 @@ service cloud.firestore {
             name: document.getElementById('channelName').value,
             image: document.getElementById('channelImage').value,
             url: document.getElementById('channelUrl').value,
-            order: parseInt(document.getElementById('channelOrder').value),
             sectionId: document.getElementById('channelSection').value,
             appUrl: document.getElementById('channelAppUrl').value || 'https://play.google.com/store/apps/details?id=com.xpola.player',
             downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
@@ -1008,7 +1107,9 @@ service cloud.firestore {
         
         try {
             if (channelId) {
-                // تحديث قناة موجودة
+                // تحديث قناة موجودة - نأخذ الترتيب من الحقل
+                channelData.order = parseInt(document.getElementById('channelOrder').value) || 1;
+                
                 if (this.firestoreAvailable) {
                     const db = firebaseUtils.getDB();
                     await db.collection('channels').doc(channelId).update(channelData);
@@ -1019,10 +1120,22 @@ service cloud.firestore {
                     this.channels[index] = { ...this.channels[index], ...channelData };
                 }
                 
-                this.showAlert('تم تحديث القناة بنجاح', 'success');
+                // إعادة ترتيب القنوات في نفس القسم
+                await this.reorderSectionChannels(channelData.sectionId);
+                
+                this.showAlert('تم تحديث القناة وإعادة ترتيب القنوات بنجاح', 'success');
             } else {
-                // إضافة قناة جديدة
+                // إضافة قناة جديدة - نعطيها ترتيب تلقائي
+                const sectionChannels = this.channels.filter(c => c.sectionId === channelData.sectionId);
+                let maxOrder = 0;
+                
+                if (sectionChannels.length > 0) {
+                    maxOrder = Math.max(...sectionChannels.map(c => c.order || 0));
+                }
+                
+                channelData.order = maxOrder + 1;
                 channelData.createdAt = new Date();
+                
                 let newChannelId;
                 
                 if (this.firestoreAvailable) {
@@ -1039,7 +1152,7 @@ service cloud.firestore {
                     ...channelData
                 });
                 
-                this.showAlert('تم إضافة القناة بنجاح', 'success');
+                this.showAlert(`تم إضافة القناة بنجاح في المركز ${channelData.order}`, 'success');
             }
             
             this.saveDataToLocalStorage();
@@ -1062,13 +1175,27 @@ service cloud.firestore {
         document.getElementById('channelName').value = channel.name;
         document.getElementById('channelImage').value = channel.image || '';
         document.getElementById('channelUrl').value = channel.url;
+        
+        // عرض الترتيب الحالي وتمكين التعديل
         document.getElementById('channelOrder').value = channel.order || 1;
+        document.getElementById('channelOrder').disabled = false;
+        document.getElementById('channelOrder').readOnly = false;
+        
         document.getElementById('channelSection').value = channel.sectionId;
         document.getElementById('channelAppUrl').value = channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
         
         document.getElementById('channelFormTitle').textContent = 'تعديل القناة';
         document.getElementById('channelSaveButton').textContent = 'تحديث القناة';
         document.getElementById('cancelChannelEdit').style.display = 'block';
+        
+        // تحديث نص المساعدة
+        const orderHelp = document.getElementById('orderHelpText');
+        if (orderHelp) {
+            const sectionChannels = this.channels.filter(c => c.sectionId === channel.sectionId);
+            const sortedSectionChannels = [...sectionChannels].sort((a, b) => (a.order || 999) - (b.order || 999));
+            const currentIndex = sortedSectionChannels.findIndex(c => c.id === channelId);
+            orderHelp.textContent = `الترتيب الحالي: ${channel.order || 1} (المركز ${currentIndex + 1} من ${sortedSectionChannels.length})`;
+        }
         
         this.updateImagePreview(channel.image, 'channelImagePreview');
         
@@ -1089,6 +1216,201 @@ service cloud.firestore {
         document.getElementById('cancelChannelEdit').style.display = 'none';
         document.getElementById('channelImagePreview').style.display = 'none';
         document.getElementById('channelAppUrl').value = 'https://play.google.com/store/apps/details?id=com.xpola.player';
+        document.getElementById('channelOrder').value = '1';
+        document.getElementById('channelOrder').disabled = true;
+        document.getElementById('channelOrder').readOnly = true;
+        document.getElementById('orderHelpText').textContent = 'سيتم تعيين الترتيب تلقائياً عند الحفظ';
+    }
+
+    // وظائف تحريك الترتيب
+    async moveChannelUp(channelId) {
+        const channel = this.channels.find(c => c.id === channelId);
+        if (!channel) return;
+        
+        // الحصول على جميع القنوات في نفس القسم مرتبة
+        const sectionChannels = this.channels
+            .filter(c => c.sectionId === channel.sectionId)
+            .sort((a, b) => (a.order || 999) - (b.order || 999));
+        
+        const currentIndex = sectionChannels.findIndex(c => c.id === channelId);
+        
+        if (currentIndex > 0) {
+            // العثور على القناة السابقة
+            const previousChannel = sectionChannels[currentIndex - 1];
+            
+            // تبادل الترتيب مع القناة السابقة
+            const tempOrder = channel.order;
+            channel.order = previousChannel.order;
+            previousChannel.order = tempOrder;
+            
+            // تحديث في Firebase إذا كان متاحاً
+            if (this.firestoreAvailable) {
+                const db = firebaseUtils.getDB();
+                await Promise.all([
+                    db.collection('channels').doc(channel.id).update({ order: channel.order }),
+                    db.collection('channels').doc(previousChannel.id).update({ order: previousChannel.order })
+                ]);
+            }
+            
+            this.saveDataToLocalStorage();
+            this.renderData();
+            this.showAlert('تم نقل القناة للأعلى', 'success');
+        } else {
+            this.showAlert('لا يمكن نقل القناة للأعلى، هي بالفعل في الأعلى', 'warning');
+        }
+    }
+
+    async moveChannelDown(channelId) {
+        const channel = this.channels.find(c => c.id === channelId);
+        if (!channel) return;
+        
+        // الحصول على جميع القنوات في نفس القسم مرتبة
+        const sectionChannels = this.channels
+            .filter(c => c.sectionId === channel.sectionId)
+            .sort((a, b) => (a.order || 999) - (b.order || 999));
+        
+        const currentIndex = sectionChannels.findIndex(c => c.id === channelId);
+        
+        if (currentIndex < sectionChannels.length - 1) {
+            // العثور على القناة التالية
+            const nextChannel = sectionChannels[currentIndex + 1];
+            
+            // تبادل الترتيب مع القناة التالية
+            const tempOrder = channel.order;
+            channel.order = nextChannel.order;
+            nextChannel.order = tempOrder;
+            
+            // تحديث في Firebase إذا كان متاحاً
+            if (this.firestoreAvailable) {
+                const db = firebaseUtils.getDB();
+                await Promise.all([
+                    db.collection('channels').doc(channel.id).update({ order: channel.order }),
+                    db.collection('channels').doc(nextChannel.id).update({ order: nextChannel.order })
+                ]);
+            }
+            
+            this.saveDataToLocalStorage();
+            this.renderData();
+            this.showAlert('تم نقل القناة للأسفل', 'success');
+        } else {
+            this.showAlert('لا يمكن نقل القناة للأسفل، هي بالفعل في الأسفل', 'warning');
+        }
+    }
+
+    // وظيفة إعادة ترتيب جميع القنوات
+    async reorderAllChannels() {
+        if (!confirm('هل أنت متأكد من إعادة ترتيب جميع القنوات؟ سيتم إعادة ترتيب القنوات في جميع الأقسام.')) {
+            return;
+        }
+        
+        try {
+            this.showAlert('جاري إعادة ترتيب جميع القنوات...', 'info');
+            
+            // الحصول على جميع الأقسام الفريدة
+            const uniqueSectionIds = [...new Set(this.channels.map(c => c.sectionId))];
+            
+            // إعادة ترتيب القنوات في كل قسم
+            for (const sectionId of uniqueSectionIds) {
+                await this.reorderSectionChannels(sectionId);
+            }
+            
+            this.saveDataToLocalStorage();
+            this.renderData();
+            this.showAlert('تم إعادة ترتيب جميع القنوات في جميع الأقسام تلقائياً', 'success');
+            
+        } catch (error) {
+            console.error('❌ خطأ في إعادة الترتيب:', error);
+            this.showAlert('خطأ في إعادة الترتيب: ' + error.message, 'error');
+        }
+    }
+
+    // وظيفة مساعدة لإعادة ترتيب القنوات في قسم معين
+    async reorderSectionChannels(sectionId) {
+        // الحصول على جميع القنوات في القسم
+        const sectionChannels = this.channels
+            .filter(c => c.sectionId === sectionId);
+        
+        // إذا لم توجد قنوات، نخرج
+        if (sectionChannels.length === 0) return;
+        
+        // فرز القنوات حسب الترتيب الحالي
+        sectionChannels.sort((a, b) => (a.order || 999) - (b.order || 999));
+        
+        console.log(`🔧 إعادة ترتيب ${sectionChannels.length} قناة في القسم ${sectionId}`);
+        
+        // تحديث الترتيب بالتسلسل (1، 2، 3، ...)
+        for (let i = 0; i < sectionChannels.length; i++) {
+            const channel = sectionChannels[i];
+            const newOrder = i + 1;
+            
+            // تحديث الترتيب فقط إذا تغير
+            if (channel.order !== newOrder) {
+                channel.order = newOrder;
+                console.log(`📝 تحديث الترتيب: ${channel.name} → ${newOrder}`);
+                
+                // تحديث في Firebase إذا كان متاحاً
+                if (this.firestoreAvailable) {
+                    const db = firebaseUtils.getDB();
+                    await db.collection('channels').doc(channel.id).update({ order: newOrder });
+                }
+            }
+        }
+        
+        console.log(`✅ تم إعادة ترتيب القنوات في القسم ${sectionId}`);
+    }
+
+    // وظائف الفلترة حسب القسم
+    filterChannelsBySection() {
+        const sectionFilter = document.getElementById('channelSectionFilter');
+        if (!sectionFilter) return;
+        
+        this.currentSectionFilter = sectionFilter.value;
+        this.renderChannelsList();
+    }
+
+    // فلترة حسب قسم معين
+    filterBySection(sectionId) {
+        this.currentSectionFilter = sectionId;
+        document.getElementById('channelSectionFilter').value = sectionId;
+        this.renderChannelsList();
+    }
+
+    // عرض قنوات قسم معين (من قائمة الأقسام)
+    viewSectionChannels(sectionId) {
+        // التبديل إلى تبويب القنوات
+        const channelsTab = document.querySelector('[href="#channelsTab"]');
+        if (channelsTab) {
+            channelsTab.click();
+        }
+        
+        // تطبيق الفلترة
+        setTimeout(() => {
+            this.filterBySection(sectionId);
+        }, 300);
+    }
+
+    // إزالة الفلترة
+    clearSectionFilter() {
+        this.currentSectionFilter = '';
+        document.getElementById('channelSectionFilter').value = '';
+        this.renderChannelsList();
+    }
+
+    // تحديث معلومات الفلترة
+    updateFilterInfo() {
+        const filterInfo = document.getElementById('filterInfo');
+        const filterInfoText = document.getElementById('filterInfoText');
+        
+        if (this.currentSectionFilter && filterInfo && filterInfoText) {
+            const section = this.sections.find(s => s.id === this.currentSectionFilter);
+            if (section) {
+                const channelCount = this.getSectionChannelsCount(section.id);
+                filterInfoText.textContent = `جاري عرض ${channelCount} قناة في قسم "${section.name}" فقط`;
+                filterInfo.style.display = 'block';
+            }
+        } else if (filterInfo) {
+            filterInfo.style.display = 'none';
+        }
     }
 
     // وظائف إدارة الإشعارات
@@ -1226,6 +1548,70 @@ service cloud.firestore {
         }
     }
 
+    async deleteSection(sectionId) {
+        if (!confirm('هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع القنوات المرتبطة به.')) return;
+        
+        try {
+            if (this.firestoreAvailable) {
+                const db = firebaseUtils.getDB();
+                await db.collection('sections').doc(sectionId).delete();
+                
+                const channelsToDelete = this.channels.filter(c => c.sectionId === sectionId);
+                for (const channel of channelsToDelete) {
+                    await db.collection('channels').doc(channel.id).delete();
+                }
+            }
+            
+            this.sections = this.sections.filter(s => s.id !== sectionId);
+            this.channels = this.channels.filter(c => c.sectionId !== sectionId);
+            
+            // إذا كان القسم المحذوف هو القسم المفلتر حالياً، أزل الفلترة
+            if (this.currentSectionFilter === sectionId) {
+                this.clearSectionFilter();
+            }
+            
+            this.saveDataToLocalStorage();
+            this.renderData();
+            
+            this.showAlert('تم حذف القسم وجميع قنواته بنجاح', 'success');
+            
+        } catch (error) {
+            console.error('❌ خطأ في حذف القسم:', error);
+            this.showAlert('خطأ في حذف القسم: ' + error.message, 'error');
+        }
+    }
+
+    async deleteChannel(channelId) {
+        if (!confirm('هل أنت متأكد من حذف هذه القناة؟')) return;
+        
+        try {
+            const channelToDelete = this.channels.find(c => c.id === channelId);
+            if (!channelToDelete) return;
+            
+            const sectionId = channelToDelete.sectionId;
+            
+            if (this.firestoreAvailable) {
+                const db = firebaseUtils.getDB();
+                await db.collection('channels').doc(channelId).delete();
+            }
+            
+            // حذف القناة من المصفوفة
+            this.channels = this.channels.filter(c => c.id !== channelId);
+            
+            // إعادة ترتيب القنوات المتبقية في نفس القسم
+            await this.reorderSectionChannels(sectionId);
+            
+            this.saveDataToLocalStorage();
+            this.renderData();
+            
+            this.showAlert('تم حذف القناة وإعادة ترتيب القنوات المتبقية', 'success');
+            
+        } catch (error) {
+            console.error('❌ خطأ في حذف القناة:', error);
+            this.showAlert('خطأ في حذف القناة: ' + error.message, 'error');
+        }
+    }
+
     filterChannels() {
         const searchTerm = document.getElementById('channelSearch').value.toLowerCase();
         
@@ -1266,56 +1652,6 @@ service cloud.firestore {
             preview.style.display = 'block';
         } else {
             preview.style.display = 'none';
-        }
-    }
-
-    async deleteSection(sectionId) {
-        if (!confirm('هل أنت متأكد من حذف هذا القسم؟ سيتم حذف جميع القنوات المرتبطة به.')) return;
-        
-        try {
-            if (this.firestoreAvailable) {
-                const db = firebaseUtils.getDB();
-                await db.collection('sections').doc(sectionId).delete();
-                
-                const channelsToDelete = this.channels.filter(c => c.sectionId === sectionId);
-                for (const channel of channelsToDelete) {
-                    await db.collection('channels').doc(channel.id).delete();
-                }
-            }
-            
-            this.sections = this.sections.filter(s => s.id !== sectionId);
-            this.channels = this.channels.filter(c => c.sectionId !== sectionId);
-            
-            this.saveDataToLocalStorage();
-            this.renderData();
-            
-            this.showAlert('تم حذف القسم وجميع قنواته بنجاح', 'success');
-            
-        } catch (error) {
-            console.error('❌ خطأ في حذف القسم:', error);
-            this.showAlert('خطأ في حذف القسم: ' + error.message, 'error');
-        }
-    }
-
-    async deleteChannel(channelId) {
-        if (!confirm('هل أنت متأكد من حذف هذه القناة؟')) return;
-        
-        try {
-            if (this.firestoreAvailable) {
-                const db = firebaseUtils.getDB();
-                await db.collection('channels').doc(channelId).delete();
-            }
-            
-            this.channels = this.channels.filter(c => c.id !== channelId);
-            
-            this.saveDataToLocalStorage();
-            this.renderData();
-            
-            this.showAlert('تم حذف القناة بنجاح', 'success');
-            
-        } catch (error) {
-            console.error('❌ خطأ في حذف القناة:', error);
-            this.showAlert('خطأ في حذف القناة: ' + error.message, 'error');
         }
     }
 
@@ -1501,7 +1837,133 @@ service cloud.firestore {
     }
 
     setupUI() {
-        // لا حاجة لإضافة أنماط إضافية هنا لأننا أضفناها في الـ CSS المنفصل
+        // إضافة CSS إضافي
+        const style = document.createElement('style');
+        style.textContent = `
+            .channel-order-badge {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                width: 30px;
+                height: 30px;
+                background: linear-gradient(135deg, #42318F, #654FD4);
+                border-radius: 50%;
+                font-weight: bold;
+                font-size: 14px;
+                color: white;
+                box-shadow: 0 3px 6px rgba(0,0,0,0.3);
+            }
+            
+            .channel-item {
+                background: rgba(255, 255, 255, 0.05);
+                padding: 15px;
+                margin-bottom: 10px;
+                border-radius: 10px;
+                border: 1px solid rgba(66, 49, 143, 0.3);
+                transition: all 0.3s ease;
+                position: relative;
+            }
+            
+            .channel-item:hover {
+                background: rgba(66, 49, 143, 0.2);
+                border-color: #654FD4;
+                transform: translateY(-3px);
+                box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            }
+            
+            .channel-thumbnail {
+                width: 60px;
+                height: 40px;
+                object-fit: cover;
+                border-radius: 6px;
+                border: 2px solid rgba(255,255,255,0.1);
+            }
+            
+            .action-buttons {
+                display: flex;
+                gap: 5px;
+            }
+            
+            .action-buttons .btn-sm {
+                padding: 6px 10px;
+                font-size: 13px;
+                transition: all 0.2s ease;
+            }
+            
+            .action-buttons .btn-sm:hover:not(.disabled) {
+                transform: translateY(-2px);
+                box-shadow: 0 4px 8px rgba(0,0,0,0.3);
+            }
+            
+            .action-buttons .btn-info {
+                background: linear-gradient(135deg, #17a2b8, #138496);
+                border: none;
+            }
+            
+            .action-buttons .btn-warning {
+                background: linear-gradient(135deg, #ffc107, #e0a800);
+                border: none;
+            }
+            
+            .action-buttons .btn-danger {
+                background: linear-gradient(135deg, #dc3545, #c82333);
+                border: none;
+            }
+            
+            .action-buttons .disabled {
+                cursor: not-allowed;
+                opacity: 0.5;
+            }
+            
+            .move-up-btn:not(.disabled):hover {
+                background: linear-gradient(135deg, #138496, #117a8b) !important;
+            }
+            
+            .move-down-btn:not(.disabled):hover {
+                background: linear-gradient(135deg, #138496, #117a8b) !important;
+            }
+            
+            .btn-info {
+                background: linear-gradient(135deg, #17a2b8, #138496);
+                border: none;
+                color: white;
+                padding: 8px 16px;
+                border-radius: 6px;
+                display: flex;
+                align-items: center;
+                gap: 8px;
+                font-weight: bold;
+            }
+            
+            .btn-info:hover {
+                background: linear-gradient(135deg, #138496, #117a8b);
+                transform: translateY(-2px);
+                box-shadow: 0 6px 12px rgba(0,0,0,0.3);
+            }
+            
+            .section-badge {
+                background: rgba(101, 79, 212, 0.2);
+                padding: 2px 8px;
+                border-radius: 4px;
+                border: 1px solid #654FD4;
+                transition: all 0.3s ease;
+            }
+            
+            .section-badge:hover {
+                background: rgba(101, 79, 212, 0.4);
+                cursor: pointer;
+            }
+            
+            .filter-info {
+                animation: slideIn 0.3s ease;
+            }
+            
+            @keyframes slideIn {
+                from { transform: translateY(-10px); opacity: 0; }
+                to { transform: translateY(0); opacity: 1; }
+            }
+        `;
+        document.head.appendChild(style);
     }
 }
 
