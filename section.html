@@ -12,7 +12,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
     
     <style>
-        ::root {
+        :root {
             --primary-color: #3545FF;
             --secondary-color: #FF5200;
             --dark-bg: #151825;
@@ -138,7 +138,6 @@
         }
 
         .section-description {
-            
             position: fixed;
             overflow: hidden;
             display: flex;
@@ -159,7 +158,6 @@
             justify-content: center;
             align-items: center;
             text-align: center;
-            
             border-bottom: 0px groove #fff;
             font-size: 13px;
             color: #b8d4f5;
@@ -190,6 +188,9 @@
             border-radius: 15px;
             cursor: pointer;
             transition: all 0.3s ease;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
         }
 
         .channel-card:hover {
@@ -199,7 +200,7 @@
 
         .channel-logo {
             width: 100%;
-            height: 10px;
+            height: 80px;
             margin: 0 auto 10px;
             padding: 5px;
             display: flex;
@@ -211,7 +212,7 @@
         .channel-logo img {
             background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
             width: 100%;
-            height: 10%;
+            height: 100%;
             margin: 0 auto 10px;
             border-radius: 10px 20px 10px 20px;
             border-bottom: 5px double rgba(255, 255, 255, 0.7); 
@@ -225,6 +226,7 @@
             margin-top: 0%;
             margin-left: 0%;
             pointer-events: none;
+            object-fit: cover;
         }
 
         .channel-name {
@@ -237,12 +239,32 @@
             border-bottom: 3px groove rgba(0, 0, 0, 5);
             color: #fff;
             border-radius: 10px;
-            margin-top: 30px;
+            margin-top: 10px;
             font-weight: bold; 
             font-family: Arial, sans-serif; 
             box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
             text-align: center;
             font-size: 10px;
+            width: 100%;
+        }
+
+        /* Order Badge */
+        .order-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: linear-gradient(135deg, #FF5200, #FF8C00);
+            color: white;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            font-weight: bold;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            z-index: 1;
         }
 
         /* Footer */
@@ -398,18 +420,18 @@
             box-shadow: 0 5px 15px rgba(0,0,0,0.3);
         }
             
-            .channel-card {
-                max-width: 1300px;
-            }
+        .channel-card {
+            max-width: 1300px;
+            position: relative;
+        }
             
-            .channel-logo {
-                height: 100px;
-            }
+        .channel-logo {
+            height: 100px;
+        }
             
-            .channel-logo img {
-                width: 100px;
-                height: 100px;
-            }
+        .channel-logo img {
+            width: 100px;
+            height: 100px;
         }
 
         @media (max-width: 480px) {
@@ -792,7 +814,7 @@
                     
                     console.log('✅ تم تحميل القسم:', this.section.name);
                     
-                    // 2. جلب القنوات الخاصة بهذا القسم
+                    // 2. جلب القنوات الخاصة بهذا القسم مرتبة حسب الترتيب
                     const channelsQuery = await db.collection('channels')
                         .where('sectionId', '==', this.sectionId)
                         .orderBy('order', 'asc')
@@ -803,7 +825,7 @@
                             id: doc.id,
                             ...doc.data()
                         }));
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة`);
+                        console.log(`✅ تم تحميل ${this.channels.length} قناة مرتبة حسب الترتيب`);
                     } else {
                         console.log('⚠️ لا توجد قنوات في هذا القسم');
                         this.channels = [];
@@ -840,12 +862,14 @@
                     
                     console.log('✅ تم العثور على القسم في البيانات المحلية:', this.section.name);
                     
-                    // 3. جلب القنوات من localStorage
+                    // 3. جلب القنوات من localStorage وفرزها حسب الترتيب
                     const savedChannels = localStorage.getItem('bein_channels');
                     if (savedChannels) {
                         const allChannels = JSON.parse(savedChannels);
-                        this.channels = allChannels.filter(channel => channel.sectionId === this.sectionId);
-                        console.log(`✅ تم تحميل ${this.channels.length} قناة من البيانات المحلية`);
+                        this.channels = allChannels
+                            .filter(channel => channel.sectionId === this.sectionId)
+                            .sort((a, b) => (a.order || 999) - (b.order || 999));
+                        console.log(`✅ تم تحميل ${this.channels.length} قناة من البيانات المحلية مرتبة حسب الترتيب`);
                     } else {
                         this.channels = [];
                     }
@@ -885,8 +909,10 @@
                     return;
                 }
                 
-                container.innerHTML = this.channels.map(channel => `
+                // عرض القنوات مرتبة حسب الترتيب مع عرض الأرقام
+                container.innerHTML = this.channels.map((channel, index) => `
                     <div class="channel-card" data-channel-id="${channel.id}">
+                        <div class="order-badge">${index + 1}</div>
                         <div class="channel-logo">
                             <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
                                  alt="${channel.name}"
