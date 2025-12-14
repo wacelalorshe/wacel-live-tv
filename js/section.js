@@ -1,396 +1,215 @@
-// ===========================================
-// تطبيق صفحة القسم - إصدار مصحح
-// يدعم الترتيب التلقائي للقنوات حسب الترتيب في Admin
-// ===========================================
+// js/section.js
+// Firebase configuration
+const firebaseConfig = {
+    apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
+    authDomain: "bein-42f9e.firebaseapp.com",
+    projectId: "bein-42f9e",
+    storageBucket: "bein-42f9e.firebasestorage.app",
+    messagingSenderId: "143741167050",
+    appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
+    measurementId: "G-JH198SKCFS"
+};
 
-class SectionPageApp {
+// تطبيق عرض القنوات في القسم
+class SectionChannelsApp {
     constructor() {
-        this.sectionId = null;
         this.section = null;
         this.channels = [];
-        this.db = null;
-        this.isInitialized = false;
+        this.hasInstalledApp = localStorage.getItem('app_installed') === 'true';
+        this.currentSectionId = null;
         this.init();
     }
 
     async init() {
         console.log('🚀 بدء تشغيل صفحة القسم...');
         
-        try {
-            // الحصول على معرف القسم من الرابط
-            this.getSectionIdFromURL();
-            
-            if (!this.sectionId) {
-                this.showError('لم يتم تحديد القسم. الرابط غير صالح.');
-                return;
-            }
-            
-            console.log('📋 معرف القسم:', this.sectionId);
-            
-            // إعداد السنة الحالية
-            document.getElementById('currentYear').textContent = new Date().getFullYear();
-            
-            // إعداد مستمعي الأحداث
-            this.setupEventListeners();
-            
-            // تحميل بيانات القسم
-            await this.loadSectionData();
-            
-            // إظهار المحتوى
-            document.getElementById('pageLoadingScreen').style.display = 'none';
-            document.getElementById('pageContentWrapper').style.display = 'block';
-            
-            this.isInitialized = true;
-            console.log('✅ تم تحميل صفحة القسم بنجاح');
-            
-        } catch (error) {
-            console.error('❌ خطأ في تحميل الصفحة:', error);
-            this.showError('حدث خطأ أثناء تحميل القسم. جاري استخدام البيانات المحلية...');
-            
-            // محاولة استخدام البيانات المحلية
-            try {
-                await this.loadFromLocalStorage();
-                this.renderData();
-                
-                document.getElementById('pageLoadingScreen').style.display = 'none';
-                document.getElementById('pageContentWrapper').style.display = 'block';
-            } catch (localError) {
-                console.error('❌ فشل تحميل البيانات المحلية:', localError);
-                this.showCriticalError('لا يمكن تحميل القسم. الرابط قد يكون غير صحيح.');
-            }
+        // تعيين السنة الحالية
+        document.getElementById('currentYear').textContent = new Date().getFullYear();
+        
+        // الحصول على معرف القسم من URL
+        this.currentSectionId = this.getSectionIdFromURL();
+        
+        if (!this.currentSectionId) {
+            this.showError('لم يتم تحديد القسم');
+            return;
         }
+        
+        // تحديث العنوان
+        document.getElementById('sectionHeader').textContent = 'جاري التحميل...';
+        
+        // تحميل البيانات
+        await this.loadData();
+        
+        // إعداد نقرات الأزرار
+        this.setupEventListeners();
+        
+        console.log('✅ تم تهيئة صفحة القسم بنجاح');
     }
 
     getSectionIdFromURL() {
+        const urlParams = new URLSearchParams(window.location.search);
+        return urlParams.get('id');
+    }
+
+    async loadData() {
+        console.log('📥 جاري تحميل بيانات القسم...');
+        
+        // عرض حالة التحميل
+        this.showLoading();
+        
         try {
-            const urlParams = new URLSearchParams(window.location.search);
-            this.sectionId = urlParams.get('id');
-            
-            console.log('🔗 معرف القسم من الرابط:', this.sectionId);
-            
-            if (!this.sectionId) {
-                // محاولة الحصول من hash إذا كان في الروابط القديمة
-                const hash = window.location.hash.substring(1);
-                if (hash) {
-                    this.sectionId = hash;
-                    console.log('🔗 معرف القسم من الـ hash:', this.sectionId);
+            // المحاولة الأولى: من Firebase
+            try {
+                await this.loadFromFirebase();
+                console.log('✅ تم تحميل بيانات القسم من Firebase');
+                return;
+            } catch (firebaseError) {
+                console.warn('⚠️ فشل تحميل Firebase:', firebaseError.message);
+                
+                // إذا فشل Firebase، حاول استخدام localStorage تلقائياً
+                try {
+                    await this.loadFromLocalStorage();
+                    console.log('✅ تم تحميل بيانات القسم من localStorage');
+                    return;
+                } catch (localStorageError) {
+                    console.warn('⚠️ فشل تحميل localStorage:', localStorageError.message);
+                    throw new Error('لا توجد بيانات متاحة');
                 }
             }
             
-            if (!this.sectionId) {
-                throw new Error('لم يتم تحديد معرف القسم');
-            }
-            
         } catch (error) {
-            console.error('❌ خطأ في الحصول على معرف القسم:', error);
-            this.sectionId = null;
+            console.error('❌ خطأ في تحميل البيانات:', error);
+            this.showError('حدث خطأ في تحميل البيانات. يرجى المحاولة مرة أخرى.');
         }
     }
 
-    async loadSectionData() {
-        console.log('📥 جاري تحميل بيانات القسم...');
-        
-        // تحديث شاشة التحميل
-        const loadingScreen = document.getElementById('pageLoadingScreen');
-        if (loadingScreen) {
-            loadingScreen.innerHTML = `
-                <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
-                <p>جاري تحميل قنوات القسم...</p>
-                <small id="loadingDetails">الاتصال بقاعدة البيانات...</small>
-            `;
-        }
-        
-        // محاولة تحميل من Firebase أولاً
-        let firebaseLoaded = false;
-        
-        try {
-            firebaseLoaded = await this.tryLoadFromFirebase();
-        } catch (firebaseError) {
-            console.error('❌ فشل تحميل Firebase:', firebaseError);
-        }
-        
-        // إذا فشل Firebase، جرب localStorage
-        if (!firebaseLoaded) {
-            await this.loadFromLocalStorage();
-        }
-        
-        // التحقق من وجود بيانات
-        if (!this.section) {
-            throw new Error('القسم غير موجود');
-        }
-        
-        // عرض البيانات
-        this.renderData();
-    }
-
-    async tryLoadFromFirebase() {
-        console.log('📡 محاولة الاتصال بـ Firebase...');
-        
-        try {
-            // محاولة تهيئة Firebase
-            if (!window.firebaseApp || !window.db) {
-                console.log('⚠️ Firebase غير مهيأ، جاري التهيئة...');
+    async loadFromFirebase() {
+        return new Promise(async (resolve, reject) => {
+            try {
+                // 1. التحقق من وجود Firebase
+                if (typeof firebase === 'undefined') {
+                    throw new Error('Firebase SDK غير محمل');
+                }
                 
-                // استخدام دالة تهيئة Firebase المباشرة
-                await this.initializeFirebase();
+                // 2. تهيئة Firebase
+                let db;
+                try {
+                    if (!firebase.apps.length) {
+                        firebase.initializeApp(firebaseConfig);
+                    }
+                    db = firebase.firestore();
+                } catch (initError) {
+                    throw new Error('فشل تهيئة قاعدة البيانات');
+                }
+                
+                if (!db) {
+                    throw new Error('قاعدة البيانات غير متاحة');
+                }
+                
+                // 3. جلب بيانات القسم
+                const sectionDoc = await db.collection('sections').doc(this.currentSectionId).get();
+                
+                if (!sectionDoc.exists) {
+                    throw new Error('القسم غير موجود');
+                }
+                
+                this.section = {
+                    id: sectionDoc.id,
+                    ...sectionDoc.data()
+                };
+                
+                // 4. تحديث معلومات القسم في الواجهة
+                this.updateSectionInfo();
+                
+                // 5. جلب قنوات القسم
+                const channelsQuery = db.collection('channels')
+                    .where('sectionId', '==', this.currentSectionId)
+                    .orderBy('order');
+                
+                const channelsSnapshot = await channelsQuery.get();
+                
+                if (channelsSnapshot.empty) {
+                    console.log('ℹ️ لا توجد قنوات في هذا القسم');
+                    this.channels = [];
+                } else {
+                    this.channels = channelsSnapshot.docs.map(doc => ({
+                        id: doc.id,
+                        ...doc.data()
+                    }));
+                    console.log(`✅ تم تحميل ${this.channels.length} قناة للقسم`);
+                }
+                
+                // 6. حفظ في localStorage كنسخة احتياطية
+                this.saveToLocalStorage();
+                
+                // 7. عرض القنوات
+                this.renderChannels();
+                
+                resolve(true);
+                
+            } catch (error) {
+                console.error('❌ فشل تحميل Firebase:', error);
+                reject(error);
             }
-            
-            if (!this.db) {
-                console.log('❌ قاعدة البيانات غير متاحة بعد التهيئة');
-                return false;
-            }
-            
-            console.log('✅ Firebase مهيأ، جاري جلب البيانات...');
-            
-            // تحديث رسالة التحميل
-            const details = document.getElementById('loadingDetails');
-            if (details) details.textContent = 'جاري جلب بيانات القسم...';
-            
-            // جلب بيانات القسم
-            const sectionDoc = await this.db.collection('sections').doc(this.sectionId).get();
-            
-            if (!sectionDoc.exists) {
-                console.log('❌ القسم غير موجود في Firebase');
-                return false;
-            }
-            
-            this.section = {
-                id: sectionDoc.id,
-                ...sectionDoc.data()
-            };
-            
-            console.log('✅ تم تحميل بيانات القسم:', this.section.name);
-            
-            // تحديث رسالة التحميل
-            if (details) details.textContent = 'جاري جلب القنوات مرتبة حسب الترتيب...';
-            
-            // جلب القنوات مرتبة حسب الترتيب
-            const channelsSnapshot = await this.db.collection('channels')
-                .where('sectionId', '==', this.sectionId)
-                .orderBy('order', 'asc')
-                .get();
-            
-            this.channels = channelsSnapshot.docs.map(doc => ({
-                id: doc.id,
-                ...doc.data()
-            }));
-            
-            console.log(`✅ تم تحميل ${this.channels.length} قناة مرتبة حسب الترتيب`);
-            
-            // حفظ نسخة في localStorage للاستخدام المستقبلي
-            this.saveToLocalStorage();
-            
-            return true;
-            
-        } catch (error) {
-            console.error('❌ خطأ في تحميل Firebase:', error);
-            
-            if (error.code === 'permission-denied') {
-                console.log('🔒 صلاحيات غير كافية للوصول إلى Firebase');
-            } else if (error.code === 'unavailable') {
-                console.log('🌐 Firebase غير متاح (مشكلة في الشبكة)');
-            }
-            
-            return false;
-        }
-    }
-
-    async initializeFirebase() {
-        try {
-            console.log('🚀 جاري تهيئة Firebase...');
-            
-            // إعدادات Firebase مباشرة
-            const firebaseConfig = {
-                apiKey: "AIzaSyAKgEiYYlmpMe0NLewulheovlTQMzVC7980",
-                authDomain: "bein-42f9e.firebaseapp.com",
-                projectId: "bein-42f9e",
-                storageBucket: "bein-42f9e.firebasestorage.app",
-                messagingSenderId: "143741167050",
-                appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
-                measurementId: "G-JH198SKCFS"
-            };
-            
-            // تهيئة Firebase
-            const app = firebase.initializeApp(firebaseConfig);
-            this.db = firebase.firestore(app);
-            
-            // حفظ في المتغيرات العامة
-            window.firebaseApp = app;
-            window.db = this.db;
-            
-            console.log('✅ تم تهيئة Firebase بنجاح');
-            
-        } catch (error) {
-            if (error.code === 'app/duplicate-app') {
-                console.log('⚠️ Firebase مهيأ بالفعل، جاري استخدام النسخة الحالية');
-                this.db = window.db || firebase.firestore();
-            } else {
-                console.error('❌ فشل تهيئة Firebase:', error);
-                throw error;
-            }
-        }
+        });
     }
 
     async loadFromLocalStorage() {
-        console.log('💾 جاري تحميل البيانات من التخزين المحلي...');
-        
-        // تحديث رسالة التحميل
-        const details = document.getElementById('loadingDetails');
-        if (details) details.textContent = 'جاري تحميل من التخزين المحلي...';
-        
-        // محاولة عدة مصادر للبيانات
-        const dataSources = [
-            // 1. البيانات المشفرة الجديدة
-            () => {
-                const encrypted = localStorage.getItem('protected_bein_sections');
-                return encrypted ? decryptData(encrypted) : null;
-            },
-            // 2. البيانات غير المشفرة القديمة
-            () => {
-                const plain = localStorage.getItem('bein_sections');
-                return plain ? JSON.parse(plain) : null;
-            },
-            // 3. البيانات من التطبيق الرئيسي
-            () => {
-                const mainData = window.opener ? window.opener.protectedApp?.sections : null;
-                return mainData || null;
-            }
-        ];
-        
-        // البحث في جميع المصادر
-        for (const source of dataSources) {
+        return new Promise((resolve, reject) => {
             try {
-                const sections = source();
-                if (sections && Array.isArray(sections)) {
-                    const section = sections.find(s => s.id === this.sectionId);
-                    if (section) {
-                        this.section = section;
-                        break;
-                    }
+                // 1. جلب الأقسام من localStorage
+                const savedSections = localStorage.getItem('bein_sections');
+                if (!savedSections) {
+                    throw new Error('لا توجد بيانات محلية للأقسام');
                 }
-            } catch (error) {
-                console.warn('⚠️ خطأ في مصدر بيانات:', error);
-            }
-        }
-        
-        if (!this.section) {
-            throw new Error('القسم غير موجود في التخزين المحلي');
-        }
-        
-        console.log('✅ تم العثور على القسم في localStorage:', this.section.name);
-        
-        // جلب القنوات
-        const channelSources = [
-            () => {
-                const encrypted = localStorage.getItem('protected_bein_channels');
-                return encrypted ? decryptData(encrypted) : null;
-            },
-            () => {
-                const plain = localStorage.getItem('bein_channels');
-                return plain ? JSON.parse(plain) : null;
-            },
-            () => {
-                const mainData = window.opener ? window.opener.protectedApp?.channels : null;
-                return mainData || null;
-            }
-        ];
-        
-        for (const source of channelSources) {
-            try {
-                const allChannels = source();
-                if (allChannels && Array.isArray(allChannels)) {
-                    // فرز القنوات حسب الترتيب
-                    this.channels = allChannels
-                        .filter(channel => channel.sectionId === this.sectionId)
-                        .sort((a, b) => (a.order || 999) - (b.order || 999));
+                
+                const sections = JSON.parse(savedSections);
+                this.section = sections.find(s => s.id === this.currentSectionId);
+                
+                if (!this.section) {
+                    throw new Error('القسم غير موجود في البيانات المحلية');
+                }
+                
+                // 2. تحديث معلومات القسم في الواجهة
+                this.updateSectionInfo();
+                
+                // 3. جلب القنوات من localStorage
+                const savedChannels = localStorage.getItem('bein_channels');
+                if (savedChannels) {
+                    const allChannels = JSON.parse(savedChannels);
+                    this.channels = allChannels.filter(channel => channel.sectionId === this.currentSectionId);
                     
-                    if (this.channels.length > 0) {
-                        break;
-                    }
+                    // ترتيب القنوات حسب الترتيب
+                    this.channels.sort((a, b) => (a.order || 999) - (b.order || 999));
+                    
+                    console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage`);
+                } else {
+                    this.channels = [];
                 }
+                
+                // 4. عرض القنوات
+                this.renderChannels();
+                
+                resolve(true);
+                
             } catch (error) {
-                console.warn('⚠️ خطأ في مصدر القنوات:', error);
+                console.error('❌ فشل تحميل البيانات المحلية:', error);
+                reject(error);
             }
-        }
-        
-        console.log(`✅ تم تحميل ${this.channels.length} قناة من localStorage مرتبة حسب الترتيب`);
-        
-        // إذا لم توجد قنوات، نستخدم بيانات تجريبية
-        if (this.channels.length === 0) {
-            this.loadSampleChannels();
-        }
+        });
     }
 
-    loadSampleChannels() {
-        console.log('📋 استخدام بيانات قنوات تجريبية...');
+    updateSectionInfo() {
+        if (!this.section) return;
         
-        // بيانات تجريبية للقنوات
-        const sampleChannels = {
-            'bein-sports': [
-                { id: 'sample-1', name: 'bein sport 1', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=BEIN+1', order: 1 },
-                { id: 'sample-2', name: 'bein sport 2', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=BEIN+2', order: 2 },
-                { id: 'sample-3', name: 'bein sport 3', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=BEIN+3', order: 3 }
-            ],
-            'arabic-channels': [
-                { id: 'sample-4', name: 'القناة العربية', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=ARABIC', order: 1 },
-                { id: 'sample-5', name: 'القناة الفضائية', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=SATELLITE', order: 2 }
-            ],
-            'sports-channels': [
-                { id: 'sample-6', name: 'قناة رياضية 1', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=SPORTS+1', order: 1 },
-                { id: 'sample-7', name: 'قناة رياضية 2', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=SPORTS+2', order: 2 }
-            ]
-        };
-        
-        // الحصول على القنوات التجريبية حسب القسم
-        this.channels = sampleChannels[this.sectionId] || [
-            { id: 'sample-default', name: 'قناة تجريبية', image: 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV', order: 1 }
-        ];
-        
-        // إضافة بيانات إضافية لكل قناة
-        this.channels = this.channels.map(channel => ({
-            ...channel,
-            sectionId: this.sectionId,
-            url: '#',
-            appUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player',
-            downloadUrl: 'https://play.google.com/store/apps/details?id=com.xpola.player'
-        }));
-        
-        console.log(`✅ تم إنشاء ${this.channels.length} قناة تجريبية`);
-    }
-
-    saveToLocalStorage() {
-        try {
-            // لا نحتاج لحفظ كامل البيانات، فقط نضمن وجود القسم الحالي
-            localStorage.setItem(`section_${this.sectionId}_data`, JSON.stringify({
-                section: this.section,
-                channels: this.channels,
-                timestamp: new Date().getTime()
-            }));
-            
-            console.log('💾 تم حفظ بيانات القسم في localStorage');
-        } catch (error) {
-            console.error('❌ خطأ في حفظ البيانات محلياً:', error);
-        }
-    }
-
-    renderData() {
-        console.log('🎨 جاري عرض البيانات...');
-        
-        // تحديث عنوان الصفحة
-        document.getElementById('sectionHeader').textContent = this.section.name;
         document.getElementById('sectionName').textContent = this.section.name;
-        document.title = `${this.section.name} - Aseel TV`;
+        document.getElementById('sectionHeader').textContent = this.section.name;
         
-        // تحديث وصف القسم
-        const description = this.section.description || 
-                          `استمتع بمشاهدة ${this.channels.length} قناة متاحة في هذا القسم`;
-        document.getElementById('sectionDescription').textContent = description;
-        
-        // عرض القنوات
-        this.renderChannels();
-        
-        // إضافة أنماط CSS إذا لم تكن موجودة
-        this.addStyles();
+        if (this.section.description) {
+            document.getElementById('sectionDescription').textContent = this.section.description;
+        } else {
+            document.getElementById('sectionDescription').textContent = `قسم ${this.section.name} - ${this.channels.length} قناة`;
+        }
     }
 
     renderChannels() {
@@ -399,355 +218,218 @@ class SectionPageApp {
             console.error('❌ حاوية القنوات غير موجودة');
             return;
         }
+
+        // تصفية القنوات النشطة وترتيبها
+        const activeChannels = this.channels
+            .filter(channel => channel.isActive !== false)
+            .sort((a, b) => (a.order || 1) - (b.order || 1));
         
-        // ترتيب القنوات حسب الترتيب
-        const sortedChannels = this.channels.sort((a, b) => (a.order || 999) - (b.order || 999));
-        
-        console.log(`📺 جاري عرض ${sortedChannels.length} قناة مرتبة حسب الترتيب`);
-        
-        if (sortedChannels.length === 0) {
+        if (activeChannels.length === 0) {
             container.innerHTML = `
-                <div style="text-align: center; padding: 50px; color: #B8B8B8;">
-                    <i class="uil uil-tv-retro" style="font-size: 4rem; display: block; margin-bottom: 20px;"></i>
-                    <h4>لا توجد قنوات في هذا القسم</h4>
-                    <p>سيتم إضافة القنوات قريباً</p>
-                    <a href="index.html" class="btn btn-primary mt-4" style="padding: 10px 30px;">
-                        <i class="uil uil-arrow-left"></i> العودة للأقسام
-                    </a>
+                <div class="loading" style="grid-column: 1 / -1;">
+                    <i class="uil uil-tv-retro" style="font-size: 3rem; color: #6c757d;"></i>
+                    <p class="mt-3">لا توجد قنوات متاحة في هذا القسم حالياً</p>
+                    <small>سيتم إضافة قنوات قريباً</small>
                 </div>
             `;
             return;
         }
+
+        console.log(`🎯 عرض ${activeChannels.length} قناة في القسم`);
         
-        // إنشاء HTML للقنوات مع عرض الأرقام حسب الترتيب
-        container.innerHTML = `
-            <div class="channels-grid">
-                ${sortedChannels.map((channel, index) => `
-                    <div class="channel-card" data-channel-id="${channel.id}" 
-                         onclick="sectionPageApp.openChannel(${index})"
-                         style="animation-delay: ${index * 0.1}s">
-                        <div class="order-badge">${index + 1}</div>
-                        <div class="channel-logo">
-                            <img src="${channel.image || 'https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'}" 
-                                 alt="${channel.name}"
-                                 onerror="this.src='https://via.placeholder.com/100x100/2F2562/FFFFFF?text=TV'">
-                        </div>
-                        <div class="channel-name">${channel.name}</div>
-                        <div class="channel-overlay">
-                            <i class="uil uil-play-circle"></i>
-                            <span>مشاهدة القناة</span>
-                        </div>
+        // إنشاء HTML للقنوات
+        container.innerHTML = activeChannels.map(channel => {
+            const defaultImage = 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=TV';
+            const channelImage = channel.image || defaultImage;
+            
+            return `
+                <div class="channel-card" data-channel-id="${channel.id}">
+                    <div class="channel-logo">
+                        <img src="${channelImage}" alt="${channel.name}" 
+                             onerror="this.src='${defaultImage}'">
                     </div>
-                `).join('')}
-            </div>
-        `;
-        
-        // إضافة تأثيرات للقنوات
-        this.animateChannels();
-    }
-
-    addStyles() {
-        // إضافة الأنماط إذا لم تكن موجودة
-        if (!document.querySelector('#section-styles')) {
-            const style = document.createElement('style');
-            style.id = 'section-styles';
-            style.textContent = `
-                .channels-grid {
-                    display: grid;
-                    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-                    gap: 20px;
-                    padding: 20px 0;
-                }
-                
-                .channel-card {
-                    background: linear-gradient(135deg, rgba(47, 37, 98, 0.9), rgba(58, 66, 102, 0.9));
-                    border-radius: 15px;
-                    padding: 20px;
-                    text-align: center;
-                    border: 1px solid #42318F;
-                    transition: all 0.3s ease;
-                    cursor: pointer;
-                    position: relative;
-                    overflow: hidden;
-                    opacity: 0;
-                    transform: translateY(20px);
-                    animation: fadeInUp 0.5s ease forwards;
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                }
-                
-                @keyframes fadeInUp {
-                    to {
-                        opacity: 1;
-                        transform: translateY(0);
-                    }
-                }
-                
-                .channel-card:hover {
-                    transform: translateY(-10px) scale(1.03);
-                    box-shadow: 0 15px 35px rgba(0, 0, 0, 0.5);
-                    border-color: #654FD4;
-                }
-                
-                .order-badge {
-                    position: absolute;
-                    top: -10px;
-                    right: -10px;
-                    background: linear-gradient(135deg, #FF5200, #FF8C00);
-                    color: white;
-                    width: 30px;
-                    height: 30px;
-                    border-radius: 50%;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                    font-size: 14px;
-                    font-weight: bold;
-                    box-shadow: 0 3px 6px rgba(0,0,0,0.3);
-                    z-index: 1;
-                }
-                
-                .channel-logo {
-                    width: 100px;
-                    height: 100px;
-                    margin: 0 auto 15px;
-                    border-radius: 50%;
-                    overflow: hidden;
-                    border: 3px solid #42318F;
-                    background: #1A1A2E;
-                    display: flex;
-                    align-items: center;
-                    justify-content: center;
-                }
-                
-                .channel-logo img {
-                    width: 100%;
-                    height: 100%;
-                    object-fit: cover;
-                }
-                
-                .channel-name {
-                    color: #E1E1E1;
-                    font-size: 18px;
-                    font-weight: bold;
-                    margin-top: 10px;
-                    text-shadow: 0 1px 2px rgba(0,0,0,0.5);
-                    text-align: center;
-                }
-                
-                .channel-overlay {
-                    position: absolute;
-                    top: 0;
-                    left: 0;
-                    right: 0;
-                    bottom: 0;
-                    background: rgba(101, 79, 212, 0.9);
-                    display: flex;
-                    flex-direction: column;
-                    align-items: center;
-                    justify-content: center;
-                    opacity: 0;
-                    transition: opacity 0.3s ease;
-                    border-radius: 15px;
-                    color: white;
-                    font-size: 16px;
-                    font-weight: bold;
-                }
-                
-                .channel-card:hover .channel-overlay {
-                    opacity: 1;
-                }
-                
-                .channel-overlay i {
-                    font-size: 2.5rem;
-                    margin-bottom: 10px;
-                }
+                    <div class="channel-name">${channel.name}</div>
+                    ${channel.description ? `<div class="channel-description">${channel.description}</div>` : ''}
+                </div>
             `;
-            document.head.appendChild(style);
-        }
+        }).join('');
+
+        // إضافة مستمعي الأحداث للقنوات
+        this.addChannelClickListeners();
+        
+        console.log('✅ تم عرض القنوات بنجاح');
     }
 
-    animateChannels() {
-        // إضافة تأثيرات للقنوات بعد تحميلها
-        setTimeout(() => {
-            const cards = document.querySelectorAll('.channel-card');
-            cards.forEach((card, index) => {
-                card.style.animationDelay = `${index * 0.1}s`;
+    addChannelClickListeners() {
+        const channelCards = document.querySelectorAll('.channel-card');
+        channelCards.forEach(card => {
+            card.addEventListener('click', (e) => {
+                const channelId = card.getAttribute('data-channel-id');
+                this.handleChannelClick(channelId, e);
             });
-        }, 100);
+        });
     }
 
-    openChannel(index) {
-        const channel = this.channels[index];
+    handleChannelClick(channelId, event) {
+        event.preventDefault();
+        event.stopPropagation();
+        
+        const channel = this.channels.find(c => c.id === channelId);
         if (!channel) return;
         
-        console.log('🔗 فتح القناة:', channel.name);
+        console.log(`📺 نقر على القناة: ${channel.name}`);
         
-        if (channel.url && channel.url !== '#' && channel.url.trim() !== '') {
-            try {
-                // فتح الرابط في نافذة جديدة
-                window.open(channel.url, '_blank');
-            } catch (error) {
-                console.error('❌ خطأ في فتح الرابط:', error);
-                this.showInstallModal(channel);
-            }
-        } else {
+        // التحقق من التثبيت
+        if (!this.hasInstalledApp) {
             this.showInstallModal(channel);
+        } else {
+            this.openChannel(channel);
         }
     }
 
     showInstallModal(channel) {
         const modal = document.getElementById('installModal');
-        if (modal) {
-            modal.style.display = "block";
-            
-            // تحديث زر التأكيد
-            const confirmBtn = document.getElementById('confirmInstall');
-            if (confirmBtn) {
-                confirmBtn.onclick = () => {
-                    const downloadUrl = channel.downloadUrl || channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
-                    window.open(downloadUrl, '_blank');
-                    this.closeModal();
-                };
+        const confirmBtn = document.getElementById('confirmInstall');
+        const cancelBtn = document.getElementById('cancelInstall');
+        
+        // إزالة المستمعين السابقين
+        confirmBtn.replaceWith(confirmBtn.cloneNode(true));
+        cancelBtn.replaceWith(cancelBtn.cloneNode(true));
+        
+        const newConfirmBtn = document.getElementById('confirmInstall');
+        const newCancelBtn = document.getElementById('cancelInstall');
+        
+        // إضافة مستمعين جدد
+        newConfirmBtn.addEventListener('click', () => {
+            this.installApp(channel);
+        });
+        
+        newCancelBtn.addEventListener('click', () => {
+            modal.style.display = 'none';
+        });
+        
+        // عرض المودال
+        modal.style.display = 'block';
+        
+        // إغلاق المودال عند النقر خارج المحتوى
+        window.addEventListener('click', (e) => {
+            if (e.target === modal) {
+                modal.style.display = 'none';
             }
+        });
+    }
+
+    installApp(channel) {
+        console.log('📱 تثبيت التطبيق...');
+        
+        const modal = document.getElementById('installModal');
+        modal.style.display = 'none';
+        
+        // فتح رابط تحميل التطبيق
+        const appUrl = channel.appUrl || 'https://play.google.com/store/apps/details?id=com.xpola.player';
+        window.open(appUrl, '_blank');
+        
+        // تحديث حالة التثبيت
+        this.hasInstalledApp = true;
+        localStorage.setItem('app_installed', 'true');
+        
+        // فتح القناة بعد ثواني
+        setTimeout(() => {
+            this.openChannel(channel);
+        }, 2000);
+    }
+
+    openChannel(channel) {
+        console.log(`▶️ فتح القناة: ${channel.name}`);
+        
+        if (!channel.url || channel.url === '#') {
+            this.showError('رابط البث غير متوفر حالياً');
+            return;
+        }
+        
+        // فتح رابط البث في نافذة جديدة
+        window.open(channel.url, '_blank');
+        
+        // تسجيل النشاط
+        this.logChannelView(channel);
+    }
+
+    logChannelView(channel) {
+        try {
+            // يمكنك إضافة كود لتسجيل المشاهدات هنا
+            console.log(`📊 تسجيل مشاهدة القناة: ${channel.name}`);
+        } catch (error) {
+            console.warn('⚠️ فشل تسجيل المشاهدة:', error);
         }
     }
 
-    closeModal() {
-        const modal = document.getElementById('installModal');
-        if (modal) modal.style.display = "none";
+    showLoading() {
+        const container = document.getElementById('channelsContainer');
+        if (container) {
+            container.innerHTML = `
+                <div class="loading" style="grid-column: 1 / -1;">
+                    <div class="spinner-border text-primary mb-3" role="status">
+                        <span class="visually-hidden">جاري التحميل...</span>
+                    </div>
+                    <p>جاري تحميل القنوات...</p>
+                    <small>يرجى الانتظار</small>
+                </div>
+            `;
+        }
     }
 
     showError(message) {
         const container = document.getElementById('channelsContainer');
         if (container) {
             container.innerHTML = `
-                <div style="text-align: center; padding: 50px; color: #dc3545;">
-                    <i class="uil uil-exclamation-triangle" style="font-size: 4rem; display: block; margin-bottom: 20px;"></i>
-                    <h4>${message}</h4>
-                    <a href="index.html" class="btn btn-primary mt-4" style="padding: 10px 30px;">
-                        <i class="uil uil-arrow-left"></i> العودة للأقسام
-                    </a>
+                <div class="loading" style="grid-column: 1 / -1;">
+                    <i class="uil uil-exclamation-triangle" style="font-size: 3rem; color: #dc3545;"></i>
+                    <p class="mt-3 text-danger">${message}</p>
+                    <button class="btn btn-primary mt-3" onclick="location.reload()">
+                        <i class="uil uil-redo"></i> إعادة المحاولة
+                    </button>
                 </div>
             `;
         }
-        
-        // إخفاء شاشة التحميل
-        document.getElementById('pageLoadingScreen').style.display = 'none';
-        document.getElementById('pageContentWrapper').style.display = 'block';
     }
 
-    showCriticalError(message) {
-        // عرض رسالة خطأ في كامل الصفحة
-        document.body.innerHTML = `
-            <div style="
-                position: fixed;
-                top: 0;
-                left: 0;
-                right: 0;
-                bottom: 0;
-                background: linear-gradient(to right, #322769, #151825, #322769);
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                justify-content: center;
-                color: white;
-                text-align: center;
-                padding: 20px;
-            ">
-                <i class="uil uil-exclamation-triangle" style="font-size: 5rem; color: #dc3545; margin-bottom: 30px;"></i>
-                <h1 style="margin-bottom: 20px;">خطأ في تحميل القسم</h1>
-                <p style="font-size: 18px; margin-bottom: 30px; max-width: 500px;">${message}</p>
-                <div style="display: flex; gap: 15px; flex-wrap: wrap;">
-                    <a href="index.html" class="btn btn-primary" style="padding: 12px 30px;">
-                        <i class="uil uil-arrow-left"></i> العودة للأقسام
-                    </a>
-                    <button onclick="location.reload()" class="btn btn-secondary" style="padding: 12px 30px;">
-                        <i class="uil uil-redo"></i> إعادة تحميل الصفحة
-                    </button>
-                </div>
-            </div>
-        `;
+    saveToLocalStorage() {
+        try {
+            // لا نحتاج لحفظ شيء هنا لأن البيانات محفوظة مسبقاً في main.js
+        } catch (error) {
+            console.error('❌ خطأ في حفظ البيانات محلياً:', error);
+        }
     }
 
     setupEventListeners() {
-        console.log('🔧 إعداد مستمعي الأحداث...');
+        // يمكن إضافة مستمعي أحداث إضافية هنا
+    }
 
-        // إغلاق نافذة التثبيت عند النقر خارجها
-        window.addEventListener('click', (event) => {
-            if (event.target === document.getElementById('installModal')) {
-                this.closeModal();
-            }
-        });
-
-        // زر تأكيد التثبيت العام
-        const confirmInstall = document.getElementById('confirmInstall');
-        if (confirmInstall) {
-            confirmInstall.addEventListener('click', () => {
-                window.open('https://play.google.com/store/apps/details?id=com.xpola.player', '_blank');
-                this.closeModal();
-            });
-        }
-
-        // زر إلغاء التثبيت
-        const cancelInstall = document.getElementById('cancelInstall');
-        if (cancelInstall) {
-            cancelInstall.addEventListener('click', () => {
-                this.closeModal();
-            });
-        }
+    async retryLoadData() {
+        console.log('🔄 إعادة محاولة تحميل بيانات القسم...');
+        await this.loadData();
     }
 }
 
-// ===========================================
-// بدء تطبيق صفحة القسم
-// ===========================================
-
-// دالة مساعدة لفك التشفير (إذا لم تكن موجودة)
-if (typeof decryptData === 'undefined') {
-    window.decryptData = function(encrypted) {
-        try {
-            return JSON.parse(atob(encrypted));
-        } catch (e) {
-            console.error('خطأ في فك تشفير البيانات');
-            return null;
-        }
-    };
-}
-
-// إضافة شاشة التحميل ديناميكياً إذا لم تكن موجودة
-if (!document.getElementById('pageLoadingScreen')) {
-    const loadingScreen = document.createElement('div');
-    loadingScreen.id = 'pageLoadingScreen';
-    loadingScreen.style.position = 'fixed';
-    loadingScreen.style.top = '0';
-    loadingScreen.style.left = '0';
-    loadingScreen.style.right = '0';
-    loadingScreen.style.bottom = '0';
-    loadingScreen.style.background = 'linear-gradient(to right, #000, #151825, #000)';
-    loadingScreen.style.display = 'flex';
-    loadingScreen.style.flexDirection = 'column';
-    loadingScreen.style.alignItems = 'center';
-    loadingScreen.style.justifyContent = 'center';
-    loadingScreen.style.zIndex = '9999';
-    loadingScreen.innerHTML = `
-        <div class="spinner-border text-primary mb-3" style="width: 3rem; height: 3rem;"></div>
-        <p class="text-white">جاري تحميل القسم...</p>
-        <small id="loadingDetails" class="text-muted">جاري التهيئة...</small>
-    `;
-    document.body.appendChild(loadingScreen);
-}
-
-// إضافة محتوى الصفحة ديناميكياً إذا لم يكن موجوداً
-if (!document.getElementById('pageContentWrapper')) {
-    const contentWrapper = document.createElement('div');
-    contentWrapper.id = 'pageContentWrapper';
-    contentWrapper.style.display = 'none';
-    document.body.appendChild(contentWrapper);
-}
-
+// بدء التطبيق عند تحميل الصفحة
 document.addEventListener('DOMContentLoaded', () => {
-    console.log('🏠 تهيئة صفحة القسم...');
-    window.sectionPageApp = new SectionPageApp();
+    console.log('📂 تهيئة صفحة القسم...');
+    window.sectionApp = new SectionChannelsApp();
 });
+
+// دالة مساعدة للعودة للرئيسية
+function goToIndexWithCheck() {
+    window.location.href = 'index.html';
+}
+
+// دالة مساعدة للذهاب لجدول المباريات
+function goToMatchesWithCheck() {
+    window.location.href = 'matches.html';
+}
+
+// جعل الدوال متاحة عالمياً
+window.reloadSectionData = function() {
+    if (window.sectionApp) {
+        window.sectionApp.retryLoadData();
+    }
+};
