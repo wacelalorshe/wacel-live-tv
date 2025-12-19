@@ -1,260 +1,0 @@
-<!DOCTYPE html>
-<html lang="ar" dir="rtl">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>وسيل لايف برو - قنوات بي إن سبورت</title>
-    
-    <!-- CSS Libraries -->
-    <link rel="stylesheet" href="https://unicons.iconscout.com/release/v4.0.0/css/line.css">
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    
-    <!-- Custom CSS -->
-    <link rel="stylesheet" href="css/style.css">
-    <link rel="stylesheet" href="css/notifications.css">
-    <!-- أضف هذا السطر الجديد ↓ -->
-    <link rel="stylesheet" href="css/notification-popup.css">
-    
-    <style>
-        /* أنماط إضافية */
-        .notification-item {
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-        
-        .notification-item:hover {
-            background: rgba(101, 79, 212, 0.2) !important;
-            transform: translateX(-5px);
-        }
-        
-        .notification-item.unread {
-            border-right: 3px solid #FF5200 !important;
-        }
-        
-        /* تحسينات للنظام الجديد */
-        .notification-popup-backdrop {
-            position: fixed;
-            top: 0;
-            left: 0;
-            right: 0;
-            bottom: 0;
-            background: rgba(0, 0, 0, 0.9);
-            z-index: 9998;
-        }
-    </style>
-</head>
-<body>
-    <!-- Header -->
-    <header>
-        <div class="header-title">
-            <a href="index.html" class="text-box">
-                <span>وسيل لايف برو TV</span>
-            </a>
-        </div>
-    </header>
-    
-    <!-- Notifications System -->
-    <div class="notifications-container">
-        <div id="notificationsDropdown" class="notifications-dropdown">
-            <div class="notifications-header">
-                <h5><i class="uil uil-bell"></i> الإشعارات</h5>
-                <button class="btn btn-sm" onclick="toggleNotifications()">
-                    <i class="uil uil-times"></i>
-                </button>
-            </div>
-            <div id="notificationsList" class="notifications-list">
-                <div class="text-center py-3">
-                    <div class="spinner-border text-primary" role="status">
-                        <span class="visually-hidden">جاري التحميل...</span>
-                    </div>
-                    <p class="mt-2">جاري تحميل الإشعارات...</p>
-                    <small>يتم التحقق من قاعدة البيانات</small>
-                </div>
-            </div>
-            <div class="notifications-footer">
-                <a href="#" onclick="markAllAsRead()">تحديد الكل كمقروء</a>
-                <span style="margin: 0 10px; color: #b8d4f5">|</span>
-                <a href="#" onclick="reloadNotifications()">إعادة تحميل</a>
-            </div>
-        </div>
-        
-        <!-- Notifications Button -->
-        <button class="notifications-btn" onclick="toggleNotifications()">
-            <i class="uil uil-bell"></i>
-            <span id="unreadCount" class="unread-badge" style="display: none;">0</span>
-        </button>
-    </div>
-    
-    <!-- Main Content -->
-    <div class="content">
-        <h1 class="page-title">أقسام القنوات المتاحة</h1>
-        <div class="welcome-message">
-            في تطبيق وسيل لايف برو
-        </div>
-        
-        <!-- Sections Grid -->
-        <div id="sectionsContainer" class="sections-container">
-            <div class="loading">
-                <div class="spinner-border text-primary mb-3" role="status">
-                    <span class="visually-hidden">جاري التحميل...</span>
-                </div>
-                <p>جاري تحميل الأقسام...</p>
-                <small>يرجى الانتظار</small>
-            </div>
-        </div>
-    </div>
-    
-    <!-- Footer -->
-    <div class="footer">
-        <p class="copyright">جميع الحقوق محفوظة &copy; <span id="currentYear"></span> وسيل لايف برو TV</p>
-    </div>
-    
-    <!-- Bottom Navigation -->
-    <div class="bottom-nav">
-        <a href="index.html" class="nav-item active">
-            <i class="uil uil-home"></i>
-            <span>الرئيسية</span>
-        </a>
-        <a href="matches.html" class="nav-item">
-            <i class="uil uil-calendar-alt"></i>
-            <span>جدول المباريات</span>
-        </a>
-        <a href="https://t.me/wacelalorshepro" class="nav-item" target="_blank">
-            <i class="uil uil-telegram-alt"></i>
-            <span>تليجرام</span>
-        </a>
-        <a href="https://play.google.com/store/apps/details?id=com.xpola.player" class="nav-item" target="_blank">
-            <i class="uil uil-download-alt"></i>
-            <span>تحميل المشغل</span>
-        </a>
-    </div>
-    
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-
-    <!-- Bootstrap JS -->
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <!-- Custom JS -->
-    <script src="js/main.js"></script>
-    <script src="js/firebase-notifications.js"></script>
-    <!-- أضف هذا السطر الجديد ↓ -->
-    <script src="js/notification-popup.js"></script>
-    
-    <!-- Script للوظائف العامة -->
-    <script>
-        // تعيين السنة الحالية
-        document.getElementById('currentYear').textContent = new Date().getFullYear();
-        
-        // وظائف عامة للاستدعاء من HTML
-        window.toggleNotifications = function() {
-            if (window.firebaseNotifications) {
-                window.firebaseNotifications.toggleDropdown();
-            } else if (window.app) {
-                window.app.toggleNotifications();
-            }
-        };
-        
-        window.markAllAsRead = function() {
-            if (window.firebaseNotifications) {
-                window.firebaseNotifications.markAllAsRead();
-            } else if (window.app) {
-                window.app.markAllAsRead();
-            }
-        };
-        
-        window.reloadNotifications = function() {
-            if (window.firebaseNotifications) {
-                window.firebaseNotifications.reloadNotifications();
-            } else if (window.app) {
-                window.app.loadNotifications();
-            }
-        };
-        
-        // إغلاق القائمة عند النقر خارجها
-        document.addEventListener('click', function(event) {
-            const dropdown = document.getElementById('notificationsDropdown');
-            const button = document.querySelector('.notifications-btn');
-            
-            if (dropdown && button && 
-                !dropdown.contains(event.target) && 
-                !button.contains(event.target)) {
-                dropdown.classList.remove('show');
-            }
-        });
-        
-        // اختبار مباشر لـ Firebase
-        console.log('=== اختبار Firebase في index.html ===');
-        
-        // اختبار الاتصال بعد تحميل الصفحة
-        setTimeout(async () => {
-            console.log('🔍 جاري اختبار اتصال Firebase...');
-            
-            try {
-                if (typeof firebase === 'undefined') {
-                    console.error('❌ Firebase SDK غير محمل في الصفحة الرئيسية');
-                    return;
-                }
-                
-                console.log('✅ Firebase SDK محمل في الصفحة الرئيسية');
-                
-                const firebaseConfig = {
-                    apiKey: "AIzaSyAkgEiYYlmpMe0NLewulheovlTQMz5C980",
-                    authDomain: "bein-42f9e.firebaseapp.com",
-                    projectId: "bein-42f9e",
-                    storageBucket: "bein-42f9e.firebasestorage.app",
-                    messagingSenderId: "143741167050",
-                    appId: "1:143741167050:web:922d3a0cddb40f67b21b33",
-                    measurementId: "G-JH198SKCFS"
-                };
-                
-                let app;
-                if (firebase.apps.length === 0) {
-                    app = firebase.initializeApp(firebaseConfig);
-                    console.log('✅ تم تهيئة Firebase في الاختبار');
-                } else {
-                    app = firebase.apps[0];
-                    console.log('✅ Firebase مهيأ بالفعل في الاختبار');
-                }
-                
-                const db = firebase.firestore();
-                const snapshot = await db.collection('notifications').get();
-                console.log(`📊 العدد الإجمالي للإشعارات في Firebase: ${snapshot.size}`);
-                
-            } catch (error) {
-                console.error('❌ فشل اختبار Firebase:', error.message);
-            }
-        }, 2000);
-        
-        // وظائف مساعدة للنظام الجديد
-        window.openNotificationPopup = function(notification) {
-            if (window.notificationPopup) {
-                window.notificationPopup.showPopup(notification);
-            }
-        };
-        
-        window.closeNotificationPopup = function() {
-            if (window.notificationPopup) {
-                window.notificationPopup.closePopup();
-            }
-        };
-        
-        window.toggleNotificationPopup = function() {
-            if (window.notificationPopup) {
-                if (window.notificationPopup.popupShown) {
-                    window.notificationPopup.closePopup();
-                } else {
-                    // محاولة العثور على إشعار غير مقروء لعرضه
-                    const unreadCount = window.notificationPopup.getUnreadNotificationsCount();
-                    if (unreadCount > 0) {
-                        // هنا يمكن إضافة كود لجلب إشعار غير مقروء
-                        console.log('عرض إشعار غير مقروء...');
-                    }
-                }
-            }
-        };
-    </script>
-</body>
-</html>
