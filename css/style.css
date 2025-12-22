@@ -230,13 +230,13 @@ header {
 
 .section-card {
     background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    padding: 15px;
+    padding: 5px;
     background-size: cover;
     background-position: top center;
     background-repeat: no-repeat;
     margin: 20px 10px;
-    height: 80%;
-    width: 80%;
+    height: 70%;
+    width: 70%;
     border-bottom: 4px groove #fff;
     border-top: 4px groove #fff;
     border-left: 0px ridge rgb(255 0 0 / 100%);
@@ -284,8 +284,8 @@ header {
 
 .section-image img {
     background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    width: 90px;
-    height: 90px;
+    width: 80px;
+    height: 80px;
     margin: 0 auto 10px;
     border-radius: 10px 20px 10px 20px;
     border-bottom: 5px double rgba(255, 255, 255, 0.7); 
@@ -297,7 +297,7 @@ header {
     align-items: center;
     justify-content: center;
     margin-top: 0%;
-    margin-left: 0%;
+    margin-left: 15%;
     pointer-events: none;
 }
 
