@@ -173,7 +173,7 @@ class MatchApp {
 
             // أندية دوري أبطال آسيا
             "الاتحاد السوري": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/9846.png', color: '#DC3545' },
-            "السد": { url: 'https://jdwel.com/image/teams/1109.png', color: '#DC3545' },
+            "السد": { url: 'https://upload.wikimedia.org/wikipedia/ar/c/c2/%D8%B4%D8%B9%D8%A7%D8%B1_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%B3%D8%AF_%D8%A7%D9%84%D9%82%D8%B7%D8%B1%D9%8A_2019.svg', color: '#DC3545' },
             "شباب الأهلي": { url: 'https://jdwel.com/image/teams/2802.png', color: '#DC3545' },
             "ناساف كارشي": { url: 'https://jdwel.com/image/teams/1249.png', color: '#DC3545' },
             "باختاكور": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10304.png', color: '#FFD700' },
