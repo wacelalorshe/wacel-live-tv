@@ -25,7 +25,7 @@ class MatchApp {
             // المنتخبات الوطنية (مدموجة من أقسام كأس العالم، وكأس الأمم، وكوبا أمريكا، وكأس العرب)
             // ===================================
 
-            // المنتخبات العربية
+                 // المنتخبات العربية
             'السعودية': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/ksa.png', color: '#006C3E' },
             'قطر': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/qat.png', color: '#8A1538' },
             'الإمارات': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/uae.png', color: '#DC3545' },
@@ -42,6 +42,15 @@ class MatchApp {
             'فلسطين': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/ple.png', color: '#009739' },
             'السودان': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/sud.png', color: '#000000' },
             'ليبيا': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/lby.png', color: '#008C49' },
+            
+                        'الكونغو': { url: 'https://jdwel.com/image/teams/47.png', color: '#008C49' },
+                                   'بنين': { url: 'https://jdwel.com/image/teams/228.png', color: '#008C49' },
+                                         'بوتسوانا': { url: 'https://jdwel.com/image/teams/196.png', color: '#008C49' },
+                                            'تنزانيا': { url: 'https://jdwel.com/image/teams/85.png', color: '#008C49' },
+                                            'أوغندا': { url: 'https://jdwel.com/image/teams/219.png', color: '#008C49' },
+                          
+                                       '♥': { url: '♥', color: '#008C49' },                                                     
+            
 
             // المنتخبات الأوروبية
             'فرنسا': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/fra.png', color: '#0055A4' },
@@ -92,7 +101,7 @@ class MatchApp {
             "آرسنال": { url: 'https://jdwel.com/image/teams/2999.png', color: '#DC052B' },
             "بريتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t36.png', color: '#0057B8' },
             "فولهام": { url: 'https://resources.premierleague.com/premierleague/badges/50/t54.png', color: '#000000' },
-            "كريستال بالاس": { url: 'https://resources.premierleague.com/premierleague/badges/50/t31.png', color: '#1B458F' },
+            "كريستال بالاس": { url: 'https://jdwel.com/image/teams/1279.png', color: '#1B458F' },
             "وولفرهامبتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t39.png', color: '#FDB913' },
             "إيفرتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t11.png', color: '#003399' },
             "بورنموث": { url: 'https://resources.premierleague.com/premierleague/badges/50/t91.png', color: '#DC052B' },
@@ -101,6 +110,7 @@ class MatchApp {
          "وست هام": { url: 'https://jdwel.com/image/teams/5168.png', color: '#003090' },
          "توتنهام هوتسبير": { url: 'https://resources.premierleague.com/premierleague/badges/50/t6.png', color: '#DC052B' },
             "ساوثهامبتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t20.png', color: '#DC052B' },
+            "كريستال بالاس": { url: 'https://jdwel.com/image/teams/1279.png', color: '#008C49' },
             
             
             // الدوري الإسباني
@@ -163,6 +173,9 @@ class MatchApp {
 
             // أندية دوري أبطال آسيا
             "الاتحاد السوري": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/9846.png', color: '#DC3545' },
+            "السد": { url: 'https://jdwel.com/image/teams/1109.png', color: '#DC3545' },
+            "شباب الأهلي": { url: 'https://jdwel.com/image/teams/2802.png', color: '#DC3545' },
+            "ناساف كارشي": { url: 'https://jdwel.com/image/teams/1249.png', color: '#DC3545' },
             "باختاكور": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10304.png', color: '#FFD700' },
             "استقلال": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10308.png', color: '#0066AA' },
             "برسبوليس": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10307.png', color: '#DC052B' },
@@ -181,6 +194,8 @@ class MatchApp {
         }
     };
 }
+            
+            
 
     async initializeApp() {
         console.log('⚽ بدء تشغيل جدول المباريات...');
@@ -211,7 +226,7 @@ class MatchApp {
                     await this.loadDataFromLocalStorage();
                     console.log('✅ تم تحميل البيانات من localStorage');
                 } catch (localStorageError) {
-                    console.warn('⚠️ فشل تحميل localStorage:', localStorageError.message);
+                    console.warn('⚠️ فشل تحميل localStorage:', localStorageStorageError.message);
                     this.loadDefaultData();
                     console.log('✅ تم تحميل البيانات الافتراضية');
                 }
@@ -257,16 +272,10 @@ class MatchApp {
                 
                 if (!db) throw new Error('قاعدة البيانات غير متاحة');
                 
-                const today = new Date();
-                today.setHours(0, 0, 0, 0);
-                
+                // جلب جميع المباريات من Firebase
                 let matchesSnapshot;
                 try {
-                    matchesSnapshot = await db.collection('matches')
-                        .where('matchDate', '>=', today)
-                        .orderBy('matchDate')
-                        .orderBy('matchTime')
-                        .get();
+                    matchesSnapshot = await db.collection('matches').get();
                 } catch (queryError) {
                     console.warn('⚠️ خطأ في استعلام المباريات:', queryError);
                     matchesSnapshot = await db.collection('matches').get();
@@ -348,6 +357,10 @@ class MatchApp {
         console.log('📋 استخدام البيانات الافتراضية...');
         
         const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+        const tomorrow = new Date(today);
+        tomorrow.setDate(tomorrow.getDate() + 1);
         
         this.matchesList = [
             {
@@ -368,7 +381,27 @@ class MatchApp {
                 matchDate: today.toISOString().split('T')[0],
                 matchTime: '22:00',
                 channelId: 'channel2',
+                status: 'live'
+            },
+            {
+                id: 'match3',
+                team1: 'مانشستر يونايتد',
+                team2: 'ليفربول',
+                competition: 'الدوري الإنجليزي',
+                matchDate: tomorrow.toISOString().split('T')[0],
+                matchTime: '18:00',
+                channelId: 'channel1',
                 status: 'upcoming'
+            },
+            {
+                id: 'match4',
+                team1: 'يوفنتوس',
+                team2: 'ميلان',
+                competition: 'الدوري الإيطالي',
+                matchDate: yesterday.toISOString().split('T')[0],
+                matchTime: '20:30',
+                channelId: 'channel2',
+                status: 'finished'
             }
         ];
         
@@ -450,13 +483,33 @@ class MatchApp {
             return;
         }
 
-        const filteredMatches = this.filterMatchesByDate(this.currentFilter);
+        let filteredMatches = this.filterMatchesByDate(this.currentFilter);
+        
+        // 🆕 التعديل: فرز المباريات - المباشر أولاً، ثم القادمة، ثم المنتهية
+        filteredMatches.sort((a, b) => {
+            // تحديد حالة كل مباراة
+            const statusA = this.determineMatchStatus(a);
+            const statusB = this.determineMatchStatus(b);
+            
+            // ترتيب الأولوية: مباشر > قادم > منتهي
+            const priority = { 'live': 1, 'upcoming': 2, 'finished': 3 };
+            
+            if (priority[statusA] !== priority[statusB]) {
+                return priority[statusA] - priority[statusB];
+            }
+            
+            // إذا كانت نفس الحالة، فرز حسب التاريخ والوقت
+            const dateA = new Date(`${a.matchDate}T${a.matchTime}`);
+            const dateB = new Date(`${b.matchDate}T${b.matchTime}`);
+            
+            return dateA - dateB;
+        });
         
         if (filteredMatches.length === 0) {
             let message = '';
             switch(this.currentFilter) {
                 case 'today': message = 'لا توجد مباريات اليوم'; break;
-                case 'tomorrow': message = 'لا توجد مباريات غداً'; break;
+                case 'tomorrow': message = 'لا توجد مباريات غداً أو أمس'; break;
                 case 'week': message = 'لا توجد مباريات هذا الأسبوع'; break;
                 default: message = 'لا توجد مباريات متاحة';
             }
@@ -483,185 +536,166 @@ class MatchApp {
         console.log('✅ تم عرض المباريات بنجاح');
     }
 
-// 🔹 تحديث دالة createMatchCard لتضمين المنطق الزمني الجديد
-createMatchCard(match) {
-    const channel = this.channelsList.find(c => c.id === match.channelId);
-    
-    // 🆕 التعديلات الجديدة تبدأ من هنا
-    const now = new Date();
-    // تجميع التاريخ والوقت لإنشاء كائن Date للمباراة
-    const matchDateTime = new Date(`${match.matchDate}T${match.matchTime}`);
-    
-    // حساب الفرق بالدقائق بين وقت البدء والآن
-    // القيمة موجبة: المباراة لم تبدأ بعد
-    // القيمة سالبة: المباراة بدأت
-    const diffInMinutes = (matchDateTime.getTime() - now.getTime()) / (1000 * 60);
-    
-    // مدة المباراة الافتراضية هي ساعتان (120 دقيقة)
-    const matchDurationMinutes = 120; 
-    
-    // حالة المباراة الافتراضية
-    let status = 'upcoming', statusText = 'قريباً', statusIcon = 'uil uil-clock';
-    
-    if (match.status === 'live' || match.isLive || (diffInMinutes <= 0 && diffInMinutes > -matchDurationMinutes)) {
-        // 1. المباراة مباشرة:
-        //    - إذا كان 'status' أو 'isLive' مضبوطاً مسبقاً على 'live' (من مصدر البيانات)
-        //    - أو: إذا كان وقت المباراة قد بدأ (diffInMinutes <= 0) ولم يمر عليها ساعتان بعد (diffInMinutes > -120)
-        status = 'live'; 
-        statusText = 'مباشر'; 
-        statusIcon = 'uil uil-play-circle';
+    // 🆕 دالة مساعدة لتحديد حالة المباراة
+    determineMatchStatus(match) {
+        const now = new Date();
+        const matchDateTime = new Date(`${match.matchDate}T${match.matchTime}`);
+        const diffInMinutes = (matchDateTime.getTime() - now.getTime()) / (1000 * 60);
+        const matchDurationMinutes = 120;
         
-    } else if (diffInMinutes < -matchDurationMinutes) {
-        // 2. انتهت المباراة:
-        //    - إذا مر على وقت البدء أكثر من ساعتين (120 دقيقة)
-        status = 'finished'; 
-        statusText = 'انتهت المباراة'; 
-        statusIcon = 'uil uil-check-circle';
-        
-    } else if (diffInMinutes > 0 && diffInMinutes <= 60) {
-        // 3. تبدأ قريباً:
-        //    - إذا كان وقت البدء في المستقبل (diffInMinutes > 0)
-        //    - و: إذا كان الفرق أقل من أو يساوي ساعة واحدة (60 دقيقة)
-        status = 'upcoming'; 
-        statusText = 'تبدأ قريباً'; 
-        statusIcon = 'uil uil-hourglass'; 
-        
-    } else {
-        // 4. حالة قادمة أخرى (أكثر من ساعة)
-        status = 'upcoming'; 
-        statusText = 'قريباً'; 
-        statusIcon = 'uil uil-clock';
+        if (match.status === 'live' || match.isLive || (diffInMinutes <= 0 && diffInMinutes > -matchDurationMinutes)) {
+            return 'live';
+        } else if (diffInMinutes < -matchDurationMinutes) {
+            return 'finished';
+        } else {
+            return 'upcoming';
+        }
     }
-    // 🆕 نهاية التعديلات الجديدة
-    
-    // جلب معلومات شعارات الفرق (باقي الكود كما هو)
-    const team1Info = this.teamLogos[match.team1] || this.teamLogos.default;
-    const team2Info = this.teamLogos[match.team2] || this.teamLogos.default;
-    
-    const formattedDate = this.formatMatchDate(match.matchDate);
-    const formattedTime = this.formatTimeEnglish(match.matchTime);
-    
-    return `
-        <div class="match-card" data-match-id="${match.id}">
-            <div class="match-teams">
-                <div class="teams-container">
-                    <div class="team">
-                        <div class="team-logo-container">
-                            <img src="${team1Info.url}" alt="${match.team1} Logo" style="width: ${team1Info.size || 50}px; height: ${team1Info.size || 50}px; border-radius: 50%; border: 0px solid ${team1Info.color};">
+
+    createMatchCard(match) {
+        const channel = this.channelsList.find(c => c.id === match.channelId);
+        
+        // تحديد حالة المباراة
+        const status = this.determineMatchStatus(match);
+        let statusText, statusIcon;
+        
+        switch(status) {
+            case 'live':
+                statusText = 'مباشر';
+                statusIcon = 'uil uil-play-circle';
+                break;
+            case 'finished':
+                statusText = 'انتهت';
+                statusIcon = 'uil uil-check-circle';
+                break;
+            default:
+                statusText = 'قريباً';
+                statusIcon = 'uil uil-clock';
+                break;
+        }
+        
+        // جلب معلومات شعارات الفرق
+        const team1Info = this.teamLogos[match.team1] || this.teamLogos.default;
+        const team2Info = this.teamLogos[match.team2] || this.teamLogos.default;
+        
+        const formattedDate = this.formatMatchDate(match.matchDate);
+        const formattedTime = this.formatTimeEnglish(match.matchTime);
+        
+        return `
+            <div class="match-card" data-match-id="${match.id}">
+                <div class="match-teams">
+                    <div class="teams-container">
+                        <div class="team">
+                            <div class="team-logo-container">
+                                <img src="${team1Info.url}" alt="${match.team1} Logo" style="width: ${team1Info.size || 50}px; height: ${team1Info.size || 50}px; border-radius: 50%; border: 0px solid ${team1Info.color};">
+                            </div>
+                            <div class="team-name glow">${match.team1}</div>
                         </div>
-                        <div class="team-name glow">${match.team1}</div>
-                    </div>
-                    
-                    <div class="vs-container">
-                        <div class="vs">VS</div>
-                        <div class="match-time-small">${formattedTime}</div>
-                    </div>
-                    
-                    <div class="team">
-                        <div class="team-logo-container">
-                            <img src="${team2Info.url}" alt="${match.team2} Logo" style="width: ${team2Info.size || 50}px; height: ${team2Info.size || 50}px; border-radius: 50%; border: 0px solid ${team2Info.color};">
+                        
+                        <div class="vs-container">
+                            <div class="vs">VS</div>
+                            <div class="match-time-small">${formattedTime}</div>
                         </div>
-                        <div class="team-name glow">${match.team2}</div>
-                    </div>
-                </div>
-            </div>
-            
-            <div class="match-status-container">
-                <div class="match-status ${status}">
-                    <i class="${statusIcon}"></i>
-                    ${statusText}
-                </div>
-                </div>
-            <div class="watch-btn-container">
-                <button class="watch-btn" onclick="window.matchApp.openMatch('${match.id}'); event.stopPropagation()">
-                    <i class="uil uil-play-circle"></i> مشاهدة المباراة
-                </button>
-            </div>
-            
-            
-            <div class="match-info-horizontal">
-                <div class="info-item channel" title="${channel ? channel.name : 'قناة غير محددة'}">
-                    <div class="info-content">
-                        <i class="uil uil-tv-retro info-icon"></i>
-                        <div class="info-text">
-                            <div class="info-label">القناة</div>
-                            <div class="info-value">${channel ? channel.name : 'غير محدد'}</div>
+                        
+                        <div class="team">
+                            <div class="team-logo-container">
+                                <img src="${team2Info.url}" alt="${match.team2} Logo" style="width: ${team2Info.size || 50}px; height: ${team2Info.size || 50}px; border-radius: 50%; border: 0px solid ${team2Info.color};">
+                            </div>
+                            <div class="team-name glow">${match.team2}</div>
                         </div>
                     </div>
                 </div>
                 
-                <div class="info-item date" title="تاريخ المباراة">
-                    <div class="info-content">
-                        <i class="uil uil-calendar-alt info-icon"></i>
-                        <div class="info-text">
-                            <div class="info-label">التاريخ</div>
-                            <div class="info-value">${formattedDate}</div>
-                        </div>
+                <div class="match-status-container">
+                    <div class="match-status ${status}">
+                        <i class="${statusIcon}"></i>
+                        ${statusText}
                     </div>
+                </div>
+                <div class="watch-btn-container">
+                    <button class="watch-btn" onclick="window.matchApp.openMatch('${match.id}'); event.stopPropagation()">
+                        <i class="uil uil-play-circle"></i> مشاهدة المباراة
+                    </button>
                 </div>
                 
-                <div class="info-item league" title="${match.competition || 'بطولة'}">
-                    <div class="info-content">
-                        <i class="uil uil-trophy info-icon" style="color: #FFD700; font-size: 25px; margin-left: 10px;"></i>
-                        <div class="info-text">
-                            <div class="info-label">البطولة</div>
-                            <div class="info-value">${match.competition || 'غير محدد'}</div>
+                <div class="match-info-horizontal">
+                    <div class="info-item channel" title="${channel ? channel.name : 'قناة غير محددة'}">
+                        <div class="info-content">
+                            <i class="uil uil-tv-retro info-icon"></i>
+                            <div class="info-text">
+                                <div class="info-label">القناة</div>
+                                <div class="info-value">${channel ? channel.name : 'غير محدد'}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item date" title="تاريخ المباراة">
+                        <div class="info-content">
+                            <i class="uil uil-calendar-alt info-icon"></i>
+                            <div class="info-text">
+                                <div class="info-label">التاريخ</div>
+                                <div class="info-value">${formattedDate}</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="info-item league" title="${match.competition || 'بطولة'}">
+                        <div class="info-content">
+                            <i class="uil uil-trophy info-icon" style="color: #FFD700; font-size: 25px; margin-left: 10px;"></i>
+                            <div class="info-text">
+                                <div class="info-label">البطولة</div>
+                                <div class="info-value">${match.competition || 'غير محدد'}</div>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            
-            </div>
-        </div>
-    `;
-}
-
-// 🔹 تحديث دالة formatMatchDate لجعل التاريخ أقصر
-formatMatchDate(dateString) {
-    if (!dateString) return '--/--';
-    try {
-        const date = new Date(dateString);
-        const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
-        const dayName = days[date.getDay()];
-        const month = date.getMonth() + 1;
-        const day = date.getDate();
-        // تنسيق مختصر: الاثنين 12/15
-        return `${dayName} ${month}/${day}`;
-    } catch (error) {
-        return '--/--';
+        `;
     }
-}
 
-// 🔹 دالة formatTimeEnglish (تبقى كما هي)
-formatTimeEnglish(timeString) {
-    if (!timeString) return '--:--';
-    try {
-        const [hours, minutes] = timeString.split(':');
-        
-        const arabicToEnglish = {
-            '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
-            '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
-        };
-        
-        let hourNum = hours;
-        let minuteNum = minutes || '00';
-        
-        if (/\u0660-\u0669/.test(hourNum)) {
-            hourNum = hourNum.split('').map(char => arabicToEnglish[char] || char).join('');
+    formatMatchDate(dateString) {
+        if (!dateString) return '--/--';
+        try {
+            const date = new Date(dateString);
+            const days = ['الأحد', 'الاثنين', 'الثلاثاء', 'الأربعاء', 'الخميس', 'الجمعة', 'السبت'];
+            const dayName = days[date.getDay()];
+            const month = date.getMonth() + 1;
+            const day = date.getDate();
+            // تنسيق مختصر: الاثنين 12/15
+            return `${dayName} ${month}/${day}`;
+        } catch (error) {
+            return '--/--';
         }
-        if (/\u0660-\u0669/.test(minuteNum)) {
-            minuteNum = minuteNum.split('').map(char => arabicToEnglish[char] || char).join('');
-        }
-        
-        hourNum = parseInt(hourNum, 10);
-        minuteNum = parseInt(minuteNum, 10);
-        
-        return `${hourNum}:${minuteNum < 10 ? '0' + minuteNum : minuteNum}`;
-    } catch (error) {
-        return timeString;
     }
-}
+
+    formatTimeEnglish(timeString) {
+        if (!timeString) return '--:--';
+        try {
+            const [hours, minutes] = timeString.split(':');
+            
+            const arabicToEnglish = {
+                '٠': '0', '١': '1', '٢': '2', '٣': '3', '٤': '4',
+                '٥': '5', '٦': '6', '٧': '7', '٨': '8', '٩': '9'
+            };
+            
+            let hourNum = hours;
+            let minuteNum = minutes || '00';
+            
+            if (/\u0660-\u0669/.test(hourNum)) {
+                hourNum = hourNum.split('').map(char => arabicToEnglish[char] || char).join('');
+            }
+            if (/\u0660-\u0669/.test(minuteNum)) {
+                minuteNum = minuteNum.split('').map(char => arabicToEnglish[char] || char).join('');
+            }
+            
+            hourNum = parseInt(hourNum, 10);
+            minuteNum = parseInt(minuteNum, 10);
+            
+            return `${hourNum}:${minuteNum < 10 ? '0' + minuteNum : minuteNum}`;
+        } catch (error) {
+            return timeString;
+        }
+    }
 
     // ============================================
     // 🔹 الجزء 4: دوال الفلترة
@@ -670,10 +704,14 @@ formatTimeEnglish(timeString) {
     filterMatchesByDate(filter) {
         const now = new Date();
         const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
         const tomorrow = new Date(today);
         tomorrow.setDate(tomorrow.getDate() + 1);
         const nextWeek = new Date(today);
         nextWeek.setDate(nextWeek.getDate() + 7);
+        const lastWeek = new Date(today);
+        lastWeek.setDate(lastWeek.getDate() - 7);
         
         return this.matchesList.filter(match => {
             if (!match.matchDate) return false;
@@ -681,11 +719,18 @@ formatTimeEnglish(timeString) {
             matchDate.setHours(0, 0, 0, 0);
             
             switch(filter) {
-                case 'today': return matchDate.getTime() === today.getTime();
-                case 'tomorrow': return matchDate.getTime() === tomorrow.getTime();
-                case 'week': return matchDate >= today && matchDate <= nextWeek;
-                case 'all': return true;
-                default: return matchDate.getTime() === today.getTime();
+                case 'today': 
+                    return matchDate.getTime() === today.getTime();
+                case 'tomorrow': 
+                    // 🆕 التعديل: عرض مباريات الغد والأمس معاً
+                    return matchDate.getTime() === tomorrow.getTime() || 
+                           matchDate.getTime() === yesterday.getTime();
+                case 'week': 
+                    return matchDate >= lastWeek && matchDate <= nextWeek;
+                case 'all': 
+                    return true;
+                default: 
+                    return matchDate.getTime() === today.getTime();
             }
         });
     }
@@ -736,39 +781,37 @@ formatTimeEnglish(timeString) {
     }
 
     // 🔹 الدالة: showInstallModal (تم تحديث لون الخلفية والحدود)
-showInstallModal(channel) {
-    // إزالة أي نافذة موجودة مسبقاً
-    const existingModal = document.getElementById('installModal');
-    if (existingModal) {
-        document.body.removeChild(existingModal);
-    }
-    
-    // إنشاء نافذة جديدة مع خيار عدم المشاهدة مرة أخرى
-    const modalHTML = `
-        <div id="installModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;">
-            <div style="background: linear-gradient(#16213e, #1a1a2e); border-radius: 15px; padding: 30px; max-width: 450px; width: 90%; border: 2px solid #654FD4; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
-                <i class="uil uil-mobile-android-alt" style="font-size: 50px; color: #654FD4; margin-bottom: 20px;"></i>
-                <h3 style="color: white; margin-bottom: 10px;">مشاهدة المباراة</h3>
-                <p style="color: #B8B8B8; margin-bottom: 25px;">اختر الطريقة التي تريد بها مشاهدة المباراة</p>
-                <div style="display: flex; flex-direction: column; gap: 12px;">
-                    <button id="installAppBtn" style="background: linear-gradient(135deg, #42318F, #654FD4); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <i class="uil uil-download-alt"></i> تثبيت التطبيق ومشاهدة
-                    </button>
-                    <button id="openChannelBtn" style="background: linear-gradient(135deg, #42318F, #654FD4); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <i class="uil uil-play-circle"></i> مشاهدة مباشرة
-                    </button>
-                    <button id="dontShowAgainBtn" style="background: rgba(184, 184, 184, 0.2); color: #B8B8B8; border: 1px solid #B8B8B8; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
-                        <i class="uil uil-ban"></i> عدم المشاهدة مرة أخرى
-                    </button>
-                    <button id="cancelModalBtn" style="background: transparent; color: #FF5200; border: 1px solid #FF5200; padding: 10px 20px; border-radius: 25px; cursor: pointer; margin-top: 10px;">
-                        إلغاء
-                    </button>
+    showInstallModal(channel) {
+        // إزالة أي نافذة موجودة مسبقاً
+        const existingModal = document.getElementById('installModal');
+        if (existingModal) {
+            document.body.removeChild(existingModal);
+        }
+        
+        // إنشاء نافذة جديدة مع خيار عدم المشاهدة مرة أخرى
+        const modalHTML = `
+            <div id="installModal" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 10000; display: flex; align-items: center; justify-content: center;">
+                <div style="background: linear-gradient(#16213e, #1a1a2e); border-radius: 15px; padding: 30px; max-width: 450px; width: 90%; border: 2px solid #654FD4; text-align: center; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);">
+                    <i class="uil uil-mobile-android-alt" style="font-size: 50px; color: #654FD4; margin-bottom: 20px;"></i>
+                    <h3 style="color: white; margin-bottom: 10px;">مشاهدة المباراة</h3>
+                    <p style="color: #B8B8B8; margin-bottom: 25px;">اختر الطريقة التي تريد بها مشاهدة المباراة</p>
+                    <div style="display: flex; flex-direction: column; gap: 12px;">
+                        <button id="installAppBtn" style="background: linear-gradient(135deg, #42318F, #654FD4); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="uil uil-download-alt"></i> تثبيت التطبيق ومشاهدة
+                        </button>
+                        <button id="openChannelBtn" style="background: linear-gradient(135deg, #42318F, #654FD4); color: white; border: none; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="uil uil-play-circle"></i> مشاهدة مباشرة
+                        </button>
+                        <button id="dontShowAgainBtn" style="background: rgba(184, 184, 184, 0.2); color: #B8B8B8; border: 1px solid #B8B8B8; padding: 12px 25px; border-radius: 25px; cursor: pointer; font-weight: bold; display: flex; align-items: center; justify-content: center; gap: 8px;">
+                            <i class="uil uil-ban"></i> عدم المشاهدة مرة أخرى
+                        </button>
+                        <button id="cancelModalBtn" style="background: transparent; color: #FF5200; border: 1px solid #FF5200; padding: 10px 20px; border-radius: 25px; cursor: pointer; margin-top: 10px;">
+                            إلغاء
+                        </button>
+                    </div>
                 </div>
             </div>
-        </div>
-    `;
-// ... باقي الدالة
-
+        `;
         
         const modalDiv = document.createElement('div');
         modalDiv.innerHTML = modalHTML;
@@ -1073,4 +1116,4 @@ window.resetModalSettings = function() {
     }
 };
 
-console.log("✅ تم تحميل matches.js بنسخته النهائية مع التحديثات الزمنية");
+console.log("✅ تم تحميل matches.js بنسخته النهائية مع التحديثات الزمنية والترتيب");
