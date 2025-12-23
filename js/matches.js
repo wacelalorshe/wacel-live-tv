@@ -89,7 +89,7 @@ class MatchApp {
             // الدوري الإنجليزي الممتاز
             "نوتينغهام": { url: 'https://resources.premierleague.com/premierleague/badges/50/t25.png', color: '#DC3545' },
             "برينتفورد": { url: 'https://resources.premierleague.com/premierleague/badges/50/t94.png', color: '#DC3545' },
-            "أرسنال": { url: 'https://resources.premierleague.com/premierleague/badges/50/t3.png', color: '#EF0107' },
+            "أرسنال": { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTbLrC_RXiTRD-0gAYu3HqkchrBDGdYPyFQkMkxAKJhkg&s=10', color: '#EF0107' },
             "تشيلسي": { url: 'https://resources.premierleague.com/premierleague/badges/50/t8.png', color: '#034694' },
             "ليفربول": { url: 'https://resources.premierleague.com/premierleague/badges/50/t14.png', color: '#C8102E' },
             "مانشستر يونايتد": { url: 'https://resources.premierleague.com/premierleague/badges/50/t1.png', color: '#DC241F' },
@@ -110,7 +110,7 @@ class MatchApp {
          "وست هام": { url: 'https://jdwel.com/image/teams/5168.png', color: '#003090' },
          "توتنهام هوتسبير": { url: 'https://resources.premierleague.com/premierleague/badges/50/t6.png', color: '#DC052B' },
             "ساوثهامبتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t20.png', color: '#DC052B' },
-            "كريستال بالاس": { url: 'https://jdwel.com/image/teams/1279.png', color: '#008C49' },
+            "كريستال بالاس": { url: 'https://upload.wikimedia.org/wikipedia/ar/thumb/0/0c/Crystal_Palace_FC_logo.svg/962px-Crystal_Palace_FC_logo.svg.png', color: '#008C49' },
             
             
             // الدوري الإسباني
