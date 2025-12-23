@@ -43,11 +43,11 @@ class MatchApp {
             'السودان': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/sud.png', color: '#000000' },
             'ليبيا': { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/countries/500/lby.png', color: '#008C49' },
             
-                        'الكونغو': { url: 'https://jdwel.com/image/teams/47.png', color: '#008C49' },
-                                   'بنين': { url: 'https://jdwel.com/image/teams/228.png', color: '#008C49' },
-                                         'بوتسوانا': { url: 'https://jdwel.com/image/teams/196.png', color: '#008C49' },
-                                            'تنزانيا': { url: 'https://jdwel.com/image/teams/85.png', color: '#008C49' },
-                                            'أوغندا': { url: 'https://jdwel.com/image/teams/219.png', color: '#008C49' },
+                        'الكونغو': { url: 'https://upload.wikimedia.org/wikipedia/ar/6/60/Congo_Republic_FA.gif', color: '#008C49' },
+                                   'بنين': { url: 'https://upload.wikimedia.org/wikipedia/ar/c/ce/Benin_Football_Federation_logo.svg', color: '#008C49' },
+                                         'بوتسوانا': { url: 'https://upload.wikimedia.org/wikipedia/commons/thumb/f/fa/Flag_of_Botswana.svg/330px-Flag_of_Botswana.svg.png', color: '#008C49' },
+                                            'تنزانيا': { url: 'https://upload.wikimedia.org/wikipedia/commons/3/38/Flag_of_Tanzania.svg', color: '#008C49' },
+                                            'أوغندا': { url: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcQkiK8_NqMrMcvWa_NnDfauu59upDGzD1isdfm9fgHVsQ&s=10', color: '#008C49' },
                           
                                        '♥': { url: '♥', color: '#008C49' },                                                     
             
@@ -101,7 +101,7 @@ class MatchApp {
             "آرسنال": { url: 'https://jdwel.com/image/teams/2999.png', color: '#DC052B' },
             "بريتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t36.png', color: '#0057B8' },
             "فولهام": { url: 'https://resources.premierleague.com/premierleague/badges/50/t54.png', color: '#000000' },
-            "كريستال بالاس": { url: 'https://jdwel.com/image/teams/1279.png', color: '#1B458F' },
+            "كريستال بالاس": { url: 'https://upload.wikimedia.org/wikipedia/ar/thumb/0/0c/Crystal_Palace_FC_logo.svg/962px-Crystal_Palace_FC_logo.svg.png', color: '#1B458F' },
             "وولفرهامبتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t39.png', color: '#FDB913' },
             "إيفرتون": { url: 'https://resources.premierleague.com/premierleague/badges/50/t11.png', color: '#003399' },
             "بورنموث": { url: 'https://resources.premierleague.com/premierleague/badges/50/t91.png', color: '#DC052B' },
@@ -174,8 +174,8 @@ class MatchApp {
             // أندية دوري أبطال آسيا
             "الاتحاد السوري": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/9846.png', color: '#DC3545' },
             "السد": { url: 'https://upload.wikimedia.org/wikipedia/ar/c/c2/%D8%B4%D8%B9%D8%A7%D8%B1_%D9%86%D8%A7%D8%AF%D9%8A_%D8%A7%D9%84%D8%B3%D8%AF_%D8%A7%D9%84%D9%82%D8%B7%D8%B1%D9%8A_2019.svg', color: '#DC3545' },
-            "شباب الأهلي": { url: 'https://jdwel.com/image/teams/2802.png', color: '#DC3545' },
-            "ناساف كارشي": { url: 'https://jdwel.com/image/teams/1249.png', color: '#DC3545' },
+            "شباب الأهلي": { url: 'https://upload.wikimedia.org/wikipedia/ar/thumb/e/e7/%D8%B4%D8%B9%D8%A7%D8%B1_%D9%86%D8%A7%D8%AF%D9%8A_%D8%B4%D8%A8%D8%A7%D8%A8_%D8%A7%D9%84%D8%A3%D9%87%D9%84%D9%8A.svg/1141px-%D8%B4%D8%B9%D8%A7%D8%B1_%D9%86%D8%A7%D8%AF%D9%8A_%D8%B4%D8%A8%D8%A7%D8%A8_%D8%A7%D9%84%D8%A3%D9%87%D9%84%D9%8A.svg.png', color: '#DC3545' },
+            "ناساف كارشي": { url: 'https://upload.wikimedia.org/wikipedia/ar/1/1b/FC_Nasaf.png', color: '#DC3545' },
             "باختاكور": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10304.png', color: '#FFD700' },
             "استقلال": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10308.png', color: '#0066AA' },
             "برسبوليس": { url: 'https://a.espncdn.com/combiner/i?img=/i/teamlogos/soccer/500/10307.png', color: '#DC052B' },
