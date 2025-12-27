@@ -284,8 +284,11 @@ header {
 
 .section-image img {
     background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    width: 80px;
-    height: 80px;
+    /* استخدام وحدات نسبية أو الحد الأقصى للعرض داخل العنصر الأب */
+    width: 80%;
+    height: auto; /* للحفاظ على نسبة العرض إلى الارتفاع */
+    max-width: 100px; /* تحديد حد أقصى لصورة اللوجو */
+    aspect-ratio: 1 / 1; /* للحفاظ على الشكل المربع */
     margin: 0 auto 10px;
     border-radius: 10px 20px 10px 20px;
     border-bottom: 5px double rgba(255, 255, 255, 0.7); 
@@ -293,11 +296,7 @@ header {
     border-left: 0px ridge #2F2562;
     border-right: 0px groove #2F2562;
     padding: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 0%;
-    margin-left: 15%;
+    display: block;
     pointer-events: none;
 }
 
