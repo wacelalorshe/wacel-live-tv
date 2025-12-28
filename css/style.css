@@ -114,60 +114,64 @@ header {
     padding-bottom: 80px;
 }
 
-.page-title, .section-title {
-            position: fixed;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            display: inline-block;
-            background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #000);
-            border-radius: 0px;
-            top: 79px;
-            left: 0;
-            right: 0;
-            width: 100%;
-            padding: 1px;
-            z-index: 999;
-            margin: 0 auto 100px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            border-bottom: 3px groove  rgba(0, 0, 0, 0.1);
-            border-top: 2px ridge rgba(0, 0, 0, 0.4);
-            font-size: 14px;
-            color: #b8d4f5; 
-        }
+/* --- تنسيق العناوين الثابتة الملتصقة --- */
 
-        .welcome-message, .section-description {
-            position: fixed;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            display: inline-block;
-            background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #000);
-            border-radius: 0px;
-            top: 96px;
-            left: 0;
-            right: 0;
-            width: 100%;
-            padding-bottom: 5px;
-            margin-bottom: 15px;
-            z-index: 999;
-            margin: 10 auto 100px;
-            overflow: hidden;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            text-align: center;
-            align-items: center;
-            border-bottom: 3px groove  rgba(0, 0, 0, 0.1);
+/* العنصر الأول: العنوان الرئيسي (Page Title / Section Title) */
+.page-title, .section-title {
+    position: fixed;
+    top: 79px; /* يبدأ تماماً بعد الهيدر */
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 30px; /* تحديد ارتفاع ثابت لضمان الالتصاق */
+    z-index: 1000;
+    background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #b8d4f5;
+    font-size: 14px;
+    margin: 0; /* إلغاء أي هوامش تسبب فراغ */
+    padding: 0;
+    /* الحدود الجمالية التي تفصل بين العنصرين */
+    border-top: 2px ridge rgba(0, 0, 0, 0.4);
+    border-bottom: 1.5px groove rgba(255, 255, 255, 0.1); 
+    box-sizing: border-box;
+}
+
+/* العنصر الثاني: الوصف (Welcome Message / Section Description) */
+.welcome-message, .section-description {
+    position: fixed;
+    /* يبدأ من (ارتفاع الهيدر 79px + ارتفاع العنوان الأول 30px) = 109px */
+    top: 109px; 
+    left: 0;
+    right: 0;
+    width: 100%;
+    height: 30px; /* توحيد الارتفاع لضمان التناسق */
+    z-index: 999;
+    background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #000);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    color: #b8d4f5;
+    font-size: 13px;
+    margin: 0; /* إلغاء أي هوامش */
+    padding: 0;
+    /* حدود تفصل بينه وبين ما قبله وما بعده */
+    border-bottom: 3px groove  rgba(0, 0, 0, 0.1);
             border-top: 2px ridge rgba(0, 0, 0, 0.4);
             box-shadow: 0 0px 10px  rgba(255, 255, 255, 0.2);
-            font-size: 13px;
-            color: #b8d4f5;
-        }
+    box-sizing: border-box;
+}
+
+/* --- تعديل محتوى الصفحة لكي لا يختفي خلف العناوين الثابتة --- */
+.content {
+    /* (هيدر 79 + عنوان 30 + وصف 30) = 139px */
+    margin-top: 150px !important; 
+    padding: 10px;
+}
 
 
 /* Ticker */
