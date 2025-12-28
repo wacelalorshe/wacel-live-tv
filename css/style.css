@@ -15,7 +15,19 @@
     --text-secondary: #a8b1e1;
     --card-bg-match: linear-gradient(145deg, rgba(21, 24, 37, 0.9), rgba(30, 33, 58, 0.9));
 }
+/* إزالة الخطوط الافتراضية من جميع الروابط */
+a {
+    text-decoration: none !important;
+}
 
+/* ثم إعادة الخطوط للعناصر التي تريدها فقط */
+.header-title .text-box {
+    text-decoration: underline; /* إذا كنت تريد الخط هنا */
+}
+
+.ticker li a {
+    text-decoration: underline; /* إذا كنت تريد الخط هنا */
+} 
 * {
     margin: 0;
     padding: 0;
@@ -67,7 +79,7 @@ header {
     font-weight: bold;
     text-decoration: none;
     transition: all 0.3s ease;
-    font-size: 13px;
+    font-size: 16px;
     color: #fff;
     box-shadow: 0 0px 10px  rgba(255, 255, 255, 100);
 }
@@ -265,6 +277,7 @@ header {
 
 
 
+
 /* Sections Grid - التعديل الأساسي */
 .sections-grid, .channels-container {
     display: grid;
@@ -288,15 +301,20 @@ header {
  
 
 .section-card, .channel-card {
-	background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-	border-radius: 15px;
-	
-    padding: 10px 5px; /* تقليل الحشو الجانبي */
-    width: 100%;
-    max-width: 150px; /* تحديد عرض أقصى لضمان عدم ضخامة البطاقة */
-    border-bottom: 3px groove #fff; /* محاكاة تصميم section.css */
-    border-top: 3px groove #fff;    /* محاكاة تصميم section.css */
-    box-sizing: border-box; /* لضمان حساب الحجم بدقة */
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    padding: 1px;
+    margin: 10px 0; /* إزالة الهامش الأفقي ليتسع بشكل أفضل داخل الشبكة */
+    height: 90%; /* يمكن استخدام min-height: 150px; للتكيف */
+    width: 90%; /* عرض نسبي داخل عمود الشبكة */
+    max-width: 250px; /* تحديد حد أقصى للحجم في الشاشات الكبيرة */
+    border-bottom: 4px groove #fff;
+    border-top: 4px groove #fff;
+    border-left: 0px ridge rgb(255 0 0 / 100%);
+    border-right: 0px ridge #f1f8e9;
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* التأكد من أن padding و border لا يغيران حجم العنصر */
 }
 
 
@@ -307,8 +325,9 @@ header {
 }
 
 .section-card-link {
+	
     color: white;
-    text-decoration: none;
+    text-decoration: none !important;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -321,9 +340,13 @@ header {
 
 .section-image {
     width: 100%;
+    height: auto; /* إزالة الارتفاع الثابت */
+    margin: 0 auto 1px;
+    padding: 5px;
     display: flex;
+    align-items: center;
     justify-content: center;
-    margin-bottom: 10px;
+    margin-top: 1px;
 }
 
 
@@ -331,30 +354,21 @@ header {
 
 
 .section-image img, .channel-logo img {
-    width: 75%; /* جعل الصورة تأخذ مساحة متوازنة داخل البطاقة */
-    height: auto;
-    aspect-ratio: 1 / 1; /* الحفاظ على شكل المربع دائماً */
-    border-radius: 10px 20px; /* نفس انحناءات section.css */
-    object-fit: contain; /* منع تشوه الصورة */
-    
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
     /* استخدام وحدات نسبية أو الحد الأقصى للعرض داخل العنصر الأب */
-    width: 100%;
+    width: 80%;
     height: auto; /* للحفاظ على نسبة العرض إلى الارتفاع */
     max-width: 100px; /* تحديد حد أقصى لصورة اللوجو */
     aspect-ratio: 1 / 1; /* للحفاظ على الشكل المربع */
-    margin: 0 auto 0px;
+    margin: 0 auto 1px;
     border-radius: 10px 20px 10px 20px;
-    border-bottom: 2px ridge rgba(255, 255, 255, 0.7); 
-    border-top: 2px groove rgba(255, 255, 255, 0.7); 
-    border-left: 0px ridge #2F2562;
-    border-right: 0px groove #2F2562;
+    border-bottom: 2px groove rgba(255, 255, 255, 0.7); 
+    border-top: 2px ridge rgba(255, 255, 255, 0.7); 
+    border-left: 0px groove rgba(255, 255, 255, 0.7); 
+    border-right: 0px ridge rgba(255, 255, 255, 0.7); 
     padding: 3px;
     display: block;
     pointer-events: none;
-    justify-content: center; 
-    text-align: center;
-    
-
 
 }
 
@@ -362,26 +376,37 @@ header {
 
 
 .section-name, .channel-name {
-    font-size: 11px; /* تصغير الخط ليناسب نظام الـ 3 بطاقات */
-    overflow: hidden;
-    text-overflow: ellipsis; /* وضع نقاط (...) إذا كان الاسم طويلاً */
-    white-space: nowrap; /* منع النص من النزول لسطر جديد */
-    width: 95%;
-    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    padding: 5px 10px;
-    color: #fff;
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825); 
+    padding: 3px 0;
+    
+    
+    
+    border-top: 2px groove rgba(0, 0, 0, 100);
+    border-left: 0px ridge #6D42B8;
+    border-right: 0px groove #6D42B8;
+    border-bottom: 3px groove rgba(0, 0, 0, 5);
+    color: #b8d4f5;
     border-radius: 10px;
     margin-top: 10px;
     font-weight: bold; 
-    font-size: 0.85rem;
-    width: 90%; /* مساحة كافية للنص */
+    font-family: Arial, sans-serif; 
+    box-shadow: 0 0px 0px rgba(255, 255, 255, 100);
     text-align: center;
-    box-shadow: 0 0px 5px rgba(255, 255, 255, 0.5);
-    border: 1px solid rgba(255,255,255,0.2);
+    font-size: 0.5rem; /* وحدة نسبية */
 }
 
+
+.section-description {
+    color: #E1E1E1;
+    font-size: 0.7rem; /* وحدة نسبية */
+    margin-top: 5px;
+    text-align: center;
+    line-height: 0.3;
+}
+
+
 .section-badge {
-    background: #fff;
+    background: #000;
     padding: 2px 8px;
     color: #000;
     border-radius: 40px;
@@ -394,24 +419,17 @@ header {
 }
 
 
-.section-description {
-    color: #E1E1E1;
-    font-size: 9px;
-    margin-top: 10px;
-    line-height: 1.4;
-    text-align: center;
-}
 
 .section-badge {
-    background-image: linear-gradient(to right, #fff, #fff, #fff, #fff, #fff);
+    background-image: linear-gradient(to right, #000, #000, #000, #000, #000, #000);
     padding: 0px;
     box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
     border-top: 3px groove rgba(0, 0, 0, 100);
     border-left:0px ridge #6D42B8;
     border-right:0px groove #6D42B8;
-    border-bottom: 3px groove rgba(0, 0, 0, 5);
+    border-bottom: px groove rgba(0, 0, 0, 5);
     padding: 0px;
-    color: #000;
+    color: #fff;
     border-radius: 40px;
     margin-top: 10px;
     font-size: 12px;
@@ -437,17 +455,18 @@ header {
 .channel-card {
     background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
     padding: 15px;
-    background-size: cover;
-    background-position: top center;
-    background-repeat: no-repeat;
-    margin: 25px 5px;
-    height: 80%;
-    width: 90%;
+    margin: 10px 0; /* إزالة الهامش الأفقي ليتسع بشكل أفضل داخل الشبكة */
+    height: 90%; /* يمكن استخدام min-height: 150px; للتكيف */
+    width: 90%; /* عرض نسبي داخل عمود الشبكة */
+    max-width: 250px; /* تحديد حد أقصى للحجم في الشاشات الكبيرة */
     border-bottom: 4px groove #fff;
     border-top: 4px groove #fff;
     border-left: 0px ridge rgb(255 0 0 / 100%);
     border-right: 0px ridge #f1f8e9;
     border-radius: 15px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-sizing: border-box; /* التأكد من أن padding و border لا يغيران حجم العنصر */
 }
 
 .channel-card:hover {
@@ -456,19 +475,23 @@ header {
 }
 
 .channel-logo {
-    width: 10px;
-    height: 10px;
+    width: 100%;
+    height: auto; /* إزالة الارتفاع الثابت */
     margin: 0 auto 10px;
     padding: 5px;
     display: flex;
     align-items: center;
     justify-content: center;
-    margin-top: 10px;
+    margin-top: 1px;
 }
 
 .channel-logo img {
-    width: 90px;
-    height: 90px;
+    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+    /* استخدام وحدات نسبية أو الحد الأقصى للعرض داخل العنصر الأب */
+    width: 80%;
+    height: auto; /* للحفاظ على نسبة العرض إلى الارتفاع */
+    max-width: 100px; /* تحديد حد أقصى لصورة اللوجو */
+    aspect-ratio: 1 / 1; /* للحفاظ على الشكل المربع */
     margin: 0 auto 10px;
     border-radius: 10px 20px 10px 20px;
     border-bottom: 5px double rgba(255, 255, 255, 0.7); 
@@ -476,35 +499,37 @@ header {
     border-left: 0px ridge #2F2562;
     border-right: 0px groove #2F2562;
     padding: 3px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-top: 80%;
+    display: block;
     pointer-events: none;
 }
 
 .channel-name {
     background-image: linear-gradient(to right, #000, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825,#151825, #151825, #151825, #151825, #151825, #151825, #151825, #151825, #000);
-    padding: 0px;
+    padding: 3px 0;
     box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
-    border-top: 3px groove rgba(0, 0, 0, 100);
-    border-left:0px ridge #6D42B8;
-    border-right:0px groove #6D42B8;
+    border-top: 2px groove rgba(0, 0, 0, 100);
+    border-left: 0px ridge #6D42B8;
+    border-right: 0px groove #6D42B8;
     border-bottom: 3px groove rgba(0, 0, 0, 5);
-    padding: 0px;
     color: #fff;
-    border-radius: 40px;
-    margin-top: 50px;
-    margin-right:0%;
-    width: 100%; 
+    border-radius: 10px;
+    margin-top: 30px;
     font-weight: bold; 
     font-family: Arial, sans-serif; 
-    padding-left: 0%; 
-    padding-right: 0%; 
     box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
-    justify-content: center; 
     text-align: center;
+    font-size: 0.8rem; /* وحدة نسبية */
 }
+
+.channel-description {
+    color: #E1E1E1;
+    font-size: 0.7rem; /* وحدة نسبية */
+    margin-top: 5px;
+    text-align: center;
+    line-height: 1.3;
+}
+
+
 
 /* Modal Styles */
 .modal {
@@ -520,18 +545,19 @@ header {
     animation: fadeIn 0.3s;
 }
 
-.modal-content {
-    background: linear-gradient(to right, var(--dark-bg), #3A4266);
-    margin: auto;
-    padding: 20px;
-    border: 3px groove #fff;
-    width: 90%;
-    max-width: 500px;
-    border-radius: 15px;
-    text-align: center;
-    color: var(--text-light);
-    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
-    animation: slideIn 0.3s;
+/* Modal Styles */
+/* لا تحتاج إلى تغييرات كبيرة في الـ Modal لأنها تستخدم النسبة المئوية والعرض الأقصى */
+#installModal, .modal {
+    display: none;
+    position: fixed;
+    z-index: 2000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    padding-top: 10vh; /* استخدام vh بدلاً من px */
+    animation: fadeIn 0.3s;
 }
 
 @keyframes fadeIn {
@@ -642,6 +668,65 @@ header {
 }
 
 
+* الأجهزة اللوحية (Tablets) وما شابه (من 768px إلى 1024px) */
+@media (max-width: 1024px) {
+    .channels-container {
+        grid-template-columns: repeat(auto-fill, minmax(130px, 1fr));
+        gap: 15px;
+    }
+    
+    .channel-card {
+        padding: 10px;
+    }
+}
+
+/* الهواتف الذكية (Small Phones) */
+@media (max-width: 480px) {
+    .section-title {
+        top: 80px; /* تغيير موقع العنوان في الشاشات الصغيرة */
+        font-size: 0.9rem;
+        padding: 4px 1px;
+    }
+
+    .section-description {
+        top: 110px;
+        font-size: 11px;
+        padding: 4px;
+    }
+
+    .channels-container {
+        grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+        gap: 10px;
+        padding: 10px;
+        margin-top: 40px; /* لتعويض موقع العنوان والوصف الجديد */
+    }
+    
+    .channel-card {
+        padding: 8px;
+        margin: 10px 0;
+    }
+    
+    .channel-logo img {
+        max-width: 70px;
+    }
+    
+    .channel-name {
+        font-size: 0.7rem;
+        margin-top: 15px;
+    }
+
+    .channel-description {
+        font-size: 0.65rem;
+    }
+
+    .modal-content {
+        width: 95%; /* زيادة عرض الـ Modal قليلاً */
+        padding: 15px;
+    }
+}
+
+
+
 /* Responsive Design - أنماط عامة/أقسام/قنوات */
 
 /* شاشات التابلت والأجهزة الأفقية (~768px) */
@@ -655,7 +740,7 @@ header {
     
     .section-card {
         min-height: 60px;
-        padding: 15px;
+        padding: 1px;
     }
     
     .section-image {
@@ -725,8 +810,8 @@ header {
     }
     
     .section-image {
-        width: 80px;
-        height: 80px;
+        width: 100px;
+        height: 100px;
     }
     
     .section-icon {
@@ -742,11 +827,10 @@ header {
     }
     
     .section-name {
-        font-size: 9px;
-        padding: 0px 5px;
-        margin-bottom: 10px;
-        width: 100%;
-        height: 100%;
+        .channel-name {
+        font-size: 0.2rem;
+        margin-top: 15px;
+    }
     }
     
     .channels-container {
