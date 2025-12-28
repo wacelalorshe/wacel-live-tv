@@ -108,61 +108,67 @@ header {
 
 /* Main Content */
 .content {
-    margin-top: 100px;
+    margin-top: 120px;
     padding: 20px;
     min-height: calc(100vh - 180px);
     padding-bottom: 80px;
 }
 
 .page-title, .section-title {
-	position: fixed;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    display: inline-block;
-    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    border-radius: 0px;
-    top: 72px;
-    left: 0;
-    right: 0;
-    width: 90%;
-    padding: 5px;
-    z-index: 999;
-    margin: 0 auto 100px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border: 0px solid rgba(255, 255, 255, 0.1);
-    font-size: 16px;
-    color: #b8d4f5; 
-}
+            position: fixed;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            display: inline-block;
+            background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #000);
+            border-radius: 0px;
+            top: 79px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding: 1px;
+            z-index: 999;
+            margin: 0 auto 100px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            border-bottom: 3px groove  rgba(0, 0, 0, 0.1);
+            border-top: 2px ridge rgba(0, 0, 0, 0.4);
+            font-size: 14px;
+            color: #b8d4f5; 
+        }
 
-.welcome-message, .section-description {
-    position: fixed;
-    overflow: hidden;
-    display: flex;
-    align-items: center;
-    display: inline-block;
-    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    border-radius: 0px;
-    top: 103px;
-    left: 0;
-    right: 0;
-    width: 90%;
-    padding-bottom: 25px;
-    z-index: 999;
-    margin: 0 auto 100px;
-    overflow: hidden;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    border: 0px solid rgba(255, 255, 255, 0.1);
-    font-size: 16px;
-    color: #b8d4f5;
-}
+        .welcome-message, .section-description {
+            position: fixed;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
+            display: inline-block;
+            background-image: linear-gradient(to right, #000, #3A4266, #3A4266, #3A4266, #3A4266, #000);
+            border-radius: 0px;
+            top: 96px;
+            left: 0;
+            right: 0;
+            width: 100%;
+            padding-bottom: 5px;
+            margin-bottom: 15px;
+            z-index: 999;
+            margin: 10 auto 100px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            align-items: center;
+            border-bottom: 3px groove  rgba(0, 0, 0, 0.1);
+            border-top: 2px ridge rgba(0, 0, 0, 0.4);
+            box-shadow: 0 0px 10px  rgba(255, 255, 255, 0.2);
+            font-size: 13px;
+            color: #b8d4f5;
+        }
+
 
 /* Ticker */
 .ticker {
@@ -255,31 +261,40 @@ header {
 
 
 
-/* Sections Grid */
-.sections-grid {
+/* Sections Grid - التعديل الأساسي */
+.sections-grid, .channels-container {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(2000px, 1fr));
-    gap: 20px;
-    padding: 0px 0;
+    /* هذا السطر يجبر ظهور 3 أعمدة متساوية */
+    grid-template-columns: repeat(3, 1fr); 
+    gap: 12px;
+    padding: 10px;
     justify-items: center;
+    width: 100%;
 }
 
-.section-card {
-    background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    padding: 15px;
-    margin: 10px 0; /* إزالة الهامش الأفقي ليتسع بشكل أفضل داخل الشبكة */
-    height: 90%; /* يمكن استخدام min-height: 150px; للتكيف */
-    width: 90%; /* عرض نسبي داخل عمود الشبكة */
-    max-width: 250px; /* تحديد حد أقصى للحجم في الشاشات الكبيرة */
-    border-bottom: 4px groove #fff;
-    border-top: 4px groove #fff;
-    border-left: 0px ridge rgb(255 0 0 / 100%);
-    border-right: 0px ridge #f1f8e9;
-    border-radius: 15px;
-    cursor: pointer;
-    transition: all 0.3s ease;
-    box-sizing: border-box; /* التأكد من أن padding و border لا يغيران حجم العنصر */
+/* Channels Grid - التعديل ليتناسب مع الأقسام */
+.channels-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 20px;
+    padding: 20px;
+    justify-items: center;
+    margin-top: 100px; 
 }
+ 
+
+.section-card, .channel-card {
+	background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
+	border-radius: 15px;
+	
+    padding: 10px 5px; /* تقليل الحشو الجانبي */
+    width: 100%;
+    max-width: 150px; /* تحديد عرض أقصى لضمان عدم ضخامة البطاقة */
+    border-bottom: 3px groove #fff; /* محاكاة تصميم section.css */
+    border-top: 3px groove #fff;    /* محاكاة تصميم section.css */
+    box-sizing: border-box; /* لضمان حساب الحجم بدقة */
+}
+
 
 .section-card:hover {
     transform: translateY(-5px);
@@ -302,16 +317,21 @@ header {
 
 .section-image {
     width: 100%;
-    height: auto; /* إزالة الارتفاع الثابت */
-    margin: 0 auto 1px;
-    padding: 0px;
     display: flex;
-    align-items: center;
     justify-content: center;
-    margin-top: 1px;
+    margin-bottom: 10px;
 }
 
-.section-image img {
+
+
+
+
+.section-image img, .channel-logo img {
+    width: 75%; /* جعل الصورة تأخذ مساحة متوازنة داخل البطاقة */
+    height: auto;
+    aspect-ratio: 1 / 1; /* الحفاظ على شكل المربع دائماً */
+    border-radius: 10px 20px; /* نفس انحناءات section.css */
+    object-fit: contain; /* منع تشوه الصورة */
     
     /* استخدام وحدات نسبية أو الحد الأقصى للعرض داخل العنصر الأب */
     width: 100%;
@@ -337,26 +357,38 @@ header {
 
 
 
-.section-name {
+.section-name, .channel-name {
+    font-size: 11px; /* تصغير الخط ليناسب نظام الـ 3 بطاقات */
+    overflow: hidden;
+    text-overflow: ellipsis; /* وضع نقاط (...) إذا كان الاسم طويلاً */
+    white-space: nowrap; /* منع النص من النزول لسطر جديد */
+    width: 95%;
     background-image: linear-gradient(to right, #151825, #3A4266, #3A4266, #3A4266, #3A4266, #151825);
-    padding: 0px 0;
-    box-shadow: 0 0px 100px rgba(255, 255, 255, 100);
-    border-top: 2px groove rgba(0, 0, 0, 100);
-    border-left: 0px ridge #6D42B8;
-    border-right: 0px groove #6D42B8;
-    border-bottom: 3px groove rgba(0, 0, 0, 5);
+    padding: 5px 10px;
     color: #fff;
     border-radius: 10px;
-    margin-top: 30px;
+    margin-top: 10px;
     font-weight: bold; 
-    font-family: Arial, sans-serif; 
-    box-shadow: 0 0px 5px rgba(255, 255, 255, 100);
+    font-size: 0.85rem;
+    width: 90%; /* مساحة كافية للنص */
     text-align: center;
-    font-size: 0.8rem; /* وحدة نسبية */
-    
-    width: 50%; 
-    
+    box-shadow: 0 0px 5px rgba(255, 255, 255, 0.5);
+    border: 1px solid rgba(255,255,255,0.2);
 }
+
+.section-badge {
+    background: #fff;
+    padding: 2px 8px;
+    color: #000;
+    border-radius: 40px;
+    margin-top: 8px;
+    font-size: 11px;
+    width: auto; /* يتمدد حسب النص */
+    min-width: 40%;
+    font-weight: bold;
+    text-align: center;
+}
+
 
 .section-description {
     color: #E1E1E1;
@@ -681,6 +713,8 @@ header {
         padding: 10px 0;
     }
     
+    
+    
     .section-card {
         min-height: 140px;
         padding: 10px;
@@ -939,3 +973,15 @@ header {
 .nav-item:hover .nav-svg-icon{
   transform: scale(1.12);
 }
+
+/* الكود المضاف */
+@media (max-width: 767px) {
+    .sections-grid {
+        grid-template-columns: repeat(3, 1fr) !important;
+        gap: 8px; /* مسافات ضيقة جداً للهواتف */
+    }
+    .section-card {
+        padding: 4px 2px;
+    }
+}
+
