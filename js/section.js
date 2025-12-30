@@ -1,3 +1,4 @@
+
 // js/section.js
 // Firebase configuration
 const firebaseConfig = {
@@ -142,8 +143,8 @@ class SectionChannelsApp {
                 // 6. حفظ في localStorage كنسخة احتياطية
                 this.saveToLocalStorage();
                 
-                // 7. عرض القنوات
-                this.renderChannels();
+                // 7. عرض القنوات مع الإعلانات
+                this.renderChannelsWithAds();
                 
                 resolve(true);
                 
@@ -187,8 +188,8 @@ class SectionChannelsApp {
                     this.channels = [];
                 }
                 
-                // 4. عرض القنوات
-                this.renderChannels();
+                // 4. عرض القنوات مع الإعلانات
+                this.renderChannelsWithAds();
                 
                 resolve(true);
                 
@@ -212,8 +213,51 @@ class SectionChannelsApp {
         }
     }
 
-    renderChannels() {
+    // دالة إنشاء كود الإعلان
+    createAdCode() {
+        return `
+            <script type="text/javascript">
+                atOptions = { 
+                    'key' : '5d17aac1d94f6ffe2742a2ce78e5b0b1', 
+                    'format' : 'iframe', 
+                    'height' : 50, 
+                    'width' : 320, 
+                    'params' : {} 
+                };
+            </script>
+            <script src="https://www.highperformanceformat.com/5d17aac1d94f6ffe2742a2ce78e5b0b1/invoke.js"></script>
+        `;
+    }
+
+    // دالة لإنشاء عنصر إعلان
+    createAdElement() {
+        const adDiv = document.createElement('div');
+        adDiv.className = 'ad-between-channels';
+        
+        // إنشاء سكريبت الإعلان
+        const script1 = document.createElement('script');
+        script1.type = 'text/javascript';
+        script1.textContent = `atOptions = { 
+            'key' : '5d17aac1d94f6ffe2742a2ce78e5b0b1', 
+            'format' : 'iframe', 
+            'height' : 50, 
+            'width' : 320, 
+            'params' : {} 
+        };`;
+        
+        const script2 = document.createElement('script');
+        script2.src = 'https://www.highperformanceformat.com/5d17aac1d94f6ffe2742a2ce78e5b0b1/invoke.js';
+        
+        adDiv.appendChild(script1);
+        adDiv.appendChild(script2);
+        
+        return adDiv;
+    }
+
+    renderChannelsWithAds() {
         const container = document.getElementById('channelsContainer');
+        const adContainer = document.getElementById('adContainer');
+        
         if (!container) {
             console.error('❌ حاوية القنوات غير موجودة');
             return;
@@ -232,17 +276,28 @@ class SectionChannelsApp {
                     <small>سيتم إضافة قنوات قريباً</small>
                 </div>
             `;
+            
+            // إضافة إعلان في الأسفل حتى لو لم توجد قنوات
+            if (adContainer) {
+                adContainer.innerHTML = this.createAdCode();
+            }
+            
             return;
         }
 
-        console.log(`🎯 عرض ${activeChannels.length} قناة في القسم`);
+        console.log(`🎯 عرض ${activeChannels.length} قناة في القسم مع الإعلانات`);
         
-        // إنشاء HTML للقنوات
-        container.innerHTML = activeChannels.map(channel => {
+        // مسح المحتوى القديم
+        container.innerHTML = '';
+        
+        // إضافة قنوات مع الإعلانات بين كل 3 قنوات
+        for (let i = 0; i < activeChannels.length; i++) {
+            // إضافة قناة
+            const channel = activeChannels[i];
             const defaultImage = 'https://via.placeholder.com/200x100/2F2562/FFFFFF?text=TV';
             const channelImage = channel.image || defaultImage;
             
-            return `
+            const channelHTML = `
                 <div class="channel-card" data-channel-id="${channel.id}">
                     <div class="channel-logo">
                         <img src="${channelImage}" alt="${channel.name}" 
@@ -252,14 +307,29 @@ class SectionChannelsApp {
                     ${channel.description ? `<div class="channel-description">${channel.description}</div>` : ''}
                 </div>
             `;
-        }).join('');
-
-        // إضافة مستمعي الأحداث للقنوات
+            
+            container.innerHTML += channelHTML;
+            
+            // إضافة إعلان بعد كل 3 قنوات، ولكن ليس بعد القناة الأخيرة
+            if ((i + 1) % 3 === 0 && (i + 1) < activeChannels.length) {
+                const adDiv = this.createAdElement();
+                container.appendChild(adDiv);
+            }
+        }
+        
+        // إضافة إعلان إضافي في الأسفل (في adContainer المنفصل)
+        if (adContainer && activeChannels.length > 0) {
+            const adDiv = this.createAdElement();
+            adContainer.appendChild(adDiv);
+        }
+        
+        // إضافة مستمعي الأحداث للقنوات بعد عرضها
         this.addChannelClickListeners();
         
-        console.log('✅ تم عرض القنوات بنجاح');
+        console.log('✅ تم عرض القنوات مع الإعلانات بنجاح');
     }
 
+    // دالة لإضافة مستمعي الأحداث للقنوات
     addChannelClickListeners() {
         const channelCards = document.querySelectorAll('.channel-card');
         channelCards.forEach(card => {
@@ -356,7 +426,6 @@ class SectionChannelsApp {
 
     logChannelView(channel) {
         try {
-            // يمكنك إضافة كود لتسجيل المشاهدات هنا
             console.log(`📊 تسجيل مشاهدة القناة: ${channel.name}`);
         } catch (error) {
             console.warn('⚠️ فشل تسجيل المشاهدة:', error);
@@ -365,6 +434,8 @@ class SectionChannelsApp {
 
     showLoading() {
         const container = document.getElementById('channelsContainer');
+        const adContainer = document.getElementById('adContainer');
+        
         if (container) {
             container.innerHTML = `
                 <div class="loading" style="grid-column: 1 / -1;">
@@ -376,10 +447,16 @@ class SectionChannelsApp {
                 </div>
             `;
         }
+        
+        if (adContainer) {
+            adContainer.innerHTML = '';
+        }
     }
 
     showError(message) {
         const container = document.getElementById('channelsContainer');
+        const adContainer = document.getElementById('adContainer');
+        
         if (container) {
             container.innerHTML = `
                 <div class="loading" style="grid-column: 1 / -1;">
@@ -390,6 +467,10 @@ class SectionChannelsApp {
                     </button>
                 </div>
             `;
+        }
+        
+        if (adContainer) {
+            adContainer.innerHTML = '';
         }
     }
 
